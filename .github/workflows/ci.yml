@@ -47,6 +47,11 @@ env:
 permissions:
   contents: read
   pull-requests: write
+  # security-events: write is required by github/codeql-action/upload-sarif
+  # in the full-suite-guard job to publish golangci-lint findings to the
+  # Security tab and surface inline PR annotations. Read-only at the
+  # default level — only the upload step needs the write grant.
+  security-events: write
 
 jobs:
   sha-check:
@@ -647,6 +652,53 @@ jobs:
           issue-number: ${{ github.event.pull_request.number }}
           body-path: /tmp/pr-summary/comment.md
           edit-mode: replace
+
+      # SARIF generation: re-runs the linter with --out-format=sarif so the
+      # findings can be uploaded to GitHub's code scanning UI. The binary
+      # is already on PATH from the action above and ~/.cache/golangci-lint
+      # is warm, so this is effectively a cache-hit replay (seconds, not
+      # minutes). --issues-exit-code=0 means a finding doesn't re-fail the
+      # job — the previous step is the gate; this step exists purely to
+      # produce the artifact for the Security tab.
+      - name: Generate golangci-lint SARIF report
+        if: always() && needs.sha-check.outputs.already-built != 'true'
+        working-directory: gitmap
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p /tmp/sarif
+          golangci-lint run ./... \
+            --timeout=5m \
+            --issues-exit-code=0 \
+            --max-issues-per-linter=0 \
+            --max-same-issues=0 \
+            --out-format=sarif \
+            > /tmp/sarif/golangci-lint.sarif
+          # Sanity check: SARIF must be valid JSON with a runs[] array,
+          # otherwise upload-sarif will fail with a confusing error.
+          python3 -c "import json,sys; d=json.load(open('/tmp/sarif/golangci-lint.sarif')); assert 'runs' in d, 'no runs[]'; print('SARIF OK,', len(d['runs'][0].get('results', [])), 'findings')"
+
+      # Upload to GitHub code scanning so findings appear in the Security
+      # tab AND as inline annotations on PR diffs. category: distinguishes
+      # this scanner from any future SARIF uploads (e.g. govulncheck) so
+      # they don't overwrite each other in the dashboard.
+      - name: Upload SARIF to GitHub code scanning
+        if: always() && needs.sha-check.outputs.already-built != 'true'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: /tmp/sarif/golangci-lint.sarif
+          category: golangci-lint
+
+      # Also retain the SARIF as a downloadable artifact so contributors
+      # can inspect raw findings without depending on the Security tab
+      # being enabled (some forks ship without code scanning permissions).
+      - name: Upload SARIF artifact
+        if: always() && needs.sha-check.outputs.already-built != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: golangci-lint-sarif
+          path: /tmp/sarif/golangci-lint.sarif
+          retention-days: 14
 
   test-summary:
     name: Test Summary
