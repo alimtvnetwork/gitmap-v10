@@ -182,6 +182,13 @@ func topLevelCmds() map[string]string {
 		"CmdUnzipCompact":             CmdUnzipCompact,
 		"CmdUnzipCompactAlias":        CmdUnzipCompactAlias,
 		"CmdZip":                      CmdZip,
+		"CmdReinstall":                CmdReinstall,
+		"CmdCommitLeft":               CmdCommitLeft,
+		"CmdCommitLeftA":              CmdCommitLeftA,
+		"CmdCommitRight":              CmdCommitRight,
+		"CmdCommitRightA":             CmdCommitRightA,
+		"CmdCommitBoth":               CmdCommitBoth,
+		"CmdCommitBothA":              CmdCommitBothA,
 	}
 }
 

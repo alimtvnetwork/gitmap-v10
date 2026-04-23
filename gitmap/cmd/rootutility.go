@@ -45,6 +45,7 @@ func utilityDispatchEntries() []dispatchEntry {
 		{[]string{constants.CmdFindNext, constants.CmdFindNextAlias}, func() { runFindNext(argsTail()) }},
 		{[]string{constants.CmdVSCodePMPath, constants.CmdVSCodePMPathAlias}, func() { runVSCodePMPath(argsTail()) }},
 		{[]string{constants.CmdLFSCommon, constants.CmdLFSCommonAlias}, func() { runLFSCommon(argsTail()) }},
+		{[]string{constants.CmdReinstall}, func() { runReinstall(argsTail()) }},
 	}
 }
 
