@@ -1290,17 +1290,26 @@ cd gitmap && go build -o ../gitmap .
 ### Build via run.ps1 (Windows)
 
 ```powershell
-.\run.ps1                        # Full pipeline: pull, build, deploy
+.\run.ps1                        # Full pipeline: pull, build, deploy, setup
 .\run.ps1 -R scan                # Build + scan parent folder
 .\run.ps1 -R scan D:\repos --mode ssh
+.\run.ps1 -uninstall             # Run uninstall-quick.ps1 -Yes and exit
+.\run.ps1 -reinstall             # Uninstall, then re-run run.ps1 with no args
+.\run.ps1 -NoSetup               # Skip the auto `gitmap setup` after deploy
 ```
 
 | Flag | Description |
 |------|-------------|
 | `-NoPull` | Skip `git pull` |
 | `-NoDeploy` | Skip deploy step |
+| `-NoSetup` | Skip auto-running `gitmap setup` after deploy |
 | `-Update` | Update mode with post-update validation |
+| `-uninstall` | Run `uninstall-quick.ps1 -Yes` and exit (alias: `-u`) |
+| `-reinstall` | Uninstall, then re-invoke `run.ps1` with no args (alias: `-ri`) |
 | `-R` | Run gitmap after build (trailing args forwarded) |
+
+PowerShell flags are case-insensitive, so `-uninstall`, `-Uninstall`, and
+`-UNINSTALL` are all equivalent — lowercase is preferred for typing speed.
 
 ---
 

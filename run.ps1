@@ -10,8 +10,8 @@
     .\run.ps1 -NoPull                            # skip git pull
     .\run.ps1 -ForcePull                         # discard local changes + pull (no prompt)
     .\run.ps1 -NoDeploy                          # skip deploy step
-    .\run.ps1 -Uninstall                         # run uninstall-quick.ps1 -Yes and exit
-    .\run.ps1 -Reinstall                         # uninstall, then re-run run.ps1 with no args
+    .\run.ps1 -uninstall                         # run uninstall-quick.ps1 -Yes and exit
+    .\run.ps1 -reinstall                         # uninstall, then re-run run.ps1 with no args
     .\run.ps1 -R scan                            # build + scan parent folder
     .\run.ps1 -R scan D:\repos                   # build + scan specific path
     .\run.ps1 -R scan D:\repos --mode ssh        # build + scan with flags
@@ -41,7 +41,9 @@ param(
     [switch]$R,
     [Alias("t")]
     [switch]$Test,
+    [Alias("uninstall","u")]
     [switch]$Uninstall,
+    [Alias("reinstall","ri")]
     [switch]$Reinstall,
     [switch]$DebugRepoDetect,
     [switch]$Quiet,
