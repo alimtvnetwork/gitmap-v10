@@ -26,6 +26,12 @@ func reorderFlagsBeforeArgs(args []string) []string {
 		// clone-next value-taking flags
 		"--csv": true, "--ssh-key": true, "-K": true,
 		"--target-dir": true,
+		// commit-transfer value-taking flags (spec 106 §8).
+		// Without these, "--drop ^WIP --no-provenance" would have
+		// --drop swallow "--no-provenance" as its regex value and
+		// the negation toggle would silently never fire.
+		"--strip": true, "--drop": true,
+		"--limit": true, "--since": true,
 	}
 
 	for i := 0; i < len(args); i++ {
