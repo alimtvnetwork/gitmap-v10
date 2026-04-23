@@ -67,20 +67,10 @@ func defaultSSHKeyPath(name string) string {
 	return filepath.Join(home, ".ssh", "id_rsa_"+name)
 }
 
-// expandHome expands ~ to the user's home directory.
-func expandHome(path string) string {
-	if strings.HasPrefix(path, "~") {
-		home, homeErr := os.UserHomeDir()
-		if homeErr != nil {
-			fmt.Fprintf(os.Stderr, "  ⚠ Could not determine home directory: %v\n", homeErr)
+// expandHome lives in scanresolve.go (single source of truth). The
+// stricter version there only expands "~", "~/...", "~\..." — which is
+// what every caller in this package needs. Do not redeclare it here.
 
-			return path
-		}
-		path = filepath.Join(home, path[1:])
-	}
-
-	return path
-}
 
 // ensureSSHDir creates a directory with 0700 permissions if it doesn't exist.
 func ensureSSHDir(dir string) error {
