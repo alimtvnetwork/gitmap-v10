@@ -674,9 +674,44 @@ jobs:
             --max-same-issues=0 \
             --out-format=sarif \
             > /tmp/sarif/golangci-lint.sarif
-          # Sanity check: SARIF must be valid JSON with a runs[] array,
-          # otherwise upload-sarif will fail with a confusing error.
-          python3 -c "import json,sys; d=json.load(open('/tmp/sarif/golangci-lint.sarif')); assert 'runs' in d, 'no runs[]'; print('SARIF OK,', len(d['runs'][0].get('results', [])), 'findings')"
+          # Sanity check: the SARIF file MUST exist, parse as JSON, and
+          # contain at least one entry in runs[]. Any of these failing
+          # would otherwise cause github/codeql-action/upload-sarif to
+          # blow up several steps later with a confusing "invalid SARIF"
+          # error pointing at the upload action instead of the producer.
+          # Failing here keeps the blame on the linter step and emits a
+          # GitHub `::error::` annotation that surfaces in the run UI.
+          python3 - <<'PY'
+          import json, os, sys
+          path = "/tmp/sarif/golangci-lint.sarif"
+          if not os.path.exists(path):
+              print(f"::error::SARIF sanity check: {path} does not exist — golangci-lint produced no output")
+              sys.exit(1)
+          if os.path.getsize(path) == 0:
+              print(f"::error::SARIF sanity check: {path} is empty — golangci-lint produced no output")
+              sys.exit(1)
+          try:
+              with open(path) as f:
+                  doc = json.load(f)
+          except json.JSONDecodeError as e:
+              print(f"::error::SARIF sanity check: {path} is not valid JSON: {e}")
+              sys.exit(1)
+          if not isinstance(doc, dict):
+              print(f"::error::SARIF sanity check: top-level is {type(doc).__name__}, expected object")
+              sys.exit(1)
+          runs = doc.get("runs")
+          if runs is None:
+              print("::error::SARIF sanity check: missing required 'runs' array — upload-sarif would reject this file")
+              sys.exit(1)
+          if not isinstance(runs, list):
+              print(f"::error::SARIF sanity check: 'runs' must be a list, got {type(runs).__name__}")
+              sys.exit(1)
+          if len(runs) == 0:
+              print("::error::SARIF sanity check: 'runs' array is empty — golangci-lint emitted a SARIF skeleton with no scanner runs")
+              sys.exit(1)
+          findings = sum(len(r.get("results", []) or []) for r in runs)
+          print(f"SARIF OK: {len(runs)} run(s), {findings} finding(s)")
+          PY
 
       # Upload to GitHub code scanning so findings appear in the Security
       # tab AND as inline annotations on PR diffs. category: distinguishes
