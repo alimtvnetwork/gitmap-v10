@@ -592,6 +592,62 @@ jobs:
           path: /tmp/full-suite/
           retention-days: 14
 
+  pr-summary:
+    # Posts (or updates) a sticky PR comment summarizing the full-suite-guard
+    # results: go test ./... pass/fail counts and golangci-lint issue count,
+    # with deep links to the run logs and downloadable artifacts. Sticky
+    # behavior (find-comment by sentinel + create-or-update-comment) means
+    # repeated pushes to a PR edit the same comment instead of spamming.
+    #
+    # Runs on PRs only — push events have no PR to comment on. Always runs
+    # (success + failure) so contributors see results when the build is red,
+    # which is exactly when the comment is most useful.
+    name: PR Summary
+    runs-on: ubuntu-latest
+    needs: [sha-check, full-suite-guard]
+    if: |
+      always() &&
+      github.event_name == 'pull_request' &&
+      needs.sha-check.outputs.already-built != 'true'
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download full-suite outputs
+        uses: actions/download-artifact@v4
+        with:
+          name: full-suite-outputs
+          path: /tmp/full-suite
+
+      - name: Build PR summary comment
+        shell: bash
+        env:
+          FULL_SUITE_RESULT: ${{ needs.full-suite-guard.result }}
+          GITHUB_REPO: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_SHA_SHORT: ${{ github.sha }}
+        run: |
+          mkdir -p /tmp/pr-summary
+          bash .github/scripts/pr-summary.sh \
+            /tmp/full-suite \
+            /tmp/pr-summary/comment.md
+          cat /tmp/pr-summary/comment.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Find existing PR comment
+        uses: peter-evans/find-comment@v3
+        id: find-summary
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- gitmap-ci-summary -->'
+
+      - name: Create or update sticky comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find-summary.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body-path: /tmp/pr-summary/comment.md
+          edit-mode: replace
+
   test-summary:
     name: Test Summary
     runs-on: ubuntu-latest
