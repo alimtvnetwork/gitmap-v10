@@ -530,7 +530,45 @@ jobs:
         if: needs.sha-check.outputs.already-built != 'true'
         with:
           go-version-file: gitmap/go.mod
+          # setup-go@v6 caches the module download cache (~/go/pkg/mod)
+          # keyed on go.sum automatically. The build cache and linter
+          # caches below are layered on top to cut full-suite-guard
+          # runtime: the previous run's compiled archives + linter
+          # analysis facts get reused on subsequent invocations.
           cache-dependency-path: gitmap/go.sum
+
+      # Build cache: ~/.cache/go-build holds the compiled package archives
+      # consumed by `go test` and `golangci-lint` (which also invokes the
+      # Go compiler under the hood). Keyed on go.sum + every .go source
+      # file so any code change invalidates only as much as it must, with
+      # restore-keys falling back to the most recent cache for the same
+      # go.sum (incremental rebuild) and finally any cache on this OS.
+      - name: Cache Go build cache
+        if: needs.sha-check.outputs.already-built != 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/go-build
+          key: go-build-${{ runner.os }}-${{ hashFiles('gitmap/go.sum') }}-${{ hashFiles('gitmap/**/*.go') }}
+          restore-keys: |
+            go-build-${{ runner.os }}-${{ hashFiles('gitmap/go.sum') }}-
+            go-build-${{ runner.os }}-
+
+      # golangci-lint analysis cache: ~/.cache/golangci-lint stores the
+      # per-package linter facts (e.g. SSA-based analyzers) so unchanged
+      # packages skip reanalysis. Keyed on the linter version + config +
+      # go.sum + sources so a config or version bump correctly invalidates
+      # the cache. restore-keys fall back to "same config, older sources"
+      # for partial reuse on incremental commits.
+      - name: Cache golangci-lint analysis cache
+        if: needs.sha-check.outputs.already-built != 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/golangci-lint
+          key: golangci-cache-${{ runner.os }}-v1.64.8-${{ hashFiles('gitmap/.golangci.yml') }}-${{ hashFiles('gitmap/go.sum') }}-${{ hashFiles('gitmap/**/*.go') }}
+          restore-keys: |
+            golangci-cache-${{ runner.os }}-v1.64.8-${{ hashFiles('gitmap/.golangci.yml') }}-${{ hashFiles('gitmap/go.sum') }}-
+            golangci-cache-${{ runner.os }}-v1.64.8-${{ hashFiles('gitmap/.golangci.yml') }}-
+            golangci-cache-${{ runner.os }}-v1.64.8-
 
       - name: go test ./... (every package)
         if: needs.sha-check.outputs.already-built != 'true'
@@ -543,6 +581,12 @@ jobs:
         with:
           version: v1.64.8
           working-directory: gitmap
+          # golangci-lint-action@v6 caches the linter binary itself
+          # (keyed on the `version:` input above) so we don't pay the
+          # download cost on every run. Combined with the explicit
+          # ~/.cache/golangci-lint cache above, repeat runs reuse both
+          # the binary AND its analysis facts.
+          install-mode: binary
           # --max-issues-per-linter=0 / --max-same-issues=0 disable the
           # default truncation in .golangci.yml so EVERY finding (not
           # just the first 50) blocks the merge. Belt-and-suspenders
