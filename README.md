@@ -1,0 +1,1358 @@
+<div align="center">
+
+<img src="gitmap/assets/icon.png" alt="GitMap icon" width="80" height="80">
+
+# GitMap
+
+**Git repository scanner, manager, and navigator CLI**
+
+[![CI](https://github.com/alimtvnetwork/gitmap-v6/actions/workflows/ci.yml/badge.svg)](https://github.com/alimtvnetwork/gitmap-v6/actions/workflows/ci.yml)
+[![golangci-lint](https://github.com/alimtvnetwork/gitmap-v6/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/alimtvnetwork/gitmap-v6/actions/workflows/ci.yml)
+[![Vulncheck](https://github.com/alimtvnetwork/gitmap-v6/actions/workflows/vulncheck.yml/badge.svg)](https://github.com/alimtvnetwork/gitmap-v6/actions/workflows/vulncheck.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/alimtvnetwork/gitmap-v6?style=flat-square&label=version)](https://github.com/alimtvnetwork/gitmap-v6/releases)
+[![Go](https://img.shields.io/badge/Go-1.23+-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey?style=flat-square)](https://github.com/alimtvnetwork/gitmap-v6)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](./LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/alimtvnetwork/gitmap-v6/gitmap?style=flat-square)](https://goreportcard.com/report/github.com/alimtvnetwork/gitmap-v6/gitmap)
+
+_Scan, catalog, clone, and manage all your Git repositories from a single CLI._
+
+</div>
+
+---
+
+## Quick Start
+
+### Install — Quick (pick your install folder)
+
+Prompts for the install drive/folder (press Enter for the default), then runs the full installer.
+
+#### Windows (PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v6/main/install-quick.ps1 | iex
+```
+
+#### Linux / macOS
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v6/main/install-quick.sh | bash
+```
+
+### Install — Full (defaults, no prompt)
+
+#### Windows (PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v6/main/gitmap/scripts/install.ps1 | iex
+```
+
+#### Linux / macOS
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v6/main/gitmap/scripts/install.sh | sh
+```
+
+> **How install resolves a version:** every installer follows the generic contract in [`spec/07-generic-release/09-generic-install-script-behavior.md`](spec/07-generic-release/09-generic-install-script-behavior.md). In short — **strict tag mode** (`--version <tag>` / `-Version <tag>`) installs that exact release with **no fallback whatsoever** (no `latest`, no sibling probe, no main-branch HEAD; missing tag → exit 1). **Discovery mode** (no tag supplied) probes the next 20 `-v<N+i>` sibling repos in parallel, then falls back to `releases/latest`, and finally to the default branch HEAD as a last resort.
+
+### Uninstall — Quick (one-liner)
+
+Removes the gitmap binary, deploy folder, PATH entries, and (optionally) the user data folder. First tries the canonical `gitmap self-uninstall`; falls back to a manual sweep if gitmap is no longer on PATH.
+
+#### Windows (PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v6/main/uninstall-quick.ps1 | iex
+```
+
+#### Linux / macOS
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v6/main/uninstall-quick.sh | bash
+```
+
+Useful flags (both scripts):
+
+| Flag | Effect |
+|---|---|
+| `-Yes` / `-y` `--yes` | Skip the "delete user data?" prompt and assume yes |
+| `-KeepData` / `--keep-data` | Always keep `%APPDATA%\gitmap` (Windows) or `~/.config/gitmap` (Unix) |
+| `-InstallDir` / `--dir` | Override the auto-detected deploy root |
+
+### Scan repos and see results
+
+```bash
+gitmap scan ~/projects
+gitmap ls
+```
+
+### Navigate and pull
+
+```bash
+gitmap cd my-api
+gitmap pull --all
+```
+
+Every command supports `--help` or `-h` for detailed usage with examples.
+
+---
+
+## Installation
+
+### One-Liner Install (recommended)
+
+Quick installers prompt for an install folder, then delegate to the full installer.
+
+#### Windows (PowerShell) — Quick
+
+```powershell
+irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v6/main/install-quick.ps1 | iex
+```
+
+#### Linux / macOS — Quick
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v6/main/install-quick.sh | bash
+```
+
+#### Windows (PowerShell) — Full bootstrap (works on any machine)
+
+```powershell
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/alimtvnetwork/gitmap-v6/main/gitmap/scripts/install.ps1'))
+```
+
+#### Windows (PowerShell 5+) — Short form
+
+```powershell
+irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v6/main/gitmap/scripts/install.ps1 | iex
+```
+
+#### Linux / macOS (Bash)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v6/main/gitmap/scripts/install.sh | sh
+```
+
+### Installer Options
+
+**Windows (PowerShell):**
+
+| Flag | Description | Example |
+|------|-------------|---------|
+| `-Version` | Pin a specific release | `-Version v2.51.0` |
+| `-InstallDir` | Custom install directory | `-InstallDir C:\tools\gitmap` |
+| `-Arch` | Force architecture (`amd64`, `arm64`) | `-Arch arm64` |
+| `-NoPath` | Skip adding to user PATH | `-NoPath` |
+| `-AllowFallback` | Use newest patch in same vMAJOR.MINOR if version missing | `-AllowFallback` |
+
+**Linux / macOS (Bash):**
+
+| Flag | Description | Example |
+|------|-------------|---------|
+| `--version` | Pin a specific release | `--version v2.55.0` |
+| `--dir` | Custom install directory | `--dir /opt/gitmap` |
+| `--arch` | Force architecture (`amd64`, `arm64`) | `--arch arm64` |
+| `--no-path` | Skip adding to PATH | `--no-path` |
+| `--allow-fallback` | Use newest patch in same vMAJOR.MINOR if version missing | `--allow-fallback` |
+
+#### Non-Interactive / CI Installations
+
+When installing via pipe (`irm ... | iex` or `curl ... | bash`), the terminal
+is **non-interactive**. If the requested version is missing, the installer
+**exits with code 1** without prompting.
+
+To handle missing versions in automated environments:
+
+1. **Use `--allow-fallback`** — Automatically picks the newest patch in the same
+   minor series (e.g., `v3.38.0` requested but missing → uses `v3.38.5`):
+   ```powershell
+   irm https://github.com/alimtvnetwork/gitmap-v6/releases/download/v3.38.0/release-version-v3.38.0.ps1 | iex
+   # Or with generic script:
+   irm https://gitmap.dev/scripts/release-version.ps1 | iex; Install-Gitmap -Version "v3.38.0" -AllowFallback
+   ```
+
+2. **Pre-validate the version** — Use `gitmap list-versions` to confirm existence
+   before installing.
+
+#### Version-Specific Install Scripts
+
+For reproducible installs, use the **per-version snapshot scripts** that are
+ baked with the version at release time:
+
+| Script | URL Pattern |
+|--------|-------------|
+| Pinned PowerShell | `https://github.com/alimtvnetwork/gitmap-v6/releases/download/{version}/release-version-{version}.ps1` |
+| Pinned Bash | `https://github.com/alimtvnetwork/gitmap-v6/releases/download/{version}/release-version-{version}.sh` |
+| Generic PowerShell | `https://gitmap.dev/scripts/release-version.ps1` (requires `-Version` param) |
+| Generic Bash | `https://gitmap.dev/scripts/release-version.sh` (requires `--version` flag) |
+
+**Specific version install (one-liner with fallback):**
+
+```powershell
+irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v6/main/gitmap/scripts/install.ps1 | iex; Install-Gitmap -Version "v2.51.0"
+```
+
+**Specific version + custom directory (one-liner):**
+
+```powershell
+irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v6/main/gitmap/scripts/install.ps1 | iex; Install-Gitmap -Version "v2.51.0" -InstallDir "D:\DevTools\gitmap"
+```
+
+**Custom directory install (downloaded script):**
+
+```powershell
+.\install.ps1 -InstallDir "D:\DevTools\gitmap"
+```
+
+**Pinned version + custom directory (downloaded script):**
+
+```powershell
+.\install.ps1 -Version v2.51.0 -InstallDir "C:\tools\gitmap"
+```
+
+**Linux / macOS — specific version:**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v6/main/gitmap/scripts/install.sh | sh -s -- --version v2.51.0
+```
+
+> **Tip:** Use `gitmap list-versions` to see all available release versions before pinning.
+
+### Clone & Setup (Development)
+
+```bash
+git clone https://github.com/alimtvnetwork/gitmap-v6.git gitmap
+```
+
+```bash
+cd gitmap
+./setup.sh
+```
+
+The setup script installs the pre-commit hook (golangci-lint), verifies your Go toolchain, and downloads dependencies. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full development workflow.
+
+### Install-script behavior spec (shareable with any AI)
+
+The canonical, repository-agnostic contract that every installer in this
+project (and any sibling repo) MUST follow lives at:
+
+> **[`spec/07-generic-release/09-generic-install-script-behavior.md`](spec/07-generic-release/09-generic-install-script-behavior.md)**
+
+It defines the two install modes in one place:
+
+- **Strict tag mode** — explicit `--version <tag>` installs that exact
+  release with **no** fallback to `latest`, no `-v<N+i>` sibling probe,
+  and no main-branch fallback. Missing tag → exit 1 with a canonical
+  message.
+- **Discovery mode** — no tag supplied → probe the next 20 `-v<N+i>`
+  sibling repos in **parallel** (max-hit wins) → fall back to
+  `releases/latest` → fall back to the default branch HEAD as a last
+  resort.
+
+The spec is intentionally generic (placeholders for `<owner>`, `<stem>`,
+`<binary>`, `<installerPath>`) so you can hand it to any AI working on
+any repository's installer and they will implement the same contract.
+
+---
+
+## What It Does
+
+A portable CLI that scans directory trees for Git repositories, extracts clone URLs and branch info, and outputs structured data. Every scan produces **all outputs** automatically:
+
+- **Terminal** — formatted table to stdout
+- **CSV** — `gitmap.csv`
+- **JSON** — `gitmap.json`
+- **Folder Structure** — `folder-structure.md` (tree view of discovered repos)
+
+All files are written to `.gitmap/output/` at the root of the scanned directory.
+
+---
+
+## Command Reference
+
+<div align="center">
+
+### Scanning & Discovery
+
+</div>
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `scan` | `s` | Scan directory for Git repos |
+| `rescan` | `rsc` | Re-scan previously scanned directories |
+| `list` | `ls` | Show all tracked repos with slugs |
+
+```bash
+gitmap scan ~/projects --output json --mode ssh
+gitmap ls go                    # list Go projects
+gitmap rescan                   # re-scan all known directories
+```
+
+→ [scan](gitmap/helptext/scan.md) · [rescan](gitmap/helptext/rescan.md) · [list](gitmap/helptext/list.md)
+
+---
+
+<div align="center">
+
+### Cloning & Sync
+
+</div>
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `clone` | `c` | Clone from a structured file OR a direct URL |
+| `clone-next` | `cn` | Clone next versioned iteration of current repo |
+| `desktop-sync` | `ds` | Sync tracked repos with GitHub Desktop |
+
+```bash
+# clone from a structured file
+gitmap clone json --target-dir ./restored
+gitmap clone csv                                # auto-resolves to ./gitmap-output/gitmap.csv
+gitmap clone ./gitmap-output/gitmap.json --safe-pull
+gitmap clone ./gitmap-output/gitmap.json --github-desktop
+
+# clone a single repo by URL (auto-flattens versioned URLs)
+gitmap clone https://github.com/alimtvnetwork/gitmap-v6
+gitmap clone https://github.com/alimtvnetwork/gitmap-v6 my-folder
+gitmap clone git@github.com:alimtvnetwork/gitmap-v6.git my-folder
+gitmap clone https://github.com/alimtvnetwork/gitmap-v6 --replace   # see spec 96
+
+# clone-next: jump to the next (or specific) versioned sibling
+gitmap cn v++                                   # my-app-v3 -> my-app-v4
+gitmap cn v15 --delete                          # jump to v15, delete current
+gitmap cn v++ --create-remote                   # create GitHub repo if missing
+gitmap cn v++ --no-flatten                      # keep nested folder layout
+```
+
+→ [clone](gitmap/helptext/clone.md) · [clone-next](gitmap/helptext/clone-next.md) · [desktop-sync](gitmap/helptext/desktop-sync.md)
+
+---
+
+<div align="center">
+
+### Scan & Clone — `--config`, `--mode`, `--output` recipes
+
+</div>
+
+Concrete, copy-pasteable examples for the three flags you'll reach for most.
+Defaults are `--config ./data/config.json`, `--mode https`, and
+`--output terminal`. Source of truth: [`gitmap/helptext/scan.md`](gitmap/helptext/scan.md)
+and [`gitmap/helptext/clone.md`](gitmap/helptext/clone.md).
+
+#### `--config <path>` — point scan at a non-default config
+
+```bash
+# default: reads ./data/config.json relative to the binary
+gitmap scan ~/projects
+
+# point at a project-local config (commit it alongside your repo list)
+gitmap scan ~/projects --config ./gitmap.config.json
+
+# CI: point at a profile that excludes vendored & node_modules trees
+gitmap scan /workspace --config /etc/gitmap/ci-profile.json --quiet
+
+# different config for a different drive on Windows
+gitmap scan D:\wp-work --config D:\gitmap\configs\wp.json
+```
+
+The `--config` path is recorded in the scan cache, so a follow-up
+`gitmap rescan` replays the exact same config without re-typing it.
+
+> 📖 **Full key reference:** every JSON key gitmap reads from `data/config.json`
+> — defaults, allowed values, and the nested `release` shape — is documented
+> in [`docs/config-schema.md`](docs/config-schema.md).
+
+#### `--mode ssh|https` — pick the clone-URL flavor recorded in output
+
+```bash
+# HTTPS (default) — works without keys, prompts for token on private repos
+gitmap scan ~/projects --mode https
+# → records: https://github.com/<owner>/<repo>.git
+
+# SSH — uses your ~/.ssh keys, no token prompt, works for private repos
+gitmap scan ~/projects --mode ssh
+# → records: git@github.com:<owner>/<repo>.git
+
+# scan once in HTTPS, then re-scan in SSH for a CI machine that has keys
+gitmap scan ~/projects --mode https --output json --output-path ./out/https
+gitmap scan ~/projects --mode ssh   --output json --output-path ./out/ssh
+```
+
+The mode only affects the **URL string written to the output files** —
+your local working copies are not touched. Downstream `gitmap clone`
+honours whichever URL the file contains, so the choice flows end-to-end.
+
+#### `--output csv|json|terminal` — pick the artifact format
+
+```bash
+# terminal (default) — pretty-print to stdout, no files written
+gitmap scan ~/projects
+
+# csv — machine-readable spreadsheet (one row per repo)
+gitmap scan ~/projects --output csv
+# → writes ./.gitmap/output/gitmap.csv
+
+# json — full structured payload (branch, remote, tags, last-commit SHA, ...)
+gitmap scan ~/projects --output json
+# → writes ./.gitmap/output/gitmap.json
+
+# custom output directory (handy in CI artifact uploads)
+gitmap scan ~/projects --output json --output-path ./build/scan-results
+```
+
+#### Combined recipes (the patterns you'll actually use)
+
+```bash
+# 1. Daily local sync: HTTPS + JSON, cached config
+gitmap scan ~/projects --config ~/.gitmap/personal.json --mode https --output json
+
+# 2. CI snapshot for SSH-keyed runners: SSH + CSV
+gitmap scan /workspace --config /etc/gitmap/ci.json --mode ssh --output csv
+
+# 3. Quick one-off sanity check (no files, no config tweaks)
+gitmap scan . --output terminal
+
+# 4. Scan once, then bulk-clone elsewhere using the SSH JSON manifest
+gitmap scan ~/projects --mode ssh --output json --output-path ./manifest
+gitmap clone ./manifest/gitmap.json --target-dir /opt/restored --safe-pull
+
+# 5. CSV → another machine → clone everything via HTTPS
+gitmap scan ~/projects --mode https --output csv --output-path ./share
+# (copy ./share/gitmap.csv to the other host, then:)
+gitmap clone ./gitmap.csv --target-dir ~/work --github-desktop
+```
+
+`gitmap clone` automatically picks the right input parser from the file
+extension (`.json` / `.csv` / `.txt`) or the shorthand keywords `json` /
+`csv` / `text`, so the `--output` format you chose at scan time is the
+format `clone` will read on the other side.
+
+---
+
+<div align="center">
+
+### Move & Merge
+
+</div>
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `mv` | `move` | Move LEFT into RIGHT, then delete LEFT |
+| `merge-both` | — | Fill missing files on BOTH sides; prompt on conflicts |
+| `merge-left` | — | Copy from RIGHT into LEFT; prompt on conflicts |
+| `merge-right` | — | Copy from LEFT into RIGHT; prompt on conflicts |
+
+Each side (LEFT / RIGHT) can be a local folder OR a remote URL.
+URL endpoints are auto-cloned (or pulled if already cloned), and
+the result is committed + pushed back when the operation completes.
+
+```bash
+# move: classic file copy + delete source
+gitmap mv ./gitmap-v6 ./gitmap-v6
+gitmap mv ./gitmap-v6 https://github.com/alimtvnetwork/gitmap-v6
+gitmap mv https://github.com/alimtvnetwork/gitmap-v6 ./another-folder
+gitmap mv https://github.com/alimtvnetwork/gitmap-v6 \
+         https://github.com/alimtvnetwork/gitmap-v6
+
+# merge-both: bidirectional fill (each side gains what the other has)
+gitmap merge-both ./gitmap-v6 ./gitmap-v6
+gitmap merge-both ./gitmap-v6 https://github.com/alimtvnetwork/gitmap-v6
+gitmap merge-both https://github.com/alimtvnetwork/gitmap-v6 \
+                  https://github.com/alimtvnetwork/gitmap-v6
+
+# merge-left: take RIGHT into LEFT
+gitmap merge-left ./gitmap-v6 ./gitmap-v6
+gitmap merge-left ./local https://github.com/alimtvnetwork/gitmap-v6
+
+# merge-right: take LEFT into RIGHT
+gitmap merge-right ./gitmap-v6 ./gitmap-v6
+gitmap merge-right ./local https://github.com/alimtvnetwork/gitmap-v6
+
+# bypass conflict prompts: source-side wins by default
+gitmap merge-right ./gitmap-v6 ./gitmap-v6 -y
+gitmap merge-both  ./gitmap-v6 ./gitmap-v6 -y --prefer-newer
+
+# pin remote branch + preview
+gitmap merge-right ./local https://github.com/owner/repo:develop
+gitmap mv ./gitmap-v6 ./gitmap-v6 --dry-run
+```
+
+Conflict prompt keys: **L**eft / **R**ight / **S**kip /
+**A**ll-left / **B**all-right / **Q**uit. Pass `-y` (or `-a`) to
+bypass; combine with `--prefer-left` / `--prefer-right` /
+`--prefer-newer` / `--prefer-skip` to override the default policy.
+
+→ [spec/01-app/97-move-and-merge.md](spec/01-app/97-move-and-merge.md)
+
+---
+
+<div align="center">
+
+### Git Operations
+
+</div>
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `pull` | `p` | Pull a specific repo by name |
+| `exec` | `x` | Run git command across all repos |
+| `status` | `st` | Show repo status dashboard |
+| `watch` | `w` | Live-refresh repo status dashboard |
+| `has-any-updates` | `hau` | Check if remote has new commits |
+| `latest-branch` | `lb` | Find most recently updated remote branch |
+
+```bash
+gitmap pull --group work --all
+gitmap exec fetch --prune
+gitmap watch --interval 10 --group work
+gitmap lb 5 --format csv
+```
+
+→ [pull](gitmap/helptext/pull.md) · [exec](gitmap/helptext/exec.md) · [status](gitmap/helptext/status.md) · [watch](gitmap/helptext/watch.md) · [latest-branch](gitmap/helptext/latest-branch.md)
+
+---
+
+<div align="center">
+
+### Navigation & Organization
+
+</div>
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `cd` | `go` | Navigate to a tracked repo directory |
+| `group` | `g` | Manage repo groups / activate for batch ops |
+| `multi-group` | `mg` | Select multiple groups for batch operations |
+| `alias` | `a` | Assign short names to repos |
+| `as` | `s-alias` | Register the current Git repo + name in one shot (run from inside the repo) |
+| `diff-profiles` | `dp` | Compare repos across two profiles |
+
+```bash
+gitmap cd my-api
+gitmap g work && gitmap g pull
+gitmap mg backend,frontend && gitmap mg status
+gitmap alias set api github/user/api-gateway
+gitmap as backend           # registers the current repo as 'backend' + adds it to the DB
+gitmap as                   # uses the folder basename as the alias
+gitmap alias suggest --apply
+```
+
+→ [cd](gitmap/helptext/cd.md) · [group](gitmap/helptext/group.md) · [multi-group](gitmap/helptext/multi-group.md) · [alias](gitmap/helptext/alias.md) · [as](gitmap/helptext/as.md) · [diff-profiles](gitmap/helptext/diff-profiles.md)
+
+---
+
+<div align="center">
+
+## 🚀 gitmap Release
+
+**Current version:** `v3.50.0` · Cross-platform (Windows · Linux · macOS) · Single static binary
+
+</div>
+
+The `gitmap release` command turns a clean working tree into a versioned,
+tagged, multi-target GitHub release in one step — branch + tag + push +
+binary build + checksum + changelog body + GitHub Release page.
+
+### Install or upgrade gitmap
+
+#### Windows (PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v6/main/gitmap/scripts/install.ps1 | iex
+```
+
+#### Linux / macOS
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v6/main/gitmap/scripts/install.sh | sh
+```
+
+#### Pin to an exact version
+
+```powershell
+# Windows — install v3.50.0 exactly, skip the "latest" lookup
+$ver = 'v3.50.0'
+$installer = irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v6/main/gitmap/scripts/install.ps1
+& ([scriptblock]::Create($installer)) -Version $ver -NoDiscovery
+```
+
+```bash
+# Linux / macOS — install v3.50.0 exactly
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v6/main/gitmap/scripts/install.sh \
+  | bash -s -- --version v3.50.0 --no-discovery
+```
+
+Verify:
+
+```bash
+gitmap --version
+# gitmap v3.50.0
+```
+
+### Release CLI examples
+
+| Goal | Command |
+|------|---------|
+| Auto-bump minor (`3.50.0 → 3.51.0`) and release | `gitmap r` |
+| Bump patch and release | `gitmap release --bump patch` |
+| Bump minor with binary + zip + checksums | `gitmap release --bump minor --bin --compress --checksums` |
+| Release a specific version with notes | `gitmap release v3.51.0 -N "Performance pass"` |
+| Release any registered repo from anywhere | `gitmap ra my-api v1.4.0` |
+| Pull, then release a registered repo | `gitmap rap my-api v1.4.0` |
+| Release gitmap itself from any directory | `gitmap release-self --bump patch` |
+| Multi-repo: bump every repo under cwd | `gitmap r -y` (run from a folder of repos) |
+| Preview without pushing | `gitmap release --bump patch --dry-run` |
+| List build targets that will be produced | `gitmap release --list-targets` |
+
+```bash
+# End-to-end: register once, release from anywhere
+cd ~/code/my-api
+gitmap as my-api                  # one-time alias
+cd ~                              # go anywhere
+gitmap ra my-api v1.4.0 --pull    # pull --ff-only, release, push, build, attach
+```
+
+> **Auto-stash safety:** dirty trees are stashed before `release-alias`
+> with a label like `my-api-1.4.0-1715000000` and popped on exit. Pass
+> `--no-stash` to abort instead, or `--dry-run` to preview every step.
+
+### What you get — output formats
+
+Every successful release produces all of the following:
+
+| Artifact | Where | Format |
+|----------|-------|--------|
+| Release branch | local + `origin` | `release/v3.51.0` |
+| Annotated tag | local + `origin` | `v3.51.0` |
+| Local manifest | `.gitmap/release/latest.json` | JSON (version, tag, branch) |
+| GitHub Release page | github.com/&lt;owner&gt;/&lt;repo&gt;/releases | Title + body + assets |
+| Release body | GitHub Release page | Markdown — CHANGELOG section + pinned-install snippet |
+| Cross-compiled binaries (with `--bin`) | uploaded as release assets | `gitmap_v3.51.0_<os>_<arch>[.exe]` for 6 targets |
+| Compressed archives (with `--compress`) | uploaded as release assets | `.zip` (Windows) / `.tar.gz` (Linux/macOS) |
+| Checksums (with `--checksums`) | uploaded as release asset | `SHA256SUMS.txt` |
+| Custom zip groups (with `--zip-group`) | uploaded as release assets | `.zip` bundles per group |
+
+**Default build targets** (override with `--targets` or `release.targets` in `config.json`):
+
+```
+linux/amd64    linux/arm64
+darwin/amd64   darwin/arm64
+windows/amd64  windows/arm64
+```
+
+**Sample terminal output:**
+
+```
+  Creating release v3.51.0...
+  ✓ Created branch release/v3.51.0
+  ✓ Created tag v3.51.0
+  ✓ Pushed branch and tag to origin
+  ✓ Release metadata written to .gitmap/release/latest.json
+  ✓ Committed release metadata on release/v3.51.0
+  ✓ Marked v3.51.0 as latest release
+  ✓ Using CHANGELOG.md as release body
+  ✓ Attached gitmap_v3.51.0_windows_amd64.exe
+  ✓ Attached gitmap_v3.51.0_linux_amd64
+  ✓ Attached SHA256SUMS.txt
+
+  ── Release v3.51.0 complete ──
+```
+
+### Configuration file
+
+| Property | Value |
+|----------|-------|
+| **Default path** | `./data/config.json` (resolved relative to the gitmap binary) |
+| **Override** | Edit the file directly — there is no `--config` flag; CLI flags always win over config values |
+| **Format** | JSON, loaded once per command via `config.LoadFromFile` |
+| **Missing file** | Silently falls back to built-in defaults (no error) |
+
+**Full schema** (every field is optional; omit a field to use its default):
+
+```json
+{
+  "defaultMode":      "https",
+  "defaultOutput":    "terminal",
+  "outputDir":        "./output",
+  "excludeDirs":      ["node_modules", ".git"],
+  "notes":            "",
+  "dashboardRefresh": 30,
+  "release": {
+    "targets": [
+      { "goos": "windows", "goarch": "amd64" },
+      { "goos": "linux",   "goarch": "amd64" },
+      { "goos": "darwin",  "goarch": "arm64" }
+    ],
+    "checksums": true,
+    "compress":  true
+  }
+}
+```
+
+**Field meanings (release-relevant only):**
+
+| Field | Type | Default | Effect |
+|-------|------|---------|--------|
+| `release.targets[]` | array of `{goos, goarch}` | built-in 6-target matrix | Cross-compile matrix used when `--bin` is set. `--targets` flag overrides this entirely. |
+| `release.targets[].goos` | string | — | Go `GOOS` value: `windows`, `linux`, `darwin`, `freebsd`, … |
+| `release.targets[].goarch` | string | — | Go `GOARCH` value: `amd64`, `arm64`, `386`, … |
+| `release.checksums` | bool | `false` | Always emit `SHA256SUMS.txt`. Equivalent to passing `--checksums` on every release. |
+| `release.compress` | bool | `false` | Always wrap assets in `.zip`/`.tar.gz`. Equivalent to passing `--compress` on every release. |
+| `outputDir` | string | `./output` | Where non-release CLI exports land (scan reports, etc). Not used by `release` directly. |
+| `excludeDirs` | array | `[]` | Folders to skip during scanning. Not used by `release` directly. |
+
+**Resolution order** (last writer wins):
+
+```
+built-in defaults  <  data/config.json  <  CLI flags
+```
+
+So `release.compress: false` in config + `--compress` on the CLI → compression ON for that one run.
+
+### CLI flag reference — `gitmap release` / `r`
+
+```
+gitmap release [version] [flags]
+gitmap r       [version] [flags]
+```
+
+`version` is positional and optional. Forms accepted:
+
+- `v3.51.0` — release exactly this tag
+- *(omitted)* — auto-bump **minor** from the last release in `.gitmap/release/latest.json`, with a `[y/N]` prompt (skip with `-y`)
+- combined with `--bump` is an error (mutually exclusive)
+
+| Flag | Type | Default | Meaning |
+|------|------|---------|---------|
+| `--bump <level>` | string | (none) | Auto-increment version segment. Accepts `major`, `minor`, or `patch`. Mutually exclusive with positional `version`. |
+| `-N`, `--notes <text>` | string | git commit subject | Release title / notes used as the GitHub Release body header. |
+| `--commit <sha>` | string | `HEAD` | Create the release from a specific commit instead of `HEAD`. Mutually exclusive with `--branch`. |
+| `--branch <name>` | string | current branch | Create the release from the latest commit of `<name>`. Mutually exclusive with `--commit`. |
+| `--assets <path>` | string | (none) | Single file or directory to attach as release assets (in addition to `--bin`, `-Z`, `--zip-group`). |
+| `-b`, `--bin` | bool | `false` | Cross-compile Go binaries for every target in the matrix and attach them as release assets. |
+| `--targets <list>` | string | from config / built-ins | Comma-separated `goos/goarch` pairs (e.g. `windows/amd64,linux/arm64`). Overrides `release.targets` in config. |
+| `--list-targets` | bool | `false` | Resolve the target matrix, print it, exit 0. No release is created. Useful for verifying config. |
+| `--compress` | bool | `false` (or config) | Wrap each binary in a per-target archive: `.zip` for Windows, `.tar.gz` for Linux/macOS. |
+| `--checksums` | bool | `false` (or config) | Emit `SHA256SUMS.txt` covering every uploaded asset and attach it to the release. |
+| `-Z <path>` | repeatable | (none) | Ad-hoc zip: include a single file or folder as a release asset. May be passed multiple times. |
+| `--zip-group <name>` | repeatable | (none) | Attach a persistent named **zip group** (defined via `gitmap zg add`) as a release asset. May be passed multiple times. |
+| `--bundle <name>` | string | (none) | Combine all `-Z` items into one archive named `<name>.zip` instead of one archive per item. |
+| `--draft` | bool | `false` | Create the GitHub Release as an unpublished draft. Branch/tag are still pushed. |
+| `--dry-run` | bool | `false` | Print every step that would run (branch, tag, push, upload) without touching git or GitHub. |
+| `--no-commit` | bool | `false` | Skip the post-release auto-commit + push of `.gitmap/release/latest.json`. |
+| `-y`, `--yes` | bool | `false` | Auto-confirm every prompt: bare-release auto-bump, multi-repo scan, orphaned-metadata cleanup. |
+| `--verbose` | bool | `false` | Write detailed stdout/stderr trace to a timestamped log file under `data/logs/`. |
+
+**Mutually exclusive combinations** (gitmap will exit with an error):
+
+| Combination | Why |
+|-------------|-----|
+| `<version>` **and** `--bump` | Either explicit or auto-bump — pick one. |
+| `--commit` **and** `--branch` | A release has exactly one source commit. |
+
+→ Detailed help: [release](gitmap/helptext/release.md) · [release-alias](gitmap/helptext/release-alias.md) · [release-self](gitmap/helptext/release-self.md) · [release-pending](gitmap/helptext/release-pending.md) · [changelog](gitmap/helptext/changelog.md)
+
+### Changelog (recent versions)
+
+Concise, grouped per version. Each entry calls out **💥 Breaking**, **✨ Enhancements**, and **🐛 Fixes**. Versions with nothing in a category omit it. Full history lives in [`CHANGELOG.md`](CHANGELOG.md); query it from the CLI with `gitmap changelog vX.Y.Z` or `gitmap cl --limit 5`.
+
+#### v3.52.0 — 2026-04-21 — CI lint baseline cache controls (docs)
+
+- ✨ **Enhancements:** `spec/09-pipeline/01-ci-pipeline.md` now documents the two `workflow_dispatch` inputs (`lint_baseline_cache_version`, `lint_baseline_disable`) that let operators rotate or bypass the golangci-lint baseline cache without editing the workflow. Includes copy-paste `gh workflow run` examples and a new "Job: Lint Baseline Diff" section covering cache keys, seeding mode, and sticky PR comment behavior.
+- 🐛 **Fixes:** none — documentation-only sync; no CI behavior change.
+
+#### v3.51.0 — 2026-04-21 — `cn v+1 -f` flag parsing + cleaner release trailer
+
+- ✨ **Enhancements:**
+  - Three-stage progress layout (Prepare → Clone → Finalize) now shown when `gitmap cn -f` is used; default `cn` output is unchanged.
+  - `MsgForceReleasing` rewritten to plainly describe the Windows file-lock release ("Stepping out of … to release the file lock").
+- 🐛 **Fixes:**
+  - `gitmap cn v+1 -f` no longer silently dropped the `-f` flag when it followed a positional version arg. Fixed via `reorderFlagsBeforeArgs(args)` in `gitmap/cmd/clonenextflags.go` and an updated value-flag map in `gitmap/cmd/releaseargs.go` (covers `--csv`, `--ssh-key`, `-K`, `--target-dir`).
+  - `Force` now implies `Keep` for the prior-folder cleanup, suppressing the redundant "Remove current folder?" prompt.
+  - `MsgInstallHintUnix` gained a trailing blank line so the post-release shell prompt no longer sits flush against the `curl … | sh` line.
+
+#### v3.50.0 — 2026-04-21 — Force-flatten for `clone-next`
+
+- 💥 **Breaking:** none. New flag is opt-in and defaults to existing behavior.
+- ✨ **Enhancements:**
+  - `gitmap cn -f` / `--force`: force a flat clone even when cwd IS the target folder. Chdirs to the parent before remove (releases the Windows file lock), then re-clones into `<base>/`.
+  - Refuses the silent versioned-folder fallback under `-f` — you get a flat layout or a clear error, never a surprise rename.
+  - `--force` / `-f` added to zsh + PowerShell completions and to `clone-next` help text.
+- 🐛 **Fixes:** `MsgFlattenLockedHint` now mentions `-f` so users discover the escape hatch on the first lock warning.
+
+#### v3.32.1 — 2026-04-20 — `gitmap status` legacy path fix
+
+- 🐛 **Fixes:** `status` no longer fails with `could not load gitmap.json at output\gitmap.json`. It now reads from the unified `.gitmap/output/` path and transparently falls through to the SQLite database when the JSON file is missing.
+
+#### v3.32.0 — 2026-04-20 — Scan output: hoisted base path
+
+- ✨ **Enhancements:** `gitmap scan` post-scan summary prints `📂 Base: <path>` once and lists each artifact by filename only. All icon/label columns aligned to a 12-char gutter.
+
+#### v3.31.0 — 2026-04-20 — Cross-dir release/clone-next + `has-change`
+
+- ✨ **Enhancements:**
+  - `gitmap r <repo> <vX.Y.Z>` and `gitmap cn <repo> <vX.Y.Z>` — run from anywhere; gitmap chdirs in, fetches/pulls (rebase), auto-stashes, releases, then chdirs back and pops. Single-arg forms unchanged.
+  - New `gitmap has-change` (`hc`) command: prints `true`/`false` per dimension (`dirty`/`ahead`/`behind`) or `--all` for all three; `--fetch=false` for offline use.
+- 🐛 **Fixes:** `gitmap ssh` no longer exits 1 when `~/.ssh/id_rsa` already exists outside gitmap's DB — disk check moved before DB check; `--force` backs up to `id_rsa.bak.<unix-ts>` first.
+
+#### v3.30.0 — 2026-04-20 — Go Report Card badge URL
+
+- 🐛 **Fixes:** README badge now points at `goreportcard.com/badge/github.com/alimtvnetwork/gitmap-v6/gitmap` (real module path) instead of the repo root, which 404'd because there is no `go.mod` at the root.
+
+#### v3.28.0 — 2026-04-20 — Lucrative scan summary
+
+- ✨ **Enhancements:** `gitmap scan` summary regrouped into three labeled sections (`📦 Output Artifacts`, `🗄️ Database`, post-scan log) with category icons per row.
+
+#### v3.27.0 — 2026-04-20 — Real Go module path
+
+- 💥 **Breaking:** `go.mod` module path renamed from a placeholder to `github.com/alimtvnetwork/gitmap-v6/gitmap`. Anyone importing the module by the old path must update their import lines. CLI users are unaffected.
+
+#### v3.26.0 — 2026-04-20 — Constants collision audit + CI guard
+
+- ✨ **Enhancements:** new CI guard rejects PRs that introduce duplicate `Cmd*` / `Msg*` / `Err*` identifiers across `gitmap/constants/`. Backfilled audit caught 0 collisions on `main`.
+
+#### v3.25.0 — 2026-04-20 — `github-desktop` (`gd`) command
+
+- ✨ **Enhancements:** `gitmap gd` registers cwd repo with GitHub Desktop without running a full `scan` first. Pairs well with `clone-next`.
+
+#### v3.24.0 — 2026-04-20 — Quiet release output
+
+- 🐛 **Fixes:** suppressed cosmetic `LF will be replaced by CRLF` warnings during the release pipeline (kept underlying behavior identical; only stderr noise is muted).
+
+#### v3.22.0 — 2026-04-20 — Auto-register on release
+
+- ✨ **Enhancements:** `gitmap r` auto-registers the cwd repo in the database if it isn't tracked yet, instead of failing with "repo not found". The new repo is tagged with the current scan folder.
+
+> Versions older than v3.22 are summarized in [`CHANGELOG.md`](CHANGELOG.md). Notable jumps: **v3.21** (schema-version fast path + `db-migrate --force`), **v3.19** (bare release auto-bumps **minor** + multi-repo scan-dir release), **v3.17** (`Release.RepoId` foreign key + doctor duplicate-binary check), **v3.16** (repo renamed to `gitmap-v6`).
+
+### Copy-paste workflows — scan, output, re-clone
+
+End-to-end recipes for the data pipeline that feeds a release: discover repos with `scan`, capture the result as CSV/JSON, and rebuild the same set on another machine with `clone`. Every block below is a single copy-paste — no placeholders to edit unless wrapped in `<…>`.
+
+#### Scan with HTTPS clone URLs (default)
+
+```bash
+# Scan the current directory tree, terminal output only
+gitmap scan
+
+# Scan a specific folder
+gitmap scan D:\wp-work
+
+# Quiet mode (skip the post-scan clone-help section)
+gitmap scan D:\wp-work --quiet
+```
+
+#### Scan with SSH clone URLs
+
+```bash
+# SSH-style URLs (git@github.com:owner/repo.git) instead of HTTPS
+gitmap scan D:\wp-work --mode ssh
+
+# SSH + auto-register every repo with GitHub Desktop
+gitmap scan D:\wp-work --mode ssh --github-desktop
+```
+
+#### Output to CSV
+
+```bash
+# Write CSV to the default location: ./.gitmap/output/gitmap.csv
+gitmap scan D:\wp-work --output csv
+
+# CSV + custom output directory
+gitmap scan D:\wp-work --output csv --output-path ./reports
+
+# CSV + SSH URLs in one go
+gitmap scan D:\wp-work --output csv --mode ssh --output-path ./reports
+```
+
+#### Output to JSON
+
+```bash
+# Write JSON to the default location: ./.gitmap/output/gitmap.json
+gitmap scan D:\wp-work --output json
+
+# JSON + custom directory + open the folder when done
+gitmap scan D:\wp-work --output json --output-path ./reports --open
+
+# JSON + SSH URLs (handy for piping into another tool)
+gitmap scan D:\wp-work --output json --mode ssh
+```
+
+> Every `gitmap scan` run **also** writes the standard artifact bundle to `./.gitmap/output/` regardless of `--output`: `gitmap.csv`, `gitmap.json`, `gitmap.txt`, `folder-structure.md`, `clone.ps1`, `direct-clone.ps1`, `direct-clone-ssh.ps1`, `register-desktop.ps1`, `last-scan.json`. The `--output` flag controls the **terminal** representation only.
+
+#### Re-clone everything from a scan file
+
+```bash
+# Re-clone from the JSON file produced by a previous scan
+gitmap clone ./.gitmap/output/gitmap.json
+
+# Re-clone from CSV
+gitmap clone ./.gitmap/output/gitmap.csv
+
+# Re-clone from a plain text list
+gitmap clone ./.gitmap/output/gitmap.txt
+
+# Re-clone into a specific base directory
+gitmap clone ./.gitmap/output/gitmap.json --target-dir D:\restored
+
+# Re-clone + safe pull on existing repos (retries + diagnostics)
+gitmap clone ./.gitmap/output/gitmap.json --target-dir D:\restored --safe-pull
+
+# Re-clone + auto-register everything with GitHub Desktop (no prompt)
+gitmap clone ./.gitmap/output/gitmap.json --target-dir D:\restored --github-desktop
+```
+
+#### One-shot single repo (no scan file needed)
+
+```bash
+# Clone a single URL — versioned URLs (e.g. -v13) auto-flatten to <base>/
+gitmap clone https://github.com/alimtvnetwork/wp-onboarding-v13.git
+
+# Clone into a custom folder name (skips auto-flatten)
+gitmap clone https://github.com/alimtvnetwork/wp-onboarding-v13.git my-onboarding
+
+# Clone via SSH
+gitmap clone git@github.com:alimtvnetwork/wp-onboarding-v13.git
+```
+
+#### Full backup-and-restore round-trip
+
+```bash
+# === On the source machine ===
+gitmap scan D:\wp-work --mode ssh --output json
+# → produces D:\wp-work\.gitmap\output\gitmap.json (+ all sibling artifacts)
+
+# Copy the file to the new machine, then:
+
+# === On the target machine ===
+gitmap clone gitmap.json --target-dir D:\wp-work --github-desktop --safe-pull
+# → re-clones every repo via SSH, registers each with GitHub Desktop,
+#   and pulls if any of them already exist on disk.
+```
+
+→ Detailed help: [scan](gitmap/helptext/scan.md) · [rescan](gitmap/helptext/rescan.md) · [clone](gitmap/helptext/clone.md) · [clone-next](gitmap/helptext/clone-next.md)
+
+---
+
+
+<div align="center">
+
+### Release & Versioning
+
+</div>
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `release` | `r` | Create release branch, tag, and push |
+| `release-alias` | `ra` | Release a repo by its registered alias from anywhere |
+| `release-alias-pull` | `rap` | `release-alias` with implicit `--pull` (pull-then-release) |
+| `release-self` | `rs` | Release gitmap itself from any directory |
+| `release-branch` | `rb` | Create release branch without tagging |
+| `temp-release` | `tr` | Create lightweight temp release branches |
+
+```bash
+gitmap release --bump patch
+gitmap release --bump minor --bin --compress --checksums
+gitmap release v3.0.0 -N "Major redesign"
+
+# Release any aliased repo from anywhere — no `cd` required
+gitmap as my-api                                   # one-time, run from inside the repo
+gitmap release-alias my-api v1.4.0
+gitmap ra my-api v1.4.0 --pull                     # pull --ff-only, then release
+gitmap release-alias-pull my-api v1.4.0            # equivalent thin verb
+gitmap rap my-api v1.4.0 --dry-run
+
+gitmap release-self --bump patch
+gitmap tr 10 v1.$$ -s 5
+```
+
+> Dirty trees are auto-stashed before `release-alias` runs and restored on
+> exit. Pass `--no-stash` to abort instead, or `--dry-run` to preview.
+
+→ [release](gitmap/helptext/release.md) · [release-alias](gitmap/helptext/release-alias.md) · [release-alias-pull](gitmap/helptext/release-alias-pull.md) · [release-self](gitmap/helptext/release-self.md) · [release-branch](gitmap/helptext/release-branch.md) · [temp-release](gitmap/helptext/temp-release.md)
+
+---
+
+<div align="center">
+
+### Release History & Info
+
+</div>
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `changelog` | `cl` | Show release notes |
+| `changelog-generate` | `cg` | Auto-generate changelog from commits |
+| `list-versions` | `lv` | List all available Git release tags |
+| `list-releases` | `lr` | List release metadata from database |
+| `release-pending` | `rp` | Show unreleased commits since last tag |
+| `revert` | — | Revert to a specific release version |
+| `clear-release-json` | `crj` | Remove orphaned release metadata files |
+| `prune` | `pr` | Delete stale release branches |
+
+```bash
+gitmap changelog v2.49.0
+gitmap release-pending
+gitmap list-versions --json --limit 5
+gitmap cg --from v2.22.0 --to v2.24.0 --write
+gitmap revert v2.48.0
+```
+
+→ [changelog](gitmap/helptext/changelog.md) · [list-versions](gitmap/helptext/list-versions.md) · [list-releases](gitmap/helptext/list-releases.md) · [release-pending](gitmap/helptext/release-pending.md) · [revert](gitmap/helptext/revert.md) · [clear-release-json](gitmap/helptext/clear-release-json.md) · [prune](gitmap/helptext/prune.md)
+
+> **CI Pipeline:** Pushing a `release/*` branch or `v*` tag triggers GitHub Actions to cross-compile 6 targets, generate checksums, and create a GitHub release with changelog and install instructions.
+
+---
+
+<div align="center">
+
+### Data, Profiles & Bookmarks
+
+</div>
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `export` | `ex` | Export database to file |
+| `import` | `im` | Import repos from file |
+| `profile` | `pf` | Manage database profiles |
+| `bookmark` | `bk` | Save and run bookmarked commands |
+| `db-reset` | — | Reset the local SQLite database |
+
+```bash
+gitmap export && gitmap import gitmap-export.json
+gitmap profile create work && gitmap profile switch work
+gitmap bookmark save daily scan ~/projects
+gitmap bookmark run daily
+```
+
+→ [export](gitmap/helptext/export.md) · [import](gitmap/helptext/import.md) · [profile](gitmap/helptext/profile.md) · [bookmark](gitmap/helptext/bookmark.md) · [db-reset](gitmap/helptext/db-reset.md)
+
+---
+
+<div align="center">
+
+### History, Stats & Author Amendment
+
+</div>
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `history` | `hi` | Show CLI command execution history |
+| `history-reset` | `hr` | Clear command execution history |
+| `stats` | `ss` | Show aggregated usage and performance metrics |
+| `amend` | `am` | Rewrite commit author info |
+| `amend-list` | `al` | List previous author amendments |
+
+```bash
+gitmap history --limit 10
+gitmap stats --json
+gitmap amend --name "John Doe" --email "john@example.com" --dry-run
+```
+
+→ [history](gitmap/helptext/history.md) · [stats](gitmap/helptext/stats.md) · [amend](gitmap/helptext/amend.md) · [amend-list](gitmap/helptext/amend-list.md)
+
+---
+
+<div align="center">
+
+### Project Detection
+
+</div>
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `go-repos` | `gr` | List detected Go projects |
+| `node-repos` | `nr` | List detected Node.js projects |
+| `react-repos` | `rr` | List detected React projects |
+| `cpp-repos` | `cr` | List detected C++ projects |
+| `csharp-repos` | `csr` | List detected C# projects |
+
+```bash
+gitmap go-repos
+gitmap csharp-repos --json
+```
+
+→ [go-repos](gitmap/helptext/go-repos.md) · [node-repos](gitmap/helptext/node-repos.md) · [react-repos](gitmap/helptext/react-repos.md) · [cpp-repos](gitmap/helptext/cpp-repos.md) · [csharp-repos](gitmap/helptext/csharp-repos.md)
+
+---
+
+<div align="center">
+
+### Tool Installation
+
+</div>
+
+Install developer tools and databases via platform package managers directly from the CLI.
+
+#### Core Tools
+
+| Tool | Keyword | Description |
+|------|---------|-------------|
+| Visual Studio Code | `vscode` | Code editor |
+| Node.js | `node` | JavaScript runtime (includes Yarn, Bun) |
+| pnpm | `pnpm` | Fast package manager |
+| Python | `python` | Programming language |
+| Go | `go` | Programming language |
+| Git + LFS + gh | `git`, `git-lfs`, `gh` | Version control ecosystem |
+| GitHub Desktop | `github-desktop` | Git GUI |
+| C++ (MinGW) | `cpp` | C++ compiler |
+| PHP | `php` | Programming language |
+| PowerShell | `powershell` | Shell |
+
+#### Databases
+
+| Tool | Keyword | Description |
+|------|---------|-------------|
+| MySQL | `mysql` | Open-source relational database |
+| MariaDB | `mariadb` | MySQL-compatible fork |
+| PostgreSQL | `postgresql` | Advanced relational database |
+| SQLite | `sqlite` | Embedded file-based database |
+| MongoDB | `mongodb` | Document-oriented NoSQL |
+| CouchDB | `couchdb` | Document database with REST API |
+| Redis | `redis` | In-memory key-value store |
+| Cassandra | `cassandra` | Wide-column distributed NoSQL |
+| Neo4j | `neo4j` | Graph database |
+| Elasticsearch | `elasticsearch` | Full-text search and analytics |
+| DuckDB | `duckdb` | Analytical columnar database |
+
+```bash
+# Install a tool
+gitmap install node
+gitmap install postgresql
+
+# Pin a specific version
+gitmap install node --version 20.11.1
+
+# Check if installed (no install)
+gitmap install go --check
+
+# Preview install command
+gitmap install redis --dry-run
+
+# Force a specific package manager
+gitmap install vscode --manager winget
+
+# List all supported tools
+gitmap install --list
+
+# Uninstall a tool
+gitmap uninstall redis
+```
+
+**Default package managers by platform:**
+
+| Platform | Default | Fallback |
+|----------|---------|----------|
+| Windows | Chocolatey | Winget |
+| macOS | Homebrew | — |
+| Linux | apt | snap |
+
+Override in `config.json` → `install.defaultManager` or per-command with `--manager`.
+
+→ [install](gitmap/helptext/install.md)
+
+---
+
+<div align="center">
+
+### SSH Key Management
+
+</div>
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `ssh` | — | Generate and manage SSH keys |
+
+```bash
+gitmap ssh --name work --path ~/.ssh/id_rsa_work
+gitmap ssh cat --name work
+gitmap ssh list
+gitmap ssh config
+```
+
+→ [ssh](gitmap/helptext/ssh.md)
+
+---
+
+<div align="center">
+
+### Zip Groups (Release Archives)
+
+</div>
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `zip-group` | `z` | Manage named file collections for release archives |
+
+```bash
+gitmap z create docs-bundle
+gitmap z add docs-bundle ./README.md ./CHANGELOG.md ./docs/
+gitmap z show docs-bundle
+gitmap release v3.0.0 --zip-group docs-bundle
+```
+
+→ [zip-group](gitmap/helptext/zip-group.md)
+
+---
+
+<div align="center">
+
+### Environment & File-Sync
+
+</div>
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `env` | `ev` | Manage persistent environment variables and PATH |
+| `task` | `tk` | Manage file-sync watch tasks |
+
+```bash
+gitmap env set GOPATH "/home/user/go"
+gitmap env path add /usr/local/go/bin
+gitmap env list
+gitmap task create my-sync --src ./src --dest ./backup
+gitmap tk run my-sync --interval 10
+```
+
+→ [env](gitmap/helptext/env.md) · [task](gitmap/helptext/task.md)
+
+---
+
+<div align="center">
+
+### Utilities
+
+</div>
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `setup` | — | Interactive first-time configuration wizard |
+| `doctor` | — | Diagnose PATH, deploy, and version issues |
+| `update` | — | Self-update from source repo or gitmap-updater |
+| `version` | `v` | Show version number |
+| `completion` | `cmp` | Generate shell tab-completion scripts |
+| `interactive` | `i` | Launch full-screen interactive TUI |
+| `docs` | `d` | Open documentation website in browser |
+| `seo-write` | `sw` | Auto-commit SEO messages |
+| `gomod` | `gm` | Rename Go module path across repo |
+| `dashboard` | `db` | Generate interactive HTML dashboard |
+
+```bash
+gitmap doctor --fix-path
+gitmap update
+gitmap completion powershell
+gitmap interactive --refresh 10
+gitmap dashboard --limit 100 --open
+```
+
+→ [setup](gitmap/helptext/setup.md) · [doctor](gitmap/helptext/doctor.md) · [update](gitmap/helptext/update.md) · [completion](gitmap/helptext/completion.md) · [interactive](gitmap/helptext/interactive.md) · [dashboard](gitmap/helptext/dashboard.md)
+
+---
+
+## Build & Deploy
+
+### Makefile Targets
+
+| Target | Description |
+|--------|-------------|
+| `make all` | Lint → Test → Build (default) |
+| `make setup` | Install hooks and dev tools |
+| `make lint` | Run golangci-lint |
+| `make test` | Run all tests |
+| `make build` | Compile for current platform |
+| `make vulncheck` | Scan dependencies for CVEs |
+| `make release BUMP=patch` | Lint, test, then release |
+| `make release-dry` | Preview release without executing |
+| `make clean` | Remove build artifacts |
+
+### Build from Source
+
+```bash
+cd gitmap && go build -o ../gitmap .
+```
+
+### Build via run.ps1 (Windows)
+
+```powershell
+.\run.ps1                        # Full pipeline: pull, build, deploy
+.\run.ps1 -R scan                # Build + scan parent folder
+.\run.ps1 -R scan D:\repos --mode ssh
+```
+
+| Flag | Description |
+|------|-------------|
+| `-NoPull` | Skip `git pull` |
+| `-NoDeploy` | Skip deploy step |
+| `-Update` | Update mode with post-update validation |
+| `-R` | Run gitmap after build (trailing args forwarded) |
+
+---
+
+## Project Structure
+
+```
+gitmap/                        # Go CLI source
+  cmd/                         # Command handlers
+  constants/                   # All string constants (no magic strings)
+  completion/                  # Shell completion generators
+  release/                     # Release workflow and semver
+  store/                       # SQLite database layer
+  formatter/                   # Output formatters
+  helptext/                    # Embedded markdown help files
+  scripts/                     # Install/uninstall scripts
+gitmap-updater/                # Standalone update tool
+spec/                          # Specifications per feature
+src/                           # React documentation site
+.github/workflows/             # CI/CD pipelines
+```
+
+---
+
+## Web UI Dashboard
+
+GitMap includes a React-based documentation and dashboard UI:
+
+```bash
+npm install && npm run dev     # opens at http://localhost:5173
+```
+
+**Tech Stack:** Vite · TypeScript · React · shadcn/ui · Tailwind CSS
+
+---
+
+## Author
+
+<div align="center">
+
+### [Md. Alim Ul Karim](https://www.google.com/search?q=alim+ul+karim)
+
+**[Creator & Lead Architect](https://alimkarim.com)** | [Chief Software Engineer](https://www.google.com/search?q=alim+ul+karim), [Riseup Asia LLC](https://riseup-asia.com)
+
+</div>
+
+A system architect with **20+ years** of professional software engineering experience across enterprise, fintech, and distributed systems. His technology stack spans **.NET/C# (18+ years)**, **JavaScript (10+ years)**, **TypeScript (6+ years)**, and **Golang (4+ years)**.
+
+Recognized as a **top 1% talent at Crossover** and one of the top software architects globally. He is also the **Chief Software Engineer of [Riseup Asia LLC](https://riseup-asia.com)** and maintains an active presence on **[Stack Overflow](https://stackoverflow.com/users/361646/alim-ul-karim)** (2,452+ reputation, member since 2010) and **LinkedIn** (12,500+ followers).
+
+|  |  |
+|---|---|
+| **Website** | [alimkarim.com](https://alimkarim.com/) · [my.alimkarim.com](https://my.alimkarim.com/) |
+| **LinkedIn** | [linkedin.com/in/alimkarim](https://linkedin.com/in/alimkarim) |
+| **Stack Overflow** | [stackoverflow.com/users/361646/alim-ul-karim](https://stackoverflow.com/users/361646/alim-ul-karim) |
+| **Google** | [Alim Ul Karim](https://www.google.com/search?q=Alim+Ul+Karim) |
+| **Role** | Chief Software Engineer, [Riseup Asia LLC](https://riseup-asia.com) |
+
+### Riseup Asia LLC
+
+[Top Leading Software Company in WY (2026)](https://riseup-asia.com)
+
+| | |
+|---|---|
+| **Website** | [riseup-asia.com](https://riseup-asia.com) |
+| **Facebook** | [riseupasia.talent](https://www.facebook.com/riseupasia.talent/) |
+| **LinkedIn** | [Riseup Asia](https://www.linkedin.com/company/105304484/) |
+| **YouTube** | [@riseup-asia](https://www.youtube.com/@riseup-asia) |
+
+## License
+
+This project is licensed under the [MIT License](./LICENSE).

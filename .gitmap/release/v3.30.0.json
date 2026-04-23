@@ -1,0 +1,16 @@
+{
+  "version": "3.30.0",
+  "branch": "release/v3.30.0",
+  "sourceBranch": "main",
+  "commit": "b19b2b33a9537f732e60f39c370b51310a94296a",
+  "tag": "v3.30.0",
+  "assets": [],
+  "changelog": [
+    "**README.md Go Report Card badge** now points at `github.com/alimtvnetwork/gitmap-v6/gitmap` (the real Go module path set in v3.27.0) instead of the repo root `github.com/alimtvnetwork/gitmap-v6`. The previous URL returned a 404 from the Go module proxy because there is no `go.mod` at the repo root — the module lives one directory down in `gitmap/`. Both the badge image and the click-through report link were updated.",
+    "`README.md` — single line, both the `goreportcard.com/badge/...` image URL and the `goreportcard.com/report/...` link target now include the `/gitmap` subpath suffix."
+  ],
+  "isDraft": false,
+  "isPreRelease": false,
+  "createdAt": "2026-04-20T21:13:01Z",
+  "isLatest": false
+}

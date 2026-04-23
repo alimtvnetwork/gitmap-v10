@@ -1,0 +1,17 @@
+{
+  "version": "3.25.0",
+  "branch": "release/v3.25.0",
+  "sourceBranch": "main",
+  "commit": "",
+  "tag": "v3.25.0",
+  "assets": [],
+  "changelog": [
+    "New command `gitmap github-desktop` (alias `gd`) registers the current working-directory git repo with GitHub Desktop in one shot. No prior `gitmap scan` required \u2014 the long-standing `desktop-sync` (`ds`) needed the last-scan output JSON, which is why running `gd` from a freshly cloned repo used to print 'Unknown command'. The new command verifies cwd contains a `.git` entry, then invokes the GitHub Desktop CLI directly.",
+    "Optional path argument: `gitmap gd D:\\path\\to\\other\\repo` registers any folder, not just cwd.",
+    "Wired through `dispatchTooling`, listed in `gitmap help` (Cloning section) and the compact view, full `helptext/github-desktop.md` page, completion list updated, parity tests updated."
+  ],
+  "isDraft": false,
+  "isPreRelease": false,
+  "createdAt": "2026-04-20T20:40:00Z",
+  "isLatest": true
+}

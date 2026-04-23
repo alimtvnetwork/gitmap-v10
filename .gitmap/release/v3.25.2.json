@@ -1,0 +1,24 @@
+{
+  "version": "3.25.2",
+  "branch": "release/v3.25.2",
+  "sourceBranch": "main",
+  "commit": "432b8bf5b8774ee1576b50f1886dcc328f5712cb",
+  "tag": "v3.25.2",
+  "assets": [],
+  "changelog": [
+    "**`go build` no longer fails with `HelpGitHubDesktop redeclared in this block`** between `constants/constants_helpsections.go:13` and `constants/constants_cli.go:100`.",
+    "Renamed scan-flag help constant: `HelpGitHubDesktop` → `HelpScanFlagGitHubDesktop` in `constants/constants_helpsections.go`.",
+    "Updated sole consumer `cmd/rootusageflags.go` to reference the renamed constant.",
+    "Inserted `HelpScanFlagGitHubDesktop` into `.github/scripts/constants-baseline.txt` in sorted order (between `HelpScan` and `HelpScanFlags`).",
+    "Edited: `gitmap/constants/constants_helpsections.go` — renamed `HelpGitHubDesktop` → `HelpScanFlagGitHubDesktop`.",
+    "Edited: `gitmap/cmd/rootusageflags.go` — updated reference.",
+    "Edited: `.github/scripts/constants-baseline.txt` — added `HelpScanFlagGitHubDesktop`.",
+    "Edited: `gitmap/constants/constants.go` — bumped Version to 3.25.2.",
+    "Created: `.gitmap/release/v3.25.2.json` — release metadata.",
+    "Edited: `.gitmap/release/latest.json` — pointer to v3.25.2."
+  ],
+  "isDraft": false,
+  "isPreRelease": false,
+  "createdAt": "2026-04-20T20:48:46Z",
+  "isLatest": false
+}

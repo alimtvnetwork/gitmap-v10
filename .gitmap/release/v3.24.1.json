@@ -1,0 +1,16 @@
+{
+  "version": "3.24.1",
+  "branch": "release/v3.24.1",
+  "sourceBranch": "main",
+  "commit": "",
+  "tag": "v3.24.1",
+  "assets": [],
+  "changelog": [
+    "CI: regenerate .github/scripts/constants-baseline.txt (2743 -> 2757 entries) so the constants-naming guard admits the v3.24.0 additions (GitStderrNoisePatterns and friends) as grandfathered.",
+    "No gitmap/ source changed apart from the Version const bump. Future constants must still use a Cmd*/Msg*/Err*/Flag*/Default* prefix."
+  ],
+  "isDraft": false,
+  "isPreRelease": false,
+  "createdAt": "2026-04-20T20:33:29Z",
+  "isLatest": true
+}

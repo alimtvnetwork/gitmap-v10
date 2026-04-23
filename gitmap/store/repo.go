@@ -1,0 +1,93 @@
+package store
+
+import (
+	"fmt"
+
+	"github.com/alimtvnetwork/gitmap-v6/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v6/gitmap/model"
+)
+
+// UpsertRepos inserts or updates all records by absolute_path.
+func (db *DB) UpsertRepos(records []model.ScanRecord) error {
+	for _, r := range records {
+		if err := db.upsertOne(r); err != nil {
+			return fmt.Errorf(constants.ErrDBUpsert, err)
+		}
+	}
+
+	return nil
+}
+
+// upsertOne inserts or updates a single repo by absolute_path.
+func (db *DB) upsertOne(r model.ScanRecord) error {
+	_, err := db.conn.Exec(constants.SQLUpsertRepoByPath,
+		r.Slug, r.RepoName, r.HTTPSUrl, r.SSHUrl,
+		r.Branch, r.RelativePath, r.AbsolutePath,
+		r.CloneInstruction, r.Notes,
+	)
+
+	return err
+}
+
+// ListRepos returns all tracked repositories ordered by slug.
+func (db *DB) ListRepos() ([]model.ScanRecord, error) {
+	rows, err := db.conn.Query(constants.SQLSelectAllRepos)
+	if err != nil {
+		return nil, fmt.Errorf(constants.ErrDBQuery, err)
+	}
+	defer rows.Close()
+
+	return scanRows(rows)
+}
+
+// FindBySlug returns all repos matching the given slug.
+func (db *DB) FindBySlug(slug string) ([]model.ScanRecord, error) {
+	rows, err := db.conn.Query(constants.SQLSelectRepoBySlug, slug)
+	if err != nil {
+		return nil, fmt.Errorf(constants.ErrDBQuery, err)
+	}
+	defer rows.Close()
+
+	return scanRows(rows)
+}
+
+// FindByPath returns the repo at the given absolute path.
+func (db *DB) FindByPath(absPath string) ([]model.ScanRecord, error) {
+	rows, err := db.conn.Query(constants.SQLSelectRepoByPath, absPath)
+	if err != nil {
+		return nil, fmt.Errorf(constants.ErrDBQuery, err)
+	}
+	defer rows.Close()
+
+	return scanRows(rows)
+}
+
+// scanRows reads ScanRecord values from query result rows.
+func scanRows(rows interface {
+	Next() bool
+	Scan(dest ...any) error
+}) ([]model.ScanRecord, error) {
+	var results []model.ScanRecord
+
+	for rows.Next() {
+		r, err := scanOneRow(rows)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, r)
+	}
+
+	return results, nil
+}
+
+// scanOneRow reads a single ScanRecord from the current row.
+func scanOneRow(row interface{ Scan(dest ...any) error }) (model.ScanRecord, error) {
+	var r model.ScanRecord
+	err := row.Scan(
+		&r.ID, &r.Slug, &r.RepoName, &r.HTTPSUrl, &r.SSHUrl,
+		&r.Branch, &r.RelativePath, &r.AbsolutePath,
+		&r.CloneInstruction, &r.Notes,
+	)
+
+	return r, err
+}

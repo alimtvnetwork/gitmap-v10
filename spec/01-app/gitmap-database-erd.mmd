@@ -1,0 +1,246 @@
+---
+title: gitmap Database ERD (v3.5.0 — v15 naming)
+---
+erDiagram
+    Repo {
+        INTEGER RepoId PK
+        TEXT Slug
+        TEXT RepoName
+        TEXT HttpsUrl
+        TEXT SshUrl
+        TEXT Branch
+        TEXT RelativePath
+        TEXT AbsolutePath UK
+        TEXT CloneInstruction
+        TEXT Notes
+        TEXT CurrentVersionTag
+        INTEGER CurrentVersionNum
+        TEXT CreatedAt
+        TEXT UpdatedAt
+    }
+
+    Group {
+        INTEGER GroupId PK
+        TEXT Name UK
+        TEXT Description
+        TEXT Color
+        TEXT CreatedAt
+    }
+
+    GroupRepo {
+        INTEGER GroupId FK
+        INTEGER RepoId FK
+    }
+
+    RepoVersionHistory {
+        INTEGER RepoVersionHistoryId PK
+        INTEGER RepoId FK
+        TEXT FromVersionTag
+        INTEGER FromVersionNum
+        TEXT ToVersionTag
+        INTEGER ToVersionNum
+        TEXT FlattenedPath
+        TEXT CreatedAt
+    }
+
+    Release {
+        INTEGER ReleaseId PK
+        TEXT Version
+        TEXT Tag UK
+        TEXT Branch
+        TEXT SourceBranch
+        TEXT CommitSha
+        TEXT Changelog
+        TEXT Notes
+        INTEGER IsDraft
+        INTEGER IsPreRelease
+        INTEGER IsLatest
+        TEXT Source
+        TEXT CreatedAt
+    }
+
+    TempRelease {
+        INTEGER TempReleaseId PK
+        TEXT Branch UK
+        TEXT Version
+        TEXT CommitSha
+        TEXT CreatedAt
+    }
+
+    CommandHistory {
+        INTEGER CommandHistoryId PK
+        TEXT Command
+        TEXT Alias
+        TEXT Args
+        TEXT Flags
+        TEXT StartedAt
+        TEXT FinishedAt
+        INTEGER DurationMs
+        INTEGER ExitCode
+        TEXT Summary
+        INTEGER RepoCount
+        TEXT CreatedAt
+    }
+
+    Amendment {
+        INTEGER AmendmentId PK
+        TEXT Branch
+        TEXT FromCommit
+        TEXT ToCommit
+        INTEGER TotalCommits
+        TEXT PreviousAuthor
+        TEXT NewAuthor
+        TEXT Mode
+        INTEGER ForcePushed
+        TEXT CreatedAt
+    }
+
+    CommitTemplate {
+        INTEGER CommitTemplateId PK
+        TEXT Kind
+        TEXT Template
+        TEXT CreatedAt
+    }
+
+    Bookmark {
+        INTEGER BookmarkId PK
+        TEXT Name UK
+        TEXT Path
+        TEXT CreatedAt
+    }
+
+    Alias {
+        INTEGER AliasId PK
+        TEXT Alias UK
+        TEXT Command
+        TEXT CreatedAt
+    }
+
+    SshKey {
+        INTEGER SshKeyId PK
+        TEXT Name UK
+        TEXT Path
+        TEXT CreatedAt
+    }
+
+    Setting {
+        TEXT Key PK
+        TEXT Value
+    }
+
+    ProjectType {
+        INTEGER ProjectTypeId PK
+        TEXT Key UK
+        TEXT Label
+        TEXT Description
+    }
+
+    DetectedProject {
+        INTEGER DetectedProjectId PK
+        INTEGER RepoId FK
+        INTEGER ProjectTypeId FK
+        TEXT DetectedAt
+    }
+
+    GoProjectMetadata {
+        INTEGER GoProjectMetadataId PK
+        INTEGER RepoId FK
+        TEXT GoVersion
+        TEXT ModulePath
+        INTEGER DependencyCount
+        TEXT DetectedAt
+    }
+
+    GoRunnableFile {
+        INTEGER GoRunnableFileId PK
+        INTEGER GoProjectMetadataId FK
+        TEXT FilePath
+    }
+
+    CsharpProjectMetadata {
+        INTEGER CsharpProjectMetadataId PK
+        INTEGER RepoId FK
+        TEXT Framework
+        TEXT Language
+        TEXT OutputType
+        TEXT DetectedAt
+    }
+
+    CsharpProjectFile {
+        INTEGER CsharpProjectFileId PK
+        INTEGER CsharpProjectMetadataId FK
+        TEXT FilePath
+        TEXT FileName
+    }
+
+    CsharpKeyFile {
+        INTEGER CsharpKeyFileId PK
+        INTEGER CsharpProjectMetadataId FK
+        TEXT FileType
+        TEXT FilePath
+    }
+
+    InstalledTool {
+        INTEGER InstalledToolId PK
+        TEXT Tool UK
+        TEXT Version
+        TEXT Path
+        TEXT InstalledAt
+    }
+
+    ZipGroup {
+        INTEGER ZipGroupId PK
+        TEXT Name UK
+        TEXT Description
+        TEXT CreatedAt
+    }
+
+    ZipGroupItem {
+        INTEGER ZipGroupId FK
+        TEXT RepoPath
+        TEXT RelativePath
+        TEXT FullPath
+    }
+
+    TaskType {
+        INTEGER TaskTypeId PK
+        TEXT Name UK
+    }
+
+    PendingTask {
+        INTEGER PendingTaskId PK
+        INTEGER TaskTypeId FK
+        TEXT TargetPath
+        TEXT WorkingDir
+        TEXT Command
+        TEXT Args
+        TEXT CreatedAt
+        TEXT Status
+        TEXT FailReason
+    }
+
+    CompletedTask {
+        INTEGER CompletedTaskId PK
+        INTEGER OriginalTaskId
+        INTEGER TaskTypeId FK
+        TEXT TargetPath
+        TEXT WorkingDir
+        TEXT Command
+        TEXT Args
+        TEXT CompletedAt
+        TEXT Result
+    }
+
+    Repo ||--o{ GroupRepo : "has groups"
+    Group ||--o{ GroupRepo : "contains repos"
+    Repo ||--o{ RepoVersionHistory : "version transitions"
+    Repo ||--o{ DetectedProject : "project types"
+    ProjectType ||--o{ DetectedProject : "categorizes"
+    Repo ||--o{ GoProjectMetadata : "Go metadata"
+    GoProjectMetadata ||--o{ GoRunnableFile : "runnable files"
+    Repo ||--o{ CsharpProjectMetadata : "C# metadata"
+    CsharpProjectMetadata ||--o{ CsharpProjectFile : "project files"
+    CsharpProjectMetadata ||--o{ CsharpKeyFile : "key files"
+    ZipGroup ||--o{ ZipGroupItem : "contains items"
+    TaskType ||--o{ PendingTask : "categorizes"
+    TaskType ||--o{ CompletedTask : "categorizes"

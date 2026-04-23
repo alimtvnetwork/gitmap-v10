@@ -1,0 +1,81 @@
+---
+title: GitMap Core Schema (Simplified) — v15 Phase 1.2
+---
+erDiagram
+    Repo {
+        INTEGER RepoId PK
+        TEXT Slug
+        TEXT RepoName
+        TEXT HttpsUrl
+        TEXT SshUrl
+        TEXT Branch
+        TEXT RelativePath
+        TEXT AbsolutePath UK
+        TEXT CloneInstruction
+        TEXT Notes
+        TEXT CurrentVersionTag
+        INTEGER CurrentVersionNum
+        TEXT CreatedAt
+        TEXT UpdatedAt
+    }
+
+    Group {
+        INTEGER GroupId PK
+        TEXT Name UK
+        TEXT Description
+        TEXT Color
+        TEXT CreatedAt
+    }
+
+    GroupRepo {
+        INTEGER GroupId FK
+        INTEGER RepoId FK
+    }
+
+    Alias {
+        INTEGER AliasId PK
+        TEXT Alias UK
+        INTEGER RepoId FK
+        TEXT CreatedAt
+    }
+
+    Bookmark {
+        INTEGER BookmarkId PK
+        TEXT Name UK
+        TEXT Command
+        TEXT Args
+        TEXT Flags
+        TEXT CreatedAt
+    }
+
+    RepoVersionHistory {
+        INTEGER Id PK
+        INTEGER RepoId FK
+        TEXT FromVersionTag
+        INTEGER FromVersionNum
+        TEXT ToVersionTag
+        INTEGER ToVersionNum
+        TEXT FlattenedPath
+        TEXT CreatedAt
+    }
+
+    Release {
+        INTEGER ReleaseId PK
+        TEXT Version
+        TEXT Tag UK
+        TEXT Branch
+        TEXT SourceBranch
+        TEXT CommitSha
+        TEXT Changelog
+        TEXT Notes
+        INTEGER Draft
+        INTEGER PreRelease
+        INTEGER IsLatest
+        TEXT Source
+        TEXT CreatedAt
+    }
+
+    Repo ||--o{ GroupRepo : "belongs to"
+    Group ||--o{ GroupRepo : "contains"
+    Repo ||--o{ Alias : "has"
+    Repo ||--o{ RepoVersionHistory : "tracks"

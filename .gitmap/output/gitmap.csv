@@ -1,0 +1,2 @@
+repoName,httpsUrl,sshUrl,branch,relativePath,absolutePath,cloneInstruction,notes
+git-repo-navigator,https://github.com/alimtvnetwork/git-repo-navigator.git,git@github.com:alimtvnetwork/git-repo-navigator.git,main,.,D:\wp-work\riseup-asia\git-repo-navigator,git clone -b main https://github.com/alimtvnetwork/git-repo-navigator.git .,

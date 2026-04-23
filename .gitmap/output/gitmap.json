@@ -1,0 +1,13 @@
+[
+  {
+    "id": "ba5894ad-75b6-454c-8d66-6c43aed37157",
+    "repoName": "gitmap-v3",
+    "httpsUrl": "https://github.com/alimtvnetwork/gitmap-v3.git",
+    "sshUrl": "git@github.com:alimtvnetwork/gitmap-v3.git",
+    "branch": "main",
+    "relativePath": ".",
+    "absolutePath": "D:\\wp-work\\riseup-asia\\gitmap-v3",
+    "cloneInstruction": "git clone -b main https://github.com/alimtvnetwork/gitmap-v3.git .",
+    "notes": ""
+  }
+]
