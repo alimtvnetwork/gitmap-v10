@@ -742,17 +742,19 @@ function Sync-DeployDataFolder {
         [string]$DestDir
     )
 
-    if (-not (Test-Path $SourceDir)) {
+    $hasSourceDir = Test-Path $SourceDir
+    if ($hasSourceDir -eq $false) {
         return
     }
 
-    if (-not (Test-Path $DestDir)) {
+    $hasDestDir = Test-Path $DestDir
+    if ($hasDestDir -eq $false) {
         Copy-Item $SourceDir $DestDir -Recurse
         Write-Info "Copied data folder to gitmap app directory"
         return
     }
 
-    $files = Get-ChildItem -Path $SourceDir -File -ErrorAction SilentlyContinue
+    $files = Get-ChildItem -Path $SourceDir -File
     foreach ($file in $files) {
         $targetFile = Join-Path $DestDir $file.Name
         Copy-Item $file.FullName $targetFile -Force
