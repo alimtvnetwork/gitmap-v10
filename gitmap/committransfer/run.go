@@ -8,34 +8,11 @@ import (
 // RunRight is the public entry point for `commit-right`. The caller
 // has already resolved both endpoints and built the Options struct.
 //
-// Phases 2 and 3 (commit-left, commit-both) will add RunLeft and
-// RunBoth on top of the same Plan/Replay primitives.
+// Phase 1 (v3.76.0). Phases 2 + 3 (RunLeft, RunBoth) live in
+// runleftboth.go and reuse runOneDirection — RunRight is now a thin
+// wrapper kept for callers that pre-date the directional family.
 func RunRight(sourceDir, targetDir string, opts Options) error {
-	plan, err := BuildPlan(sourceDir, targetDir, opts)
-	if err != nil {
-		return fmt.Errorf("build plan: %w", err)
-	}
-	willReplay := PrintPlan(os.Stdout, plan, opts.LogPrefix)
-	if willReplay == 0 {
-		fmt.Fprintf(os.Stdout, "%s nothing to replay.\n", opts.LogPrefix)
-
-		return nil
-	}
-	if !opts.DryRun && !opts.Yes && !Confirm(opts.LogPrefix) {
-		fmt.Fprintf(os.Stderr, "%s aborted by user.\n", opts.LogPrefix)
-
-		return nil
-	}
-	res, replayErr := Replay(plan, opts)
-	if replayErr != nil {
-		PrintSummary(os.Stderr, opts.LogPrefix, res)
-
-		return replayErr
-	}
-	res.Pushed = maybePush(targetDir, opts, len(res.NewSHAs))
-	PrintSummary(os.Stdout, opts.LogPrefix, res)
-
-	return nil
+	return runOneDirection(sourceDir, targetDir, opts)
 }
 
 // maybePush runs `git push` unless --no-push is set, the target is not
