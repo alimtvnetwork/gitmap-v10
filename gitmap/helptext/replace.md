@@ -24,6 +24,7 @@ gitmap replace all                  # bump v1..v(K-1) → vK
 | `--dry-run`  | Print summary only, never write                   |
 | `--quiet` `-q` | Suppress per-file diff lines                    |
 | `--ext`      | Comma-separated extension allow-list (e.g. `.go,.md`). Leading dot optional. |
+| `--ext-case` | `sensitive` or `insensitive` (default `insensitive`). Sensitive preserves the user's casing in `--ext` and matches filenames byte-exact. |
 
 ## Examples
 

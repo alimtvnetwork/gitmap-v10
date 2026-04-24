@@ -50,6 +50,7 @@ Flags accepted in both modes:
 | `--dry-run` | bool | false | Force report-only behavior (overrides `--yes`) |
 | `--quiet` / `-q` | bool | false | Suppress per-file diff lines; print summary only |
 | `--ext` | string | "" | Comma-separated extension allow-list (e.g. `.go,.md`). Leading dot optional, case-insensitive, deduplicated. Empty = all text files. |
+| `--ext-case` | string | `insensitive` | Match casing for `--ext`: `sensitive` (byte-exact, preserves user input case) or `insensitive` (lowercased on both sides). Unknown values exit 1. |
 
 Exit codes:
 
