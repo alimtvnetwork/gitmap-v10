@@ -8,6 +8,18 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: "v3.114.0",
+    date: "2026-04-24",
+    subtitle: "Source-level AST guard: `updatedebugwindows.go` must call `fsutil.FileOrDirExists` and declare zero local `fileExists*` helpers",
+    items: [
+      "Why a second test: the v3.113.0 rename-pin test only fires when a contributor reverts the fsutil migration in a way that shadows the imported symbol. It does NOT fire if a contributor removes the fsutil import for an unrelated reason and re-inlines a local `fileExists` helper. That second path puts the redeclaration footgun back the moment any sibling cmd file declares the same name. This release adds an orthogonal guard that asserts the invariant directly against the file's AST.",
+      "New `gitmap/cmd/updatedebugwindows_source_test.go` parses `updatedebugwindows.go` with `go/parser` and asserts two invariants. `TestUpdateDebugWindowsHasFsutilLooseCall` — the file imports the canonical fsutil path AND contains at least one real call expression of the form `fsutil.FileOrDirExists(...)`. The check uses the AST (selector expression), not a substring scan, so comments mentioning the name do not satisfy the invariant.",
+      "`TestUpdateDebugWindowsHasNoLocalFileExistsDecl` — the file declares zero top-level functions named `fileExists` or `fileExistsLoose`. Method declarations with a receiver are excluded because the redeclaration footgun only applies to package-level free functions. The AST walk ignores comments and string literals, so the v3.113.0 migration doc comment that legitimately mentions `fileExistsLoose` does not false-positive.",
+      "Coverage matrix vs the v3.113.0 rename-pin test: re-adding a local helper while keeping the fsutil import (both tests catch); removing the fsutil import + re-adding a local helper (only the new AST guard catches); removing the `fsutil.FileOrDirExists` call site entirely (only the new AST guard catches); comment mentioning `fileExists` (neither test false-positives).",
+      "The source file under test is unchanged — the test asserts the state already shipped in v3.113.0 is preserved going forward. Bumped `constants.Version` to `3.114.0`.",
+    ],
+  },
+  {
     version: "v3.113.0",
     date: "2026-04-24",
     subtitle: "Centralize `fileExists` / `fileExistsLoose` / `dirExists` into a shared `gitmap/fsutil` package",
