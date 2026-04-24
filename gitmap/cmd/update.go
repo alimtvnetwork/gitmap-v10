@@ -135,6 +135,9 @@ func launchHandoff(copyPath, repoPath string, report reportErrorsConfig) {
 	if hasFlag(constants.FlagVerbose) {
 		copyArgs = append(copyArgs, constants.FlagVerbose)
 	}
+	if isDebugWindowsRequested() {
+		copyArgs = append(copyArgs, constants.FlagDebugWindows)
+	}
 
 	copyArgs = append(copyArgs, constants.FlagRepoPath, repoPath)
 	copyArgs = report.applyToHandoffArgs(copyArgs)
@@ -143,7 +146,15 @@ func launchHandoff(copyPath, repoPath string, report reportErrorsConfig) {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
-	cmd.Env = report.applyToEnv(os.Environ())
+	env := report.applyToEnv(os.Environ())
+	if isDebugWindowsRequested() {
+		env = append(env, constants.EnvDebugWindows+"=1")
+	}
+	cmd.Env = env
+	dumpDebugWindowsHeader("phase-2 handoff (active → copy)")
+	dumpDebugWindowsHandoff("phase-2-copy", copyPath,
+		append([]string{copyPath}, copyArgs...))
+	dumpDebugWindowsFooter()
 	if err := cmd.Run(); err != nil {
 		handleHandoffError(err)
 	}
