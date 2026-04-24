@@ -70,6 +70,7 @@ const (
 	MsgUpdatePhase3Resolve = "  → Cleanup target resolved via: %s\n"
 	MsgUpdatePhase3Target  = "  → Cleanup target path: %s\n"
 	MsgUpdatePhase3Started = "  → Cleanup process started (pid=%d)\n"
+	MsgUpdatePhase3LogFile = "  → Handoff log file: %s\n"
 	UpdateRunnerLogStart   = "update-runner starting, repo=%s"
 	UpdateScriptLogExec    = "executing update script: %s"
 	UpdateScriptLogExit    = "update script exited: err=%v"
