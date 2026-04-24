@@ -249,6 +249,82 @@ cd gitmap
 
 The setup script installs the pre-commit hook (golangci-lint), verifies your Go toolchain, and downloads dependencies. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full development workflow.
 
+### Update Source Before Building (avoid the `fileExists redeclared` regression)
+
+If you have an existing local checkout, **always pull the latest source before
+building**. Three releases (v3.92.0, v3.113.0, v3.114.0) eliminated a
+`fileExists` symbol collision in `gitmap/cmd/`. A pre-v3.92.0 checkout
+will fail to compile with:
+
+```
+cmd/updaterepo.go:118:6: fileExists redeclared in this block
+        cmd/updatedebugwindows.go:148:6: other declaration of fileExists
+```
+
+This error is **always** a stale-checkout symptom — the current source
+cannot produce it. Run the canonical update sequence:
+
+```bash
+cd /path/to/gitmap
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+git status                          # must report "working tree clean"
+git log -1 --format='%H %s'         # capture the SHA you're about to build
+```
+
+#### Verify the v3.92.0+ rename fix is present
+
+Three quick checks confirm the redeclaration fix is in your tree. All
+three must pass before you run `./run.sh` / `./run.ps1`:
+
+**1. The declared version is v3.92.0 or newer:**
+
+```bash
+grep '^const Version = ' gitmap/constants/constants.go
+# expected: const Version = "3.115.0"   (or higher)
+```
+
+**2. `gitmap/cmd/updatedebugwindows.go` does NOT declare a local helper:**
+
+```bash
+grep -nE '^func (fileExists|fileExistsLoose)\(' gitmap/cmd/updatedebugwindows.go
+# expected: (no output — the helper moved to gitmap/fsutil in v3.113.0)
+```
+
+**3. The shared `fsutil` package exists and is imported by `cmd/`:**
+
+```bash
+test -f gitmap/fsutil/exists.go && echo "fsutil package present"
+grep -l 'gitmap/fsutil' gitmap/cmd/updaterepo.go gitmap/cmd/updatedebugwindows.go
+# expected: both file paths printed
+```
+
+If any check fails, your checkout is older than v3.113.0. Re-run the
+update sequence above; if it still fails, your branch diverged before
+the fix landed and needs `git rebase origin/main`.
+
+#### Run the pre-build provenance stamp (recommended)
+
+Since v3.115.0, `./run.sh` and `./run.ps1` automatically print a
+provenance stamp before invoking `go build`:
+
+```bash
+bash scripts/build-stamp.sh           # prints SHA, version, file fingerprints
+bash scripts/build-stamp.sh --strict  # exits 1 if a redeclaration risk is detected
+```
+
+A healthy stamp ends with:
+
+```
+guards
+  redecl-risk-check       ok (no local fileExists* in cmd/ — fsutil migration present)
+```
+
+If you see `FAIL — fileExists/fileExistsLoose declared in both files`,
+**stop and re-pull** — `go build` will fail with the redeclaration
+error. The Windows equivalent is `pwsh scripts/build-stamp.ps1 -Strict`.
+
 ### Install-script behavior spec (shareable with any AI)
 
 The canonical, repository-agnostic contract that every installer in this

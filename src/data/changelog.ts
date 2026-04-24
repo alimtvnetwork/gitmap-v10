@@ -8,6 +8,18 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: "v3.116.0",
+    date: "2026-04-24",
+    subtitle: "README: canonical \"Update Source Before Building\" section with v3.92.0+ rename verification",
+    items: [
+      "Why: the hardening trilogy (v3.113.0 fsutil migration, v3.114.0 AST guard, v3.115.0 pre-build stamp) made the `fileExists redeclared` regression impossible on a fresh checkout — but a contributor running `git pull` on a long-lived branch still had no canonical place in the README to look up the verification commands. This release adds that section and links it to the v3.115.0 build stamp so the entire detection path is documented end-to-end.",
+      "New README section 'Update Source Before Building (avoid the `fileExists redeclared` regression)' placed immediately after 'Clone & Setup (Development)' so it is the first thing a returning contributor sees. Canonical update sequence: `git fetch` → `checkout main` → `pull --ff-only` → `git status` clean check → SHA capture.",
+      "Three copy-pasteable verification commands confirm the v3.92.0+ rename fix is present: (1) `grep '^const Version = '` against `constants.go` must be 3.92.0 or newer; (2) `grep -nE '^func (fileExists|fileExistsLoose)\\('` against `updatedebugwindows.go` must produce no output (helper moved to `gitmap/fsutil` in v3.113.0); (3) `test -f gitmap/fsutil/exists.go` + import check on both cmd/ files must print both paths.",
+      "Pointer to the v3.115.0 pre-build stamp scripts (`bash scripts/build-stamp.sh --strict` and the PowerShell equivalent) with the expected healthy-state output line ('redecl-risk-check ok') and the FAIL-state remediation ('stop and re-pull'). Explicit framing: the redeclaration error is ALWAYS a stale-checkout symptom and the current source cannot produce it.",
+      "Verification matrix now end-to-end documented across five layers: source (fsutil package, v3.113.0), compile-time (rename-pin test, v3.113.0), AST (`updatedebugwindows_source_test.go`, v3.114.0), pre-build (`scripts/build-stamp.{sh,ps1}`, v3.115.0), and documentation (README, v3.116.0). Bumped `constants.Version` to `3.116.0`.",
+    ],
+  },
+  {
     version: "v3.115.0",
     date: "2026-04-24",
     subtitle: "Pre-build provenance stamp surfaces stale checkouts in the first lines of the build log",

@@ -1,5 +1,52 @@
 # Changelog
 
+## v3.116.0 — (2026-04-24) — README: canonical "Update Source Before Building" section with v3.92.0+ rename verification
+
+### Why
+
+The hardening trilogy (v3.113.0 fsutil migration, v3.114.0 AST guard,
+v3.115.0 pre-build stamp) made the `fileExists redeclared` regression
+impossible on a fresh checkout — but a contributor running `git pull`
+on a long-lived branch still has no canonical place in the README to
+look up the verification commands. This release adds that section and
+links it to the v3.115.0 build stamp so the entire detection path is
+documented end-to-end.
+
+### Changes
+
+- New README section **"Update Source Before Building (avoid the
+  `fileExists redeclared` regression)"** placed immediately after
+  "Clone & Setup (Development)" so it is the first thing a returning
+  contributor sees:
+  - Canonical update sequence: `git fetch` → `checkout main` →
+    `pull --ff-only` → `git status` clean check → SHA capture.
+  - Three copy-pasteable verification commands that confirm the
+    v3.92.0+ rename fix is present:
+    1. `grep '^const Version = '` against `constants.go` (must be
+       `3.92.0` or newer — `3.115.0+` recommended).
+    2. `grep -nE '^func (fileExists|fileExistsLoose)\('` against
+       `updatedebugwindows.go` (must produce no output — the helper
+       moved to `gitmap/fsutil` in v3.113.0).
+    3. `test -f gitmap/fsutil/exists.go` + import check on both cmd/
+       files (both file paths must be printed).
+  - Pointer to the v3.115.0 pre-build stamp scripts (`bash
+    scripts/build-stamp.sh --strict` and the PowerShell equivalent)
+    with the expected healthy-state output line and the FAIL-state
+    remediation ("stop and re-pull").
+  - Explicit framing: the redeclaration error is **always** a
+    stale-checkout symptom and the current source cannot produce it.
+- Bumped `constants.Version` to `3.116.0`.
+
+### Verification matrix (now end-to-end documented)
+
+| Layer | Mechanism | Detection point |
+|---|---|---|
+| Source | `gitmap/fsutil` package | v3.113.0 |
+| Compile-time | rename-pin test | v3.113.0 |
+| AST | `updatedebugwindows_source_test.go` | v3.114.0 |
+| Pre-build | `scripts/build-stamp.{sh,ps1}` | v3.115.0 |
+| **Documentation** | **README "Update Source Before Building"** | **v3.116.0** |
+
 ## v3.115.0 — (2026-04-24) — Pre-build provenance stamp surfaces stale checkouts in the first lines of the build log
 
 ### Why
