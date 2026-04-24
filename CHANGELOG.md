@@ -1,5 +1,35 @@
 # Changelog
 
+## v3.109.0 — (2026-04-24) — Plan 05 Phase 1 closeout: language corpus verified
+
+### Verified
+
+- **Phase 1 language coverage already complete in tree** — confirmed all
+  ten template files for the new language batch ship with proper
+  audit-trail headers:
+  - `assets/ignore/{java,ruby,php,swift,kotlin}.gitignore`
+  - `assets/attributes/{java,ruby,php,swift,kotlin}.gitattributes`
+- **Corpus parity test pins the batch** — `gitmap/templates/corpus_parity_test.go`
+  already enumerates `java`, `ruby`, `php`, `swift`, `kotlin` and asserts
+  every ignore lang has a matching attributes counterpart (line 97 loop).
+  Any future revert to the asset directory will fail CI before merge.
+- **No lang enum drift** — confirmed the resolver discovers languages by
+  filesystem walk + filename parsing, so adding a new lang requires only
+  dropping the file in (per Plan 04 design). No `LangJava` / `LangRuby` /
+  etc. constants exist or are needed.
+
+### Plan status
+
+- Plan 05 Phase 1 marked **done** in
+  `.lovable/memory/plans/05-templates-polish-plan.md`.
+- Phase 0 (spec) ✅, Phase 1 (langs) ✅, Phase 3 (`templates diff`) ✅.
+- Remaining: Phase 2 (`templates init`), Phase 4 finishing items
+  (README snippet — deferred until `init` lands), Phase 5 (QA + tag).
+
+### Bumped
+
+- `constants.Version` → `3.109.0` (docs + plan closeout, no code changes).
+
 ## v3.108.0 — (2026-04-24) — `gitmap templates diff` (alias `td`)
 
 ### Added

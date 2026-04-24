@@ -8,6 +8,18 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: "v3.109.0",
+    date: "2026-04-24",
+    subtitle: "Plan 05 Phase 1 closeout — language corpus (java/ruby/php/swift/kotlin) verified end-to-end",
+    items: [
+      "Verified: all ten Phase 1 template files already ship in tree with correct audit-trail headers — `assets/ignore/{java,ruby,php,swift,kotlin}.gitignore` and `assets/attributes/{java,ruby,php,swift,kotlin}.gitattributes`. Every file carries the `# source:` + `# kind:` + `# lang:` + `# version: 1` four-line header per the Plan 04 audit-trail rule.",
+      "Verified: `gitmap/templates/corpus_parity_test.go` already enumerates the new five langs (lines 23-30) and asserts every ignore lang has a matching attributes counterpart (line 97 loop). Any future revert to the asset directory will fail CI before merge — no `corpus_test.go` extension required.",
+      "Verified: no lang enum drift. The resolver discovers languages via filesystem walk + filename parsing per Plan 04 design, so adding a new lang requires only dropping the file in. Confirmed zero references to `LangJava` / `LangRuby` / etc. in `gitmap/templates/*.go`. `templates list` picks up the new langs automatically.",
+      "Plan 05 status: Phase 0 (spec) ✅, Phase 1 (langs) ✅, Phase 3 (`templates diff`) ✅. Remaining: Phase 2 (`gitmap templates init` scaffolder), Phase 4 README snippet (deferred until `init` lands), Phase 5 (QA + tag).",
+      "Bumped `constants.Version` to `3.109.0`. Pure docs/plan closeout — no code changes.",
+    ],
+  },
+  {
     version: "v3.108.0",
     date: "2026-04-24",
     subtitle: "`gitmap templates diff` (alias `td`) — preview template changes without writing",

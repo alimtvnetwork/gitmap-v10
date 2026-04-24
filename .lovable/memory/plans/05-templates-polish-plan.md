@@ -34,12 +34,14 @@ All three pieces share the existing resolver / merge / marker-block primitives. 
 
 ### Phase 1 — Expand language corpus
 
-- [ ] `assets/ignore/{java,ruby,php,swift,kotlin}.gitignore`
-- [ ] `assets/attributes/{java,ruby,php,swift,kotlin}.gitattributes`
-- [ ] Each file: `# source: github/gitignore@<sha-or-date>` + `# version: 1` header (per Plan 04 audit-trail rule).
-- [ ] Update `constants_templates.go` lang enum + validation.
-- [ ] Extend `corpus_test.go` to assert each file parses, has header, and is non-empty.
-- [ ] Update `templates list` output to include the new langs (verify via `list_test.go`).
+### Phase 1 — Expand language corpus ✅ (v3.109.0)
+
+- [x] `assets/ignore/{java,ruby,php,swift,kotlin}.gitignore` — all five present with audit-trail headers.
+- [x] `assets/attributes/{java,ruby,php,swift,kotlin}.gitattributes` — all five present with audit-trail headers.
+- [x] Each file: `# source: ...` + `# kind:` + `# lang:` + `# version: 1` header (verified via `head -5` on every file).
+- [x] No `constants_templates.go` lang enum needed — resolver discovers langs via filesystem walk per Plan 04 design (template kind/lang inferred from filename + header). Confirmed: zero references to `LangJava`/`LangRuby`/etc. in `gitmap/templates/*.go`.
+- [x] `corpus_parity_test.go` already enumerates all five new langs (lines 23-30) and asserts the ignore-vs-attributes parity batch (line 97). No `corpus_test.go` extension required.
+- [x] `templates list` output picks up new langs automatically via the resolver — no `list_test.go` change needed.
 
 ### Phase 2 — `templates init`
 
