@@ -1163,6 +1163,26 @@ export const commands: CommandDef[] = [
   },
   {
     category: "tools",
+    name: "templates init", alias: "tpl ti", description: "Scaffold .gitignore + .gitattributes for one or more languages by merging the embedded templates into the current directory (idempotent, marker-block aware)",
+    usage: "gitmap templates init <lang> [<lang>...] [--lfs] [--dry-run] [--force]",
+    flags: [
+      { flag: "--lfs", description: "Also merge lfs/common.gitattributes into .gitattributes" },
+      { flag: "--dry-run", description: "Preview every block that would be written; touch nothing on disk" },
+      { flag: "--force", description: "Replace pre-existing .gitignore/.gitattributes outright (discards hand edits OUTSIDE the gitmap marker block)" },
+    ],
+    examples: [
+      { command: "gitmap templates init go", description: "Scaffold ignore + attributes for Go in the current directory" },
+      { command: "gitmap templates init go node --lfs", description: "Multi-lang scaffold plus an LFS attributes block" },
+      { command: "gitmap tpl ti python --dry-run", description: "Preview what Python scaffolding would write without touching disk" },
+    ],
+    seeAlso: [
+      { name: "templates diff", description: "Preview drift between on-disk blocks and the curated templates" },
+      { name: "templates list", description: "Discover what kind/lang pairs are available before running init" },
+      { name: "add lfs-install", description: "Apply lfs/common into .gitattributes via marker block (init --lfs is the same operation, no shell-out)" },
+    ],
+  },
+  {
+    category: "tools",
     name: "templates diff", alias: "tpl td", description: "Preview what `add ignore`/`add attributes` would change without writing — marker-block aware, exit codes mirror diff(1)",
     usage: "gitmap templates diff [--lang <name>] [--kind ignore|attributes] [--cwd <path>]",
     flags: [
