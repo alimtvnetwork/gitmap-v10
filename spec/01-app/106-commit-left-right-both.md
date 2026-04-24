@@ -96,27 +96,36 @@ unless `--mirror` is passed (see flags).
 > the goal is "the same human-readable evolution," not a tree-hash-equivalent
 > mirror.
 
-## 5. `commit-both` — interleave by timestamp
+## 5. `commit-both` — two sequential passes
+
+> **Implementation note (v3.102.0):** the original draft of this section
+> specified an author-date interleave. That variant was deferred in
+> favor of two sequential passes, which give deterministic output and
+> avoid mid-run merge-base drift. The interleaved variant remains a
+> future enhancement (tracked separately).
 
 `commit-both` resolves the union as follows:
 
-1. Compute LEFT-only commits (`base..LEFT-HEAD`) and RIGHT-only commits
-   (`base..RIGHT-HEAD`) independently.
-2. Concatenate both lists and sort by **author date ascending** (ties broken
-   by source side: LEFT first).
-3. Walk the merged sequence. For each entry, replay it onto the **opposite
-   side** using the manual-reconstruct mechanism above.
-4. After the loop, both sides contain the same chronological union of
-   commits. The original commits on each side remain (unchanged SHAs);
-   the new commits are appended on top of the current branch.
+1. **Pass 1 — LEFT → RIGHT.** Build plan from LEFT, preview, prompt
+   (unless `-y` / `--dry-run`), replay onto RIGHT, push.
+2. **Pass 2 — RIGHT → LEFT.** Build a *fresh* plan from RIGHT (so
+   LEFT's just-replayed commits are excluded by the new merge-base),
+   preview, prompt, replay onto LEFT, push.
+3. If Pass 1 fails the run aborts before Pass 2 — partial commit-both
+   is worse than half-done because the second direction's merge-base
+   would have shifted.
+
+Each pass labels its log lines with a directional suffix
+(`(left→right)` / `(right→left)`) so commit-both output is
+visually attributable to a specific direction.
 
 Edge cases:
 
-- A commit whose author date predates the merge-base is still included if
-  it's part of the `base..HEAD` range (clock-skew tolerance).
-- If LEFT and RIGHT have a commit with the same cleaned message + same
-  author date + same diff, it is considered a duplicate and replayed only
-  once (onto whichever side is missing it).
+- Pass 2's plan automatically excludes commits replayed by Pass 1
+  because `git merge-base` will now point past them.
+- If LEFT and RIGHT have a commit with the same cleaned message +
+  same author date + same diff, the provenance footer's
+  `AlreadyReplayed` check skips it on the second pass.
 
 ## 6. Commit-message normalization pipeline
 
