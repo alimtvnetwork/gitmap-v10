@@ -91,15 +91,6 @@ const (
 	EnvGitMapQuietTrue = "1"
 )
 
-// Startup version check (v3.90.0+) — see gitmap/cmd/startupversioncheck.go
-// and helptext/version-check.md.
-const (
-	FlagNoVersionCheck    = "--no-version-check"
-	MsgStartupCheckBanner = "[gitmap v%s]\n"
-	MsgStartupCheckWarn   = "  ⚠ %s requires gitmap v%s — active binary is v%s.\n" +
-		"    Run `gitmap update` to upgrade, or pass --no-version-check to silence this warning.\n"
-)
-
 // Bare-invocation binary readout labels (v3.6.0+).
 const (
 	BinaryReadoutActive   = "  Active binary:    %s\n"

@@ -287,29 +287,3 @@
   2. Any "scan the positional args" heuristic that hardcodes `[0]` or `[1]` indices is a bug waiting to happen — always iterate the slice.
   3. Real-world URL input is never clean: BOM, smart quotes, zero-width spaces, and stray wrappers are the norm, not edge cases. Sanitise on every entry point.
   4. Empty/separator-only tokens after sanitisation must be dropped silently — emitting "invalid URL: ``" is worse than emitting nothing.
-
-## 18 — Startup version check (FIXED v3.90.0)
-- **Status**: Fixed in v3.90.0
-- **Reported**: After v3.86–v3.89 added `pending clear`, `--debug-windows`, semicolon separator, and SSH-shorthand recognition in quick succession, users on older PATH binaries hit "command not found" or silently got old behaviour with **no signal** that the docs / source repo had moved on. `gitmap doctor` would surface the gap, but nobody runs `doctor` proactively.
-- **Root Cause**:
-  1. `Run()` jumped straight to `dispatch(command)` with zero version awareness.
-  2. The deployed-binary version is only verified when `gitmap doctor` is invoked — there was no per-invocation surface for "you need a newer binary".
-  3. `cmd.dispatch` returns "unknown command" identically whether the command genuinely doesn't exist OR the user just has an out-of-date binary, so the user can't tell which.
-- **Solution**:
-  1. New `gitmap/cmd/startupversioncheck.go` runs from `Run()` immediately before `dispatch(command)`. Prints a one-line `[gitmap vX.Y.Z]` banner to STDERR and warns when the typed command/flag/argument-shape requires a newer binary.
-  2. Data-driven `cmdMinVersions` map — append-only single source of truth. Keys: bare command, `<cmd> <subcmd>`, `<cmd>:--<flag>`, or `<cmd>:<behaviour-label>`.
-  3. `startupBehaviourKeys` for `clone` inspects argument SHAPES — `;` triggers `clone:semicolon-separator` (3.89.0), 2+ URLs triggers `clone:multi-url` (3.80.0), curly-quote/BOM triggers `clone:smart-quote-strip` (3.89.0). Highest-required-version wins for the warning text.
-  4. Suppression channels: `--no-version-check` (new), `--no-banner` (existing), `GITMAP_QUIET=1` (existing), and a hard-coded safe-list (`version`, `v`, `help`, `update`, `update-runner`, `update-cleanup`, `doctor`, `self-install`, `self-uninstall`) so the user can ALWAYS recover from a mismatch.
-  5. STDERR-only output — scriptable commands keep clean stdout. Never changes the exit code.
-  6. Pure local — no network, no exec of the deployed binary. Comparing `constants.Version` against the per-feature min-version map is sufficient at startup; full PATH-vs-deployed audit stays in `doctor`.
-- **Files Affected**:
-  - `gitmap/cmd/startupversioncheck.go` (new) — entire feature
-  - `gitmap/cmd/root.go` — one-line wire-up before `dispatch`
-  - `gitmap/constants/constants_doctor.go` — `FlagNoVersionCheck`, `MsgStartupCheckBanner`, `MsgStartupCheckWarn`
-  - `gitmap/helptext/version-check.md` (new) — full user-facing doc
-  - `gitmap/constants/constants.go` — version bumped to `3.90.0`
-- **Prevention**:
-  1. Every new subcommand or behaviour-bearing flag MUST be added to `cmdMinVersions` in the same commit that introduces it. Reviewer checklist item.
-  2. Min-version entries are append-only forever — never delete or downgrade, even if a feature later becomes the only behaviour. Older binaries still need the warning.
-  3. Startup checks are advisory; they NEVER abort the command or change the exit code. The user might be deliberately mixing old binary + new repo, and we don't break that workflow.
-  4. STDERR for informational scaffolding, STDOUT for command output — keeps `| jq` and friends working without `--quiet` gymnastics.

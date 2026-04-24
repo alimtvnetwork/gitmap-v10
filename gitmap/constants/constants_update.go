@@ -104,6 +104,24 @@ const (
 	MsgDebugWinChildPID   = "[debug-windows] spawned child pid: %d\n"
 	MsgDebugWinNote       = "[debug-windows] %s\n"
 	MsgDebugWinFooter     = "[debug-windows] ============================================\n\n"
+
+	// Command-line rendering: exact invocation that Phase 3 will run,
+	// formatted so the user can copy-paste it into a shell to reproduce.
+	MsgDebugWinCmdLine    = "[debug-windows] spawn command    : %s\n"
+	MsgDebugWinCmdNote    = "[debug-windows] (no `git` subprocess is launched by update-cleanup; only the line above plus os.Remove/os.RemoveAll on the paths below)\n"
+
+	// Cleanup plan: the actual filesystem operations the deployed binary
+	// will perform, enumerated BEFORE any deletion happens.
+	MsgDebugWinCleanHdr   = "[debug-windows] ----- planned cleanup operations -----\n"
+	MsgDebugWinCleanGlob  = "[debug-windows] glob             : %s\n"
+	MsgDebugWinCleanMatch = "[debug-windows]   → os.Remove    : %s\n"
+	MsgDebugWinCleanEmpty = "[debug-windows]   (no matches)\n"
+	MsgDebugWinCleanSwap  = "[debug-windows]   → os.RemoveAll : %s\n"
+	MsgDebugWinCleanShim  = "[debug-windows] drive-root shim  : %s (%s)\n"
+	MsgDebugWinCleanShimSkip = "skipped"
+	MsgDebugWinCleanShimDel  = "will os.Remove"
+	MsgDebugWinCleanFooter = "[debug-windows] --------------------------------------\n"
+
 )
 
 // Update error messages.

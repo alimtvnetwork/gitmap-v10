@@ -1,44 +1,50 @@
 # Changelog
 
-## v3.90.0 — (2026-04-24) — Startup version check
+## v3.90.0 — (2026-04-24) — `--debug-windows` shows the exact spawn command and cleanup plan
 
 ### Added
 
-- **`runStartupVersionCheck` runs on every invocation** (with safe-list exceptions). Prints a one-line `[gitmap vX.Y.Z]` banner to **stderr** showing the active binary version, and emits a warning when the typed command, flag, or argument-shape requires a newer binary than the one currently running:
+- **`dumpDebugWindowsCommandPlan`** — when `--debug-windows` (or `GITMAP_DEBUG_WINDOWS=1`) is active, the Phase 3 handoff prints the exact shell-quoted spawn invocation BEFORE calling `cmd.Start()`/`cmd.Run()`. Output is copy-paste safe across PowerShell, cmd.exe, bash, and zsh:
 
-      $ gitmap pending clear        # active is v3.85.0
-      [gitmap v3.85.0]
-        ⚠ pending clear requires gitmap v3.88.0 — active binary is v3.85.0.
-          Run `gitmap update` to upgrade, or pass --no-version-check to silence this warning.
+      [debug-windows] spawn command    : "C:\Program Files\gitmap-cli\gitmap.exe" "update-cleanup" "--debug-windows"
+      [debug-windows] (no `git` subprocess is launched by update-cleanup; only the line above plus os.Remove/os.RemoveAll on the paths below)
 
-- **`--no-version-check` flag** for per-invocation opt-out (joins existing `--no-banner` and `GITMAP_QUIET=1` suppression channels).
-- **`cmdMinVersions` map** (data-driven, append-only) — the single source of truth for "this feature ships in version X". Keys can be a bare command (`pending`), a sub-verb (`pending clear`), a flag (`update:--debug-windows`), or a behaviour label (`clone:semicolon-separator`). Adding a new requirement is one line.
-- **Behaviour detection for `clone`:** the check inspects argument *shapes* — passing `;` as a separator triggers `clone:semicolon-separator` (v3.89.0+), passing 2+ URLs triggers `clone:multi-url` (v3.80.0+), pasting curly-quote/BOM contamination triggers `clone:smart-quote-strip` (v3.89.0+). The user gets the warning for the most demanding feature on the line, not the noisiest.
-- **`gitmap/helptext/version-check.md`** — full doc covering rationale, suppression, and how to add a new requirement.
+- **`dumpDebugWindowsCleanupPlan`** — called from `runUpdateCleanup` AFTER `loadUpdateCleanupContext` but BEFORE any deletion happens, so the user sees the *plan* not the outcome. Enumerates:
+  1. Each `filepath.Glob` pattern for `gitmap-update-*` (temp handoff copies)
+  2. Each `filepath.Glob` pattern for `*.old` (backup binaries)
+  3. Each match that will be passed to `os.Remove` (skips matches equal to the active binary, mirroring `removeCleanupMatch`'s gating)
+  4. Each `*.gitmap-tmp-*` swap dir that will be passed to `os.RemoveAll`
+  5. The Windows-only drive-root shim candidate plus the verdict (`will os.Remove` / `skipped`) — mirrors the gating in `isRemovableDriveRootShim`
+
+  Sample output:
+
+      [debug-windows] ----- planned cleanup operations -----
+      [debug-windows] glob             : C:\Users\me\AppData\Local\Temp\gitmap-update-*
+      [debug-windows]   → os.Remove    : C:\Users\me\AppData\Local\Temp\gitmap-update-12345.exe
+      [debug-windows] glob             : C:\Program Files\gitmap-cli\*.old
+      [debug-windows]   → os.Remove    : C:\Program Files\gitmap-cli\gitmap.exe.old
+      [debug-windows] glob             : C:\Program Files\gitmap-cli\*.gitmap-tmp-*
+      [debug-windows]   (no matches)
+      [debug-windows] drive-root shim  : E:\gitmap.exe (skipped)
+      [debug-windows] --------------------------------------
+
+- **Explicit "no `git` subprocess" callout.** The cleanup pipeline is pure Go syscalls — it never shells out to `git`. The new `MsgDebugWinCmdNote` line states this explicitly so users debugging update issues don't waste time hunting for a phantom `git` invocation.
 
 ### Why
 
-After v3.86–v3.89 added a string of new commands (`pending clear`, `--debug-windows`, semicolon separator, SSH-shorthand recognition), users on older PATH binaries were silently running into "command not found" or quietly getting old behaviour with no signal that the docs / source repo had moved on. The doctor command catches this in a full audit but nobody runs `doctor` proactively. A one-line stderr banner on every invocation surfaces the gap exactly when it matters.
-
-### Design notes
-
-- **STDERR only.** Scriptable commands (`gitmap scan --output json | jq ...`) keep clean stdout.
-- **Pure local — no network, no exec.** Comparing `constants.Version` against the per-feature min-version map is enough; we don't need to inspect the deployed binary at startup (that's `gitmap doctor`'s job).
-- **Never changes the exit code.** Advisory only — a user deliberately running an older binary against a newer source repo must not be blocked.
-- **Safe-list:** `version`, `v`, `help`, `update`, `update-runner`, `update-cleanup`, `doctor`, `self-install`, `self-uninstall` always run silent so the user can recover from a mismatch without the banner getting in the way.
-- **Highest-wins** when multiple requirements match a single invocation. `clone --no-replace url1;url2` reports the semicolon (3.89.0), not `--no-replace` (3.55.0).
+After v3.86 added `--debug-windows` and v3.87 added the on-disk handoff log, the missing piece was *what exactly* the deployed binary was about to do. The dump showed PIDs, env vars, and a Go-formatted argv slice (`[update-cleanup --debug-windows]`) but no shell-quoted command line and no list of the actual files that would be deleted. Users hit "the update finished but my .old file is still there" and had no way to confirm the path the cleanup pass actually looked at.
 
 ### Implementation
 
-- `gitmap/cmd/startupversioncheck.go` (new) — `runStartupVersionCheck`, `cmdMinVersions` map, `startupCheckSafeCommands` set, `requiredVersionFor`, `collectMinVersionMatches`, `startupSubcommandKeys`, `startupBehaviourKeys`, `startupVersionAtLeast`, `parseStartupSemver`, `atoiSafeStartup`. All under 200 lines, all functions under 15.
-- `gitmap/cmd/root.go` — `Run()` calls `runStartupVersionCheck(command, os.Args[2:])` immediately before `dispatch(command)`.
-- `gitmap/constants/constants_doctor.go` — `FlagNoVersionCheck`, `MsgStartupCheckBanner`, `MsgStartupCheckWarn` constants (zero magic strings).
-- `gitmap/helptext/version-check.md` (new) — full user-facing doc.
+- `gitmap/cmd/updatedebugwindows_plan.go` (new) — `dumpDebugWindowsCommandPlan`, `renderShellCommand`, `quoteShellToken`, `dumpDebugWindowsCleanupPlan`, `dumpPlannedRemovals`, `dumpPlannedSwapDirs`, `dumpPlannedDriveRootShim`. All under 15 lines per function, file under 200 lines.
+- `gitmap/cmd/updatehandoff_phase3.go` — `spawnDeployedCleanupWindows` and `spawnDeployedCleanupUnix` both call `dumpDebugWindowsCommandPlan` immediately after `dumpDebugWindowsHandoff`.
+- `gitmap/cmd/updatecleanup.go` — `runUpdateCleanup` calls `dumpDebugWindowsCleanupPlan(ctx)` immediately after `loadUpdateCleanupContext`.
+- `gitmap/constants/constants_update.go` — new `MsgDebugWinCmdLine`, `MsgDebugWinCmdNote`, `MsgDebugWinCleanHdr`, `MsgDebugWinCleanGlob`, `MsgDebugWinCleanMatch`, `MsgDebugWinCleanEmpty`, `MsgDebugWinCleanSwap`, `MsgDebugWinCleanShim`, `MsgDebugWinCleanShimSkip`, `MsgDebugWinCleanShimDel`, `MsgDebugWinCleanFooter`.
 - `gitmap/constants/constants.go` — bumped `Version` to `3.90.0`.
 
 ### Compatibility
 
-Pure addition. Existing scripts that pipe `gitmap` output to other commands are unaffected because the banner goes to stderr. Existing `--no-banner` and `GITMAP_QUIET=1` suppression continue to work and now also silence the version check.
+Pure addition gated behind `--debug-windows` / `GITMAP_DEBUG_WINDOWS=1`. Default invocations are byte-for-byte identical to v3.89.0. The pre-flight glob scan is read-only and runs in microseconds — even with the debug flag on, it does not perceptibly slow cleanup.
 
 
 ## v3.89.0 — (2026-04-24) — Robust multi-URL clone parsing (PowerShell + bash)

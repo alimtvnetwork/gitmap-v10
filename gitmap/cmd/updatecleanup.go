@@ -28,6 +28,7 @@ func runUpdateCleanup() {
 	delayUpdateCleanupIfNeeded()
 
 	ctx := loadUpdateCleanupContext()
+	dumpDebugWindowsCleanupPlan(ctx)
 	total := cleanupTempArtifacts(ctx)
 	total += cleanupBackupArtifacts(ctx)
 	total += cleanupDriveRootShim(ctx)
