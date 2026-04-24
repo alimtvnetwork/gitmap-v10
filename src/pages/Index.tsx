@@ -23,64 +23,66 @@ const HomePage = () => {
             re-clone the exact layout on any machine. Track, group, release, and
             manage repositories from a single CLI.
           </p>
-          <div className="mx-auto mb-8 max-w-3xl rounded-lg border border-border bg-card/80 p-6 text-center shadow-sm">
-            <div className="mb-5 flex items-center justify-center gap-2 border-b border-border pb-3">
+          <div className="mx-auto mb-8 max-w-5xl rounded-xl bg-card/40 px-8 py-7 text-center backdrop-blur-sm">
+            <div className="mb-6 flex items-center justify-center gap-2 pb-2">
               <span className="h-2.5 w-2.5 rounded-full bg-destructive/80" />
-              <span className="h-2.5 w-2.5 rounded-full bg-primary/70" />
+              <span className="h-2.5 w-2.5 rounded-full bg-primary/80" />
               <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/50" />
-              <p className="ml-2 text-xs font-sans uppercase tracking-[0.16em] text-muted-foreground">
+              <p className="ml-2 text-xs font-sans uppercase tracking-[0.18em] text-muted-foreground">
                 Terminal quick actions
               </p>
             </div>
-            <div className="space-y-7">
+            <div className="grid gap-7 md:grid-cols-2">
               <div className="space-y-3">
-                <p className="text-sm font-sans uppercase tracking-wider text-emerald-400/90">
-                  Install — Quick
+                <p
+                  className="text-sm font-sans uppercase tracking-wider text-primary"
+                  title="Runs install-quick.ps1 / install-quick.sh — the one-line installer"
+                >
+                  Install
                 </p>
-                <div className="mx-auto max-w-2xl">
-                  <InstallBlock
-                    tabs={[
-                      {
-                        label: "Windows",
-                        command:
-                          "irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v7/main/install-quick.ps1 | iex",
-                      },
-                      {
-                        label: "Linux / macOS",
-                        command:
-                          "curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v7/main/install-quick.sh | bash",
-                      },
-                    ]}
-                  />
-                </div>
+                <InstallBlock
+                  tabs={[
+                    {
+                      label: "Windows",
+                      command:
+                        "irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v7/main/install-quick.ps1 | iex",
+                    },
+                    {
+                      label: "Linux / macOS",
+                      command:
+                        "curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v7/main/install-quick.sh | bash",
+                    },
+                  ]}
+                />
               </div>
               <div className="space-y-3">
-                <p className="text-sm font-sans uppercase tracking-wider text-emerald-400/90">
-                  Uninstall — Quick
+                <p
+                  className="text-sm font-sans uppercase tracking-wider text-primary"
+                  title="Runs uninstall-quick.ps1 / uninstall-quick.sh — the one-line uninstaller"
+                >
+                  Uninstall
                 </p>
-                <div className="mx-auto max-w-2xl">
-                  <InstallBlock
-                    tabs={[
-                      {
-                        label: "Windows",
-                        command:
-                          "irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v7/main/uninstall-quick.ps1 | iex",
-                      },
-                      {
-                        label: "Linux / macOS",
-                        command:
-                          "curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v7/main/uninstall-quick.sh | bash",
-                      },
-                    ]}
-                  />
-                </div>
-                <p className="mx-auto max-w-2xl text-xs text-muted-foreground font-sans leading-relaxed">
-                  Removes the <code className="font-mono text-foreground">gitmap</code> binary and its PATH entries, then prompts before deleting your data folder
-                  (<code className="font-mono text-foreground">%APPDATA%\gitmap</code> on Windows, <code className="font-mono text-foreground">~/.config/gitmap</code> on Linux/macOS).
-                  Pass <code className="font-mono text-foreground">--keep-data</code> to always keep it, or <code className="font-mono text-foreground">-y</code>/<code className="font-mono text-foreground">--yes</code> to skip the prompt.
-                </p>
+                <InstallBlock
+                  tabs={[
+                    {
+                      label: "Windows",
+                      command:
+                        "irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v7/main/uninstall-quick.ps1 | iex",
+                    },
+                    {
+                      label: "Linux / macOS",
+                      command:
+                        "curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v7/main/uninstall-quick.sh | bash",
+                    },
+                  ]}
+                />
               </div>
             </div>
+            <p className="mx-auto mt-6 max-w-3xl text-xs text-muted-foreground font-sans leading-relaxed">
+              Uninstall removes the <code className="font-mono text-foreground">gitmap</code> binary and its PATH entries, then prompts before deleting your data folder
+              (<code className="font-mono text-foreground">%APPDATA%\gitmap</code> on Windows, <code className="font-mono text-foreground">~/.config/gitmap</code> on Linux/macOS).
+              Pass <code className="font-mono text-foreground">--keep-data</code> to always keep it, or <code className="font-mono text-foreground">-y</code>/<code className="font-mono text-foreground">--yes</code> to skip the prompt.
+            </p>
           </div>
           <div className="flex gap-4 justify-center">
             <Link
