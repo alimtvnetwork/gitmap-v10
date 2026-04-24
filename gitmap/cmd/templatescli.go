@@ -25,6 +25,7 @@ Subcommands:
   list [flags]               List every available template (alias: tl)
   show <kind> <lang>         Print a single template to stdout (alias: ts)
   init <lang> [<lang>...]    Scaffold .gitignore / .gitattributes for languages (alias: ti)
+  diff --lang <l> [--kind k] Show what 'add' would change without writing (alias: td)
 
 Kinds:
   ignore | attributes | lfs
@@ -41,6 +42,11 @@ Flags (init):
   --dry-run                  Preview every block; do not touch disk
   --force                    Replace existing .gitignore/.gitattributes outright
 
+Flags (diff):
+  --lang <name>              Required. Which language to diff.
+  --kind <ignore|attributes> Default: both. Restrict to one kind.
+  --cwd <path>               Default: current dir. Where to look for the target file.
+
 Examples:
   gitmap templates list
   gitmap templates list --kind ignore
@@ -52,6 +58,8 @@ Examples:
   gitmap templates init go
   gitmap templates init go node --lfs
   gitmap tpl ti python --dry-run
+  gitmap templates diff --lang go
+  gitmap tpl td --lang node --kind ignore
 `
 	headerTemplatesList    = "KIND        LANG            SOURCE  PATH\n"
 	fmtTemplatesListRow    = "%-10s  %-14s  %-6s  %s\n"
@@ -90,6 +98,8 @@ func dispatchTemplates(command string) bool {
 		runTemplatesShow(rest)
 	case cmdTemplatesInit, cmdTemplatesInitAlias:
 		runTemplatesInit(rest)
+	case cmdTemplatesDiff, cmdTemplatesDiffAlias:
+		runTemplatesDiff(rest)
 	default:
 		fmt.Fprintf(os.Stderr, errUnknownTemplatesSub, sub)
 		fmt.Fprint(os.Stderr, usageTemplatesRoot)
