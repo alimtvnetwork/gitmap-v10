@@ -1,5 +1,43 @@
 # Changelog
 
+## v3.88.0 — (2026-04-24) — `gitmap pending clear` to unblock stuck clones
+
+### Added
+
+- **`gitmap pending clear [<mode>|<id>] [--dry-run] [--yes|-y]`** — removes orphaned or illegal pending tasks so the next `clone` / `clone-next` run is not blocked by a leftover row from an earlier crash. This is the deterministic escape hatch for the "pending task already exists for Clone at <bad-path>" lockout.
+- **Modes:**
+  - `orphans` (default) — `TargetPath` no longer exists on disk
+  - `illegal` — `TargetPath` looks like a URL (`https:\github.com\...`, `://`, `git@host:`) or contains illegal Windows path chars (`:` after the drive letter, `?`, `*`, `<`, `>`, `|`, `"`)
+  - `all` — every pending task (always confirms unless `--yes`)
+  - `<id>` — a single task by numeric ID
+- **Safety rails:** `--dry-run` previews without touching the DB; an interactive confirmation prompt is shown unless `--yes`/`-y` is passed; per-deletion log lines plus a final tally so the action is never silent.
+- **Help page:** new `gitmap/helptext/pending-clear.md` covering modes, flags, exit codes, and the PowerShell comma-splitting backstory that produced the URL-shaped targets in the first place.
+
+### Why
+
+Issue #11 (PowerShell comma-splitting) and issue #12 added defensive guards in the clone command, but pre-existing rows from older crashes still block subsequent runs. Until now the only way to clear them was to delete the SQLite file or write raw SQL — neither of which is safe in a session where other gitmap state matters. `pending clear` does it surgically.
+
+### Implementation
+
+- `gitmap/cmd/pendingclear.go` (new) — `runPendingClear`, arg parser, candidate selector, three classifiers (`isURLShapedTarget`, `hasIllegalPathChar`, `isOrphanTarget`), confirmation prompt, per-row deletion loop.
+- `gitmap/cmd/pending.go` — `runPending` now dispatches to `runPendingClear` when `os.Args[2] == "clear"`. List behaviour unchanged for plain `gitmap pending`.
+- `gitmap/store/pendingtask.go` — new `DeletePendingTask(id int64) error` (uses existing `SQLDeletePendingTask`; returns `ErrPendingTaskNotFound` for unknown IDs).
+- `gitmap/constants/constants_pending_task_msg.go` — new `MsgPendingClear*` and `ErrPendingClear*` constants (no magic strings).
+- `gitmap/helptext/pending-clear.md` — new help page.
+- `gitmap/constants/constants.go` — bumped `Version` to `3.88.0`.
+
+### Compatibility
+
+Pure addition. Plain `gitmap pending` is unchanged. The new subcommand reuses the existing `CmdPending` constant via positional dispatch, so the completion generator and `helptext/coverage_test.go` are unaffected.
+
+### Examples
+
+    gitmap pending clear                # default: drop orphans, prompt
+    gitmap pending clear illegal --yes  # silently drop URL-shaped/illegal-char targets
+    gitmap pending clear all --dry-run  # preview a full wipe
+    gitmap pending clear 17             # drop one specific ID
+
+
 ## v3.87.0 — (2026-04-24) — Durable on-disk handoff log for self-update cleanup
 
 ### Added
