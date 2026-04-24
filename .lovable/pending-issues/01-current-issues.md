@@ -229,6 +229,41 @@
   2. Never infer “already done” from token comments alone; verify the rendered shell actually matches the requested visual direction.
   3. Sync version + both changelog sources for every user-visible fix so release state stays trustworthy.
 
+## 17 — `clone <url1> <url2>` Treats URL #2 as Folder Name on Stale Binary (FIXED v3.95.0)
+- **Status**: Fixed in v3.95.0
+- **Reported (5th time)**: User ran `gitmap clone https://.../email-creator-v1,https://.../email-reader-v3,https://.../account-automator` in PowerShell. Output:
+  ```
+  pending task already exists for Clone at D:\...\https:\github.com\alimtvnetwork\email-reader-v3 (Id 1)
+  Cloning email-creator-v1 into https://github.com/alimtvnetwork/email-reader-v3...
+  fatal: could not create leading directories of 'D:\...\https:\github.com\alimtvnetwork\email-reader-v3.gitmap-tmp-...': Invalid argument
+  ```
+- **Root Cause**: The deployed `gitmap.exe` on the user's PATH is older than v3.80.0 and does not contain the multi-URL routing fix. Current source already has `runClone` → `shouldUseMultiClone(cf)` → `runCloneMulti` for any 2+ URL invocation, so reaching `executeDirectClone(url, folderName=<another URL>, ...)` is impossible in current code. Three pieces of evidence prove the binary is stale:
+  1. The `Cloning email-creator-v1 into https://github.com/...` log line is the literal `MsgCloneURLCloning` format from `executeDirectClone` — the path current source refuses to take for multi-URL input.
+  2. The orphaned `pending task already exists` row was inserted by an even older crashed run with the same broken URL-as-folder shape.
+  3. The user's repeated `gitmap update` runs have been failing in Phase 3 cleanup (issues #09 / #10 / #12), so the freshly built binary never replaces the stale one on PATH.
+- **Solution**:
+  1. **Defensive guard in `executeDirectClone`** — if the resolved folder name itself parses as a URL (impossible in current source), refuse to build the broken `D:\...\https:\github.com\...` path and exit with `ErrCloneStaleBinaryFolderURL` naming the exact recovery commands: `gitmap doctor`, `gitmap update`, `gitmap pending clear --yes`, and the reminder to open a NEW terminal so PATH refreshes. The guard fires only when a stale binary is in use — and the message tells the user exactly that instead of letting git fail with `Invalid argument`.
+  2. **Pinned regression tests** in `gitmap/cmd/clone_stale_binary_test.go` covering all three reported PowerShell argv shapes (comma-glued, space-split, comma+space mixed) plus the URL detector and the recovery message contents. CI now fails before the broken binary can ship.
+  3. **No changes to multi-URL routing itself** — `shouldUseMultiClone` / `runCloneMulti` / `flattenURLArgs` have been correct since v3.80.0. The fix targets the failure mode (silent fall-through to a broken code path) and the user-facing recovery story.
+  4. RCA: `spec/02-app-issues/33-stale-binary-clone-folder-url-guard.md`.
+- **Files Affected**:
+  - `gitmap/cmd/clone.go` — stale-binary guard in `executeDirectClone`
+  - `gitmap/constants/constants_clone.go` — `ErrCloneStaleBinaryFolderURL`
+  - `gitmap/cmd/clone_stale_binary_test.go` (new) — three pinned tests
+  - `spec/02-app-issues/33-stale-binary-clone-folder-url-guard.md` (new) — RCA
+  - `gitmap/constants/constants.go` — version bumped to `3.95.0`
+  - `src/constants/index.ts` — UI version sync to `v3.95.0`
+- **Action Required by User** (the source is correct, but PATH binary must be replaced):
+  1. `gitmap doctor` — confirm the active binary version (will show <3.80.0).
+  2. `gitmap update` — rebuild + redeploy. If Phase 3 cleanup still fails, the durable handoff log under `<TMP>/gitmap-update-handoff-*.log` (v3.87.0+) and `--debug-windows-json` sink (v3.91.0+) record exact branch-level evidence.
+  3. **Open a NEW terminal** so PATH refreshes.
+  4. `gitmap pending clear --yes` — drop the orphaned row.
+  5. Retry — comma- or space-separated, PowerShell or bash, all work.
+- **Prevention**:
+  1. Any new "argv → command" routing must have a regression test pinning the exact PowerShell/bash invocations real users have reported.
+  2. Code paths that would build provably-impossible filesystem paths (URL chars on Windows, control chars, etc.) must refuse early with an actionable message — never silently hand them to git.
+  3. Recurrence reports for fixes already shipped in source must immediately check the deployed binary version (`gitmap doctor`), not the source.
+
 ## 14 — `--debug-windows` flag added for self-update handoff diagnostics (FIXED v3.86.0)
 - **Status**: Fixed in v3.86.0
 - **Reported**: Follow-up to #09 / #10. Even with the cleanup-target resolution lines (`→ Cleanup target resolved via: …`, `→ Cleanup target path: …`, `→ Cleanup process started (pid=…)`), the *child* `update-cleanup` process printed almost nothing about its own environment, so when cleanup misbehaved on Windows the user could not tell which env vars, deploy path, or PID the child actually saw. There was also no way to enable richer diagnostics ad-hoc without rebuilding with `--verbose` plumbed through.
