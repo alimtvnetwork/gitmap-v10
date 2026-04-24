@@ -41,8 +41,12 @@ const (
 
 // Updater fallback.
 const (
-	UpdaterBin         = "gitmap-updater"
-	MsgUpdaterFallback = "  → No source repo found. Delegating to %s...\n\n"
+	UpdaterBin                = "gitmap-updater"
+	MsgUpdaterFallback        = "  → No source repo found. Delegating to %s...\n\n"
+	UpdateCleanupSourceConfig = "config"
+	UpdateCleanupSourceSibling = "sibling"
+	UpdateCleanupSourcePath   = "PATH"
+	UpdateCleanupSourceUnknown = "unknown"
 )
 
 // Update UI messages.
