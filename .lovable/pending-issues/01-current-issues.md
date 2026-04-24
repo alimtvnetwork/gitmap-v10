@@ -84,3 +84,42 @@
   - `gitmap/committransfer/replay.go` — signature + 2 call sites
   - `gitmap/constants/constants.go` — version bumped to `3.81.1`
 - **Prevention**: All three rules (`errorlint`, `gocritic`, `unparam`) are already enabled in `.golangci.yml` — the issue was that they passed silently before the offending code was introduced. Going forward, run `golangci-lint run --path-prefix=gitmap` locally before pushing (or rely on the CI diff-vs-baseline gate which now catches this).
+
+## 09 — Windows Update Cleanup Popup: `Windows cannot find '\\'` (FIXED v3.82.0)
+- **Status**: Fixed in v3.82.0
+- **Reported**: After a successful `gitmap update`, the terminal showed `→ Handing off cleanup to deployed binary: gitmap.exe update-cleanup`, then Windows displayed a popup: `Windows cannot find '\\'`. This repeated across multiple update attempts and the terminal showed no useful diagnostics.
+- **Reproduction Context**:
+  1. Run `gitmap update` on Windows from a deployed binary setup.
+  2. Allow the update runner to finish build/deploy + migrations.
+  3. At phase 3, the handoff copy tries to invoke the newly deployed binary with `update-cleanup`.
+  4. Instead of cleanup running quietly, Windows Shell/`cmd` surfaces `Windows cannot find '\\'`.
+- **Root Cause**:
+  1. The bug was **not** inside `runUpdateCleanup()` itself. The failure happened *before cleanup started*, in `gitmap/cmd/updatehandoff_phase3.go` during the Windows phase-3 launch.
+  2. `spawnDeployedCleanupWindows` built one flat shell command string and passed it to `cmd.exe /C`: `ping 127.0.0.1 -n 3 >nul & start "" /B "<deployed>" update-cleanup`.
+  3. That pattern depends on fragile `cmd.exe` quoting semantics (`start` has special handling for the first quoted token as a window title, and Go's Windows argument escaping adds another parsing layer). External reports for `exec.Command("cmd.exe", "/C", ...)` match this exact failure mode, including the literal popup `Windows cannot find '\\'`.
+  4. Because the handoff used `cmd.Start()` with `Stdout=nil`, `Stderr=nil`, and intentionally swallowed the returned error (`_ = cmd.Start()`), the CLI gave the user **no log output** even when the detached launch failed or mis-parsed.
+  5. Result: the update itself succeeded, but the final cleanup handoff failed noisily in a Windows popup while gitmap stayed silent.
+- **Why Logs Were Missing**:
+  1. The old Windows handoff explicitly discarded stdout/stderr.
+  2. It also ignored the `Start()` error instead of reporting it.
+  3. The popup came from Windows shell execution, outside gitmap's normal console output path, so the user saw an OS dialog but no corresponding CLI error.
+- **Solution**:
+  1. Removed the fragile `cmd.exe /C ... start ...` handoff from `gitmap/cmd/updatehandoff_phase3.go`.
+  2. Windows now launches the deployed binary **directly** with `exec.Command(deployed, constants.CmdUpdateCleanup)` instead of routing through `cmd/start`.
+  3. Added a Windows-only hidden-process helper (`gitmap/cmd/processattr_windows.go`) so the cleanup process stays unobtrusive without embedding Windows-only fields in shared code.
+  4. Added `GITMAP_UPDATE_CLEANUP_DELAY_MS=1500` env handoff plus `delayUpdateCleanupIfNeeded()` in `gitmap/cmd/updatecleanup.go`, so the cleanup process waits briefly before deleting temp `.exe` / `.old` files. This replaces the old `ping` sleep hack and avoids quoting problems entirely.
+  5. Cleanup handoff now prints the resolved target path and reports launch failures to `os.Stderr` using a dedicated constant (`ErrUpdatePhase3Handoff`) instead of failing silently.
+  6. Reused the same hidden-process helper in `selfuninstallhandoff.go` to keep process-launch behavior consistent.
+- **Files Affected**:
+  - `gitmap/cmd/updatehandoff_phase3.go` — removed `cmd/start` shell-string handoff; direct process launch + visible diagnostics
+  - `gitmap/cmd/updatecleanup.go` — added startup delay hook via env var
+  - `gitmap/cmd/processattr_windows.go` — Windows-only `HideWindow` helper
+  - `gitmap/cmd/processattr_other.go` — no-op non-Windows helper
+  - `gitmap/cmd/selfuninstallhandoff.go` — reused hidden-process helper
+  - `gitmap/constants/constants_update.go` — new delay env var + handoff diagnostics messages/errors
+  - `gitmap/constants/constants.go` — version bumped to `3.82.0`
+- **Prevention**:
+  1. Avoid string-built `cmd.exe /C start ...` launchers for internal handoffs; directly exec the target binary whenever possible.
+  2. Never silence detached-launch failures in update-critical paths — best-effort cleanup may stay non-fatal, but launch errors must still be printed.
+  3. Keep Windows-only process attributes in `_windows.go` files so future fixes do not break non-Windows builds.
+  4. If cleanup still fails after launch, the failure should now be observable in the console instead of surfacing only as a Windows popup.
