@@ -1,5 +1,25 @@
 # Changelog
 
+## v3.103.0 — (2026-04-24) — fix non-functional shell handoff via sentinel-file mechanism
+
+### Fixed
+
+- **`gitmap clone-next` shell handoff was a no-op since inception.** The previous implementation called `os.Setenv("GITMAP_SHELL_HANDOFF", path)` from the binary, which can never propagate to the parent shell (child processes cannot mutate parent env). The flattened-folder cd never happened.
+
+### Added
+
+- **Sentinel-file handoff mechanism** (`gitmap/cmd/shellhandoff.go::WriteShellHandoff`). The shell wrapper function exports `GITMAP_HANDOFF_FILE=<temp>` before invoking the binary; the binary writes the target path to that file; the wrapper reads the file after the binary exits and `cd`s the parent shell.
+- **Wired into `clone-next`, `as`, `cd <name>`, `cd repos`** so all four commands hand a target directory back to the parent shell consistently.
+- **Updated `constants.CDFunc{Bash,Zsh,PowerShell}`** wrappers to consume `GITMAP_HANDOFF_FILE` for any subcommand (preserving the existing stdout-capture path for `cd`/`go` for backwards compatibility).
+- **Unit tests** in `gitmap/cmd/shellhandoff_test.go` covering the no-op (env unset), happy-path write, and empty-path safeguard cases.
+- **Spec & memory updates**: `spec/01-app/87-clone-next-flatten.md` rewritten, new memory `.lovable/memory/features/shell-handoff-file.md`.
+
+### Backwards compatibility
+
+- Without the wrapper installed, `GITMAP_HANDOFF_FILE` is unset → `WriteShellHandoff` is a silent no-op.
+- The legacy `GITMAP_WRAPPER=1` detector and the stdout-capture path used by `cd`/`go` both remain intact.
+
+
 ## v3.95.0 — (2026-04-24) — refuse to build URL-shaped folder paths + lock multi-URL routing behind regression tests
 
 ### Fixed
