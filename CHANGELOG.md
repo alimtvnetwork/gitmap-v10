@@ -1,55 +1,35 @@
 # Changelog
 
-## v3.85.1 — (2026-04-24) — Fix three CI lint regressions (errorlint / gocritic / unparam)
+## v3.86.0 — (2026-04-24) — `--debug-windows` for self-update cleanup handoff
 
-### Fixed
+### Added
 
-- **`cmd/reinstall.go`** — replaced direct `err.(*exec.ExitError)` type assertion with `errors.As`, so wrapped errors from `cmd.Run()` are still recognised and the correct exit code is propagated. (`errorlint`)
-- **`committransfer/env.go`** — `currentEnv` now points at `os.Environ` directly instead of wrapping it in a zero-arg lambda. The previous form added an extra call frame for no benefit. (`gocritic/unlambda`)
-- **`committransfer/replay.go`** — removed the unused `info os.FileInfo` parameter from `shouldSkipPath`; both call sites already had `info` in scope from their `filepath.Walk` callbacks and only needed `(rel, opts)`. (`unparam`)
+- **`--debug-windows` flag on `gitmap update`** — opt-in diagnostics for the self-update Phase 2/Phase 3 handoff chain. Prints a `[debug-windows]` block on every relevant lifecycle event with the resolution source (`config` / `sibling` / `PATH`), resolved cleanup target path, target-exists check, child argv, key environment variables (`GITMAP_DEBUG_WINDOWS`, `GITMAP_UPDATE_CLEANUP_DELAY_MS`, `GITMAP_DEBUG_REPO_DETECT`, `GITMAP_REPORT_ERRORS`, `GITMAP_REPORT_ERRORS_FILE`, `PATH`, `GITMAP_DEPLOY_PATH`), self/parent PIDs, and the spawned child PID after a successful detached `Start()`.
+- **`GITMAP_DEBUG_WINDOWS=1` env bridge** — the flag is propagated across the handoff boundary via both argv (Phase 2 copy + Phase 3 cleanup child) and env, so the dump runs on both sides of the detached spawn even when argv inheritance is fragile (e.g. hidden Windows process attrs). Users can also flip the env manually to enable the dump on a single run without rebuilding.
 
-### Why It Repeated
+### Why
 
-The CI pipeline kept reporting the same three NEW findings because earlier runs landed on a stale commit and the auto-summary generator had no per-finding fingerprint to cross-check against. The auto-resolve pass added in the previous task will now flip any matching open `## NN — CI Lint Failures` entry to `FIXED` automatically once a clean run lands. Logged as **Issue #13** in `.lovable/pending-issues/01-current-issues.md` with full root-cause and prevention notes.
-
-### Implementation
-
-- `gitmap/cmd/reinstall.go` — `errors.As(err, &exitErr)` pattern.
-- `gitmap/committransfer/env.go` — `var currentEnv = os.Environ`.
-- `gitmap/committransfer/replay.go` — `shouldSkipPath(rel string, opts Options) bool` + updated call sites.
-- `gitmap/constants/constants.go` — bumped `Version` to `3.85.1`.
-
-### Compatibility
-
-No behaviour change. Pure lint/correctness cleanup. Safe drop-in upgrade.
-
-
-## v3.84.0 — (2026-04-24) — Fix self-update deploying to the wrong Windows install
-
-### Fixed
-
-- **`gitmap update` on Windows now deploys to the configured install first** instead of letting the current `PATH` location win. This fixes the repeated stale-binary loop where self-update appeared to run, but the old `gitmap.exe` stayed active because `run.ps1` kept refreshing the wrong install root.
-- **Generated update handoff scripts now match the runtime fix.** The temporary PowerShell script emitted by `gitmap update` now resolves the deployed binary from `powershell.json` first and only falls back to the active `PATH` binary when the configured target is missing, keeping post-update verification and cleanup aligned with the real deploy location.
-
-### Changed
-
-- **Deploy target resolution order** is now consistent across the update flow:
-  1. explicit `-DeployPath`
-  2. configured `powershell.json deployPath`
-  3. `PATH` fallback only when config is missing
-- **Version bump** — `gitmap/constants/constants.go` now reports `3.84.0`.
+Issues #09 and #10 in `.lovable/pending-issues/01-current-issues.md` covered the recurring "update appears to complete but cleanup ran on the wrong binary" loop on Windows. The earlier fixes added `→ Cleanup target resolved via:` / `→ Cleanup target path:` / `→ Cleanup process started (pid=…)` lines, but those only appear in the parent (Phase 3 dispatcher). When the child cleanup process itself misbehaved, users had no way to see *its* view of the world. `--debug-windows` closes that gap by printing the same structured dump from inside `update-cleanup` too.
 
 ### Implementation
 
-- `run.ps1` — `Resolve-DeployTarget` now prefers `powershell.json` over the current `PATH` binary, with log text updated to make the fallback explicit.
-- `gitmap/constants/constants_update.go` — updated `UpdatePSDeployDetect` so generated self-update scripts resolve the deployed binary from config first, then use `PATH` only as a missing-target fallback.
-- `gitmap/constants/constants.go` — bumped `Version` to `3.84.0`.
+- `gitmap/cmd/updatedebugwindows.go` (new) — dump helpers (`dumpDebugWindowsHeader`, `dumpDebugWindowsHandoff`, `dumpDebugWindowsChildPID`, `dumpDebugWindowsNote`, `dumpDebugWindowsFooter`, `isDebugWindowsRequested`).
+- `gitmap/cmd/updatehandoff_phase3.go` — header/footer wraps `scheduleDeployedCleanupHandoff`; handoff dump runs before `cmd.Start()`; child PID dump runs after; new `buildCleanupChildArgs` / `buildCleanupChildEnv` helpers forward the flag + env.
+- `gitmap/cmd/updatecleanup.go` — dump runs at the start of `runUpdateCleanup` so the deployed binary prints its own view of the env, self path, and parent PID.
+- `gitmap/cmd/update.go` — `launchHandoff` forwards `--debug-windows` and `GITMAP_DEBUG_WINDOWS=1` into the handoff copy and prints a Phase 2 dump line.
+- `gitmap/constants/constants_update.go` — `FlagDebugWindows`, `EnvDebugWindows`, `MsgDebugWin*` constants.
+- `gitmap/helptext/update.md` — flag table updated with full env-key list and behaviour notes.
+- `gitmap/constants/constants.go` — bumped `Version` to `3.86.0`.
 
 ### Compatibility
 
-- Safe behavior change: explicit `-DeployPath` still wins, and `PATH` is still used when no configured deploy root exists. The only removed behavior is the incorrect PATH-first preference that caused duplicate installs to hijack self-update.
+Pure addition. Without the flag (and without `GITMAP_DEBUG_WINDOWS=1`), behaviour is byte-identical to the previous release. The dump goes to stderr only, so existing stdout-capturing wrappers stay clean.
 
----
+### Usage
+
+    gitmap update --debug-windows
+    GITMAP_DEBUG_WINDOWS=1 gitmap update      # equivalent
+
 
 ## v3.53.0 — (2026-04-21) — `gitmap lfs-common`: one-shot Git LFS tracking for common binary types
 

@@ -155,29 +155,57 @@
   3. Embedded script comments/docs must be updated together with orchestration changes so future debugging is based on reality, not stale notes.
   4. Best-effort cleanup may stay non-fatal, but target-resolution failures must always be visible in the console and verbose log.
 
-## 13 — CI Lint Failures: errorlint / gocritic / unparam (FIXED v3.85.1)
-- **Status**: Fixed in v3.85.1
-- **Reported**: golangci-lint v1.64.8 reported 3 NEW findings on a CI run:
-  1. `cmd/reinstall.go:125` — `errorlint`: `err.(*exec.ExitError)` will fail on wrapped errors.
-  2. `committransfer/env.go:6` — `gocritic/unlambda`: `func() []string { return os.Environ() }` should be `os.Environ`.
-  3. `committransfer/replay.go:126` — `unparam`: `shouldSkipPath` parameter `info` is unused.
-- **Root Cause**: Three independent style/correctness regressions slipped in across separate refactors:
-  1. Direct type assertion on `error` instead of `errors.As` — predates the project's errorlint adoption; missed in earlier sweep.
-  2. A wrapping lambda around `os.Environ` left over from an earlier "test-stubbable" pattern that was simplified later.
-  3. `shouldSkipPath` originally inspected `info.IsDir()`, but the dir-skip logic moved into the callers (`filepath.Walk` callbacks already had `info` in scope), leaving `info` dead in the helper signature.
-- **Solution** (already in source as of this entry):
-  1. `cmd/reinstall.go` now uses `var exitErr *exec.ExitError; if errors.As(err, &exitErr) { exitCode = exitErr.ExitCode() }`.
-  2. `committransfer/env.go` declares `var currentEnv = os.Environ` (no lambda).
-  3. `committransfer/replay.go` `shouldSkipPath(rel string, opts Options) bool` — `info` removed; both call sites updated to `shouldSkipPath(rel, opts)`.
+## 11 — `Unknown command: https://...` Recurs Even After v3.81.0 URL-Shortcut Fix (FIXED v3.84.0)
+- **Status**: Fixed in v3.84.0
+- **Reported (4th time)**: User typed `gitmap https://github.com/.../email-creator-v1,https://github.com/.../email-reader-v3,https://github.com/.../account-automator` (and space-separated and mixed comma+space variants). All three forms produced `Unknown command: https://github.com/alimtvnetwork/email-creator-v1`. Issue #07 logged this as fixed in v3.81.0 — yet it kept happening.
+- **Root Cause** (two layers, why the same error keeps showing up):
+  1. **Stale binary on PATH.** The URL-shortcut + multi-URL clone code IS present in the source tree (`gitmap/cmd/root.go`'s `isLikelyURL` rewrite + `flattenURLArgs` in `clonemulti.go`). The user's installed `gitmap.exe` on PATH is *older than v3.81.0* and simply does not contain that shortcut. Every recent `gitmap update` has been failing in phase-3 cleanup (issues #09 / #10), so the freshly built binary never actually reaches the deployed location — the user keeps running an old one.
+  2. **Original v3.81.0 shortcut was too narrow.** `Run()` only checked `isLikelyURL(os.Args[1])`. If the user prepends a flag (`gitmap --verbose https://...`) the URL is in `os.Args[2]`, the shortcut misses, dispatch fails, and the user sees the same `Unknown command: --verbose` / `Unknown command: https://...` style failure. The shortcut needed to scan the full argv slice.
+  3. **Error message gave no actionable hint.** `Unknown command: https://...` looked like a dead-end. Nothing pointed the user at `gitmap clone <url>` or `gitmap update`, so each retry produced the same opaque error and the same frustration.
+- **Solution**:
+  1. Replaced the single-position `isLikelyURL(os.Args[1])` check with `shouldRewriteToClone(os.Args[1:])`, which scans every positional arg (skipping leading flags) and accepts any token whose comma-split pieces look like a git URL. All four reported forms now redirect to `clone` automatically:
+     - `gitmap url1,url2,url3`
+     - `gitmap url1, url2, url3`
+     - `gitmap url1 url2 url3`
+     - `gitmap --verbose url1,url2`
+  2. Added `ErrUnknownCommandURLHint` so when the offending token IS URL-shaped, the CLI now prints the explicit `gitmap clone <url>` form AND the `gitmap update` instruction with a note to reopen the terminal so PATH refreshes — instead of a dead-end error.
+  3. Bumped version to `v3.84.0` so users can confirm via `gitmap version` whether their binary actually contains this fix.
 - **Files Affected**:
-  - `gitmap/cmd/reinstall.go`
-  - `gitmap/committransfer/env.go`
-  - `gitmap/committransfer/replay.go`
-- **Why It Repeated**: The CI pipeline ran on a stale commit before these fixes were pushed. The auto-summary generator (`.github/scripts/lint-issue-summary.py`) does NOT yet have a per-finding fingerprint, so re-runs against the same stale commit kept producing the same NEW set without flipping prior FIXED entries. This is now mitigated by the auto-resolve pass added in the previous task — once the next CI run on a fresh commit reports 0 NEW for these fingerprints, any open CI-lint entry will be auto-flipped to FIXED.
+  - `gitmap/cmd/root.go` — `shouldRewriteToClone` / `looksLikeURLToken` / `looksLikeFlag` helpers; argv scan instead of `os.Args[1]` only; URL-aware unknown-command branch
+  - `gitmap/constants/constants_messages.go` — new `ErrUnknownCommandURLHint` constant
+  - `gitmap/constants/constants.go` — version bumped to `3.84.0`
+- **Why It "Repeated"**: The fix had been in source since v3.81.0 but the deployed binary on the user's machine was older because phase-3 cleanup was crashing every update (issues #09/#10). Verified independently here: `gitmap version` on the user's terminal would have shown <3.81.0. Once #09/#10 land and the user re-runs `gitmap update` successfully, the new binary reaches PATH and this error disappears even *without* this patch — but #11 also makes the shortcut more robust AND gives a self-explanatory error if it ever surfaces again on a stale binary.
 - **Prevention**:
-  1. Run `golangci-lint run ./...` locally before pushing — the same `.golangci.yml` is used in CI.
-  2. Never type-assert `error` directly; always go through `errors.As` / `errors.Is`. Enforced by `errorlint`.
-  3. Don't wrap stdlib funcs in zero-arg lambdas. If a test seam is needed, assign the function value directly (`var x = pkg.Func`).
-  4. When refactoring helper internals, re-check the helper's signature for now-dead parameters. `unparam` catches this if run locally.
-  5. The auto-resolve pass will close stale CI-lint entries automatically on the next clean run — no manual sweep required.
+  1. URL-rewrite shortcuts must scan the **full positional list**, not just `os.Args[1]`, so leading flags don't defeat them.
+  2. Unknown-command error paths should detect the offender's *shape* (URL? path? known shorthand?) and emit a targeted hint instead of a generic dead-end.
+  3. Whenever a "shortcut" fix is reported as not working, first check the user's installed binary version — stale PATH installs are the most common reason a "fixed" feature appears to regress.
+  4. The update-cleanup chain (issues #09/#10) is on the critical path for getting fixes onto user machines; failures there silently block every other improvement.
+
+## 14 — `--debug-windows` flag added for self-update handoff diagnostics (FIXED v3.86.0)
+- **Status**: Fixed in v3.86.0
+- **Reported**: Follow-up to #09 / #10. Even with the cleanup-target resolution lines (`→ Cleanup target resolved via: …`, `→ Cleanup target path: …`, `→ Cleanup process started (pid=…)`), the *child* `update-cleanup` process printed almost nothing about its own environment, so when cleanup misbehaved on Windows the user could not tell which env vars, deploy path, or PID the child actually saw. There was also no way to enable richer diagnostics ad-hoc without rebuilding with `--verbose` plumbed through.
+- **Root Cause**:
+  1. Phase-3 dispatcher (`scheduleDeployedCleanupHandoff`) printed resolution + child PID, but the child cleanup process (`runUpdateCleanup`) did not echo back its self path, parent PID, env, or the GOOS it observed.
+  2. Phase-2 handoff (`launchHandoff`) had no diagnostic output at all — users could not see what argv/env was about to be passed to the handoff copy.
+  3. `--verbose` writes to a log file, which is awkward for one-off Windows debugging where the user wants console output they can paste into a bug report.
+- **Solution**:
+  1. New `--debug-windows` flag on `gitmap update` (also activated by `GITMAP_DEBUG_WINDOWS=1`).
+  2. Structured `[debug-windows]` dump printed to **stderr** at three lifecycle points:
+     - Phase 2 (`launchHandoff` in `gitmap/cmd/update.go`) — before spawning the handoff copy.
+     - Phase 3 dispatcher (`scheduleDeployedCleanupHandoff` in `gitmap/cmd/updatehandoff_phase3.go`) — wraps the entire dispatch with header/footer; per-spawn details printed by `dumpDebugWindowsHandoff` immediately before `cmd.Start()`; spawned child PID printed by `dumpDebugWindowsChildPID` immediately after.
+     - Phase 3 child (`runUpdateCleanup` in `gitmap/cmd/updatecleanup.go`) — prints the same dump from inside the deployed binary so the user sees its own view.
+  3. Flag/env propagation: `--debug-windows` is forwarded into the Phase 2 handoff copy and the Phase 3 cleanup child via **both** argv (`buildCleanupChildArgs`) and env (`buildCleanupChildEnv` sets `GITMAP_DEBUG_WINDOWS=1`). Either signal alone activates the dump, which makes the flag survive intermediate launchers that strip argv.
+  4. Env keys printed are explicit and small (`GITMAP_DEBUG_WINDOWS`, `GITMAP_UPDATE_CLEANUP_DELAY_MS`, `GITMAP_DEBUG_REPO_DETECT`, `GITMAP_REPORT_ERRORS`, `GITMAP_REPORT_ERRORS_FILE`, `PATH`, `GITMAP_DEPLOY_PATH`) so the dump never leaks unrelated secrets from the process environment.
+- **Files Affected**:
+  - `gitmap/cmd/updatedebugwindows.go` (new) — dump helpers + flag/env detection.
+  - `gitmap/cmd/updatehandoff_phase3.go` — header/footer + handoff dump + child PID dump + `buildCleanupChildArgs`/`buildCleanupChildEnv`.
+  - `gitmap/cmd/updatecleanup.go` — dump runs at the start of `runUpdateCleanup`.
+  - `gitmap/cmd/update.go` — `launchHandoff` forwards flag + env and prints Phase 2 dump.
+  - `gitmap/constants/constants_update.go` — `FlagDebugWindows`, `EnvDebugWindows`, `MsgDebugWin*` constants.
+  - `gitmap/helptext/update.md` — flag table updated.
+  - `gitmap/constants/constants.go` — version bumped to `3.86.0`.
+- **Prevention**:
+  1. Every detached spawn in the self-update flow must carry an explicit, opt-in stderr-only diagnostic mode that survives the spawn boundary via both argv and env.
+  2. Diagnostic env-key lists must be hand-curated, never `os.Environ()` in full — that would leak credentials into bug-report pastes.
+  3. Any future addition to the cleanup handoff (extra phases, extra spawns) must extend the `[debug-windows]` dump in lockstep so the trace stays complete.
 

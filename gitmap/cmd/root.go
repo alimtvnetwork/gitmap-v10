@@ -24,11 +24,18 @@ func Run() {
 		migrateLegacyDirs()
 	}
 
-	// URL shortcut: `gitmap <git-url> [<url2> ...]` is rewritten to
-	// `gitmap clone <url> ...` so users don't have to remember the
-	// subcommand for the most common operation. Triggered when the
-	// first positional looks like an HTTPS / SSH git URL.
-	if isLikelyURL(os.Args[1]) {
+	// URL shortcut: `gitmap <git-url> [<url2> ...]` (and variants with
+	// leading flags like `gitmap --verbose <url>`) is rewritten to
+	// `gitmap clone <args...>` so users don't have to remember the
+	// subcommand for the most common operation. We trigger when any
+	// positional arg looks like an HTTPS / SSH git URL or a comma-list
+	// containing one — covering all the forms users actually type:
+	//
+	//   gitmap https://...                       → gitmap clone https://...
+	//   gitmap https://a,https://b,https://c     → gitmap clone https://a,https://b,https://c
+	//   gitmap https://a, https://b https://c    → gitmap clone https://a, https://b https://c
+	//   gitmap --verbose https://...             → gitmap clone --verbose https://...
+	if shouldRewriteToClone(os.Args[1:]) {
 		os.Args = append([]string{os.Args[0], constants.CmdClone}, os.Args[1:]...)
 	}
 
@@ -102,7 +109,85 @@ func dispatch(command string) {
 		return
 	}
 
-	fmt.Fprintf(os.Stderr, constants.ErrUnknownCommand, command)
+	if looksLikeURLToken(command) {
+		fmt.Fprintf(os.Stderr, constants.ErrUnknownCommandURLHint, command)
+	} else {
+		fmt.Fprintf(os.Stderr, constants.ErrUnknownCommand, command)
+	}
 	printUsage()
 	os.Exit(1)
+}
+
+// shouldRewriteToClone returns true when the args (excluding argv[0])
+// describe a bare-URL invocation that should be redirected to `clone`.
+// It accepts URLs in any positional slot — not just the first — so
+// invocations with leading flags (e.g. `gitmap --verbose <url>`) and
+// PowerShell's silent comma-splitting both work.
+func shouldRewriteToClone(args []string) bool {
+	if len(args) == 0 {
+		return false
+	}
+	// Never rewrite if the first token is already a known subcommand.
+	if !looksLikeFlag(args[0]) && !looksLikeURLToken(args[0]) {
+		return false
+	}
+	for _, a := range args {
+		if looksLikeURLToken(a) {
+			return true
+		}
+	}
+	return false
+}
+
+// looksLikeFlag reports whether the token starts with "-" or "--".
+func looksLikeFlag(s string) bool {
+	return len(s) > 1 && s[0] == '-'
+}
+
+// looksLikeURLToken reports whether a token (or any comma-split piece
+// of it) is shaped like a git URL. Used by both the shortcut and the
+// unknown-command hint so they agree on what counts as a URL.
+func looksLikeURLToken(s string) bool {
+	for _, part := range splitOnComma(s) {
+		if isLikelyURL(part) {
+			return true
+		}
+	}
+	return false
+}
+
+// splitOnComma is a tiny strings.Split wrapper so root.go doesn't
+// need its own strings import for this single use; trims whitespace
+// around each piece and drops empties.
+func splitOnComma(s string) []string {
+	out := make([]string, 0, 4)
+	start := 0
+	for i := 0; i <= len(s); i++ {
+		if i == len(s) || s[i] == ',' {
+			piece := trimSpaces(s[start:i])
+			if len(piece) > 0 {
+				out = append(out, piece)
+			}
+			start = i + 1
+		}
+	}
+	return out
+}
+
+// trimSpaces removes ASCII whitespace from both ends without pulling
+// the strings package into root.go's import surface.
+func trimSpaces(s string) string {
+	i, j := 0, len(s)
+	for i < j && isSpace(s[i]) {
+		i++
+	}
+	for j > i && isSpace(s[j-1]) {
+		j--
+	}
+	return s[i:j]
+}
+
+// isSpace reports whether b is ASCII whitespace.
+func isSpace(b byte) bool {
+	return b == ' ' || b == '\t' || b == '\n' || b == '\r'
 }

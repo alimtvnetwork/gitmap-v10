@@ -8,7 +8,7 @@ None
 
 ## Usage
 
-    gitmap update [--repo-path <path>] [--verbose] [--report-errors json [--report-errors-file <path>]] [--debug-repo-detect]
+    gitmap update [--repo-path <path>] [--verbose] [--report-errors json [--report-errors-file <path>]] [--debug-repo-detect] [--debug-windows]
 
 ## Flags
 
@@ -19,6 +19,7 @@ None
 | `--report-errors json` | Append a JSON-Lines entry for every non-fatal failure during the build/deploy phase (e.g. `npm install` or `npm run build` failing) so CI can branch on them without parsing prose. |
 | `--report-errors-file <path>` | Write the JSONL report to this path. When omitted, the file is auto-created at `<TMP>/gitmap-update-report-YYYYMMDD-HHMMSS.jsonl`. |
 | `--debug-repo-detect` | Print marker checks (`gitmap/main.go`, `package.json`, `vite` dep, `node_modules`, prebuilt `dist/` locations, npm on PATH) and the resulting decision (`use-prebuilt-*`, `auto-build`, `skip-no-build-script`, `skip-not-a-vite-repo`, `use-legacy-source`, `no-docs-source`). When combined with `--report-errors json`, entries are mirrored under `stage="repo-detect"`. |
+| `--debug-windows` | Print a `[debug-windows]` dump on every phase of the self-update handoff: phase name, GOOS, self executable, self/parent PIDs, resolution source (`config`/`sibling`/`PATH`), resolved cleanup target, target-exists check, child argv, relevant env vars (`GITMAP_DEBUG_WINDOWS`, `GITMAP_UPDATE_CLEANUP_DELAY_MS`, `GITMAP_DEBUG_REPO_DETECT`, `GITMAP_REPORT_ERRORS`, `GITMAP_REPORT_ERRORS_FILE`, `PATH`, `GITMAP_DEPLOY_PATH`), and spawned child PID. The flag is propagated through Phase 2 and Phase 3 via both argv and the `GITMAP_DEBUG_WINDOWS=1` env bridge so the dump runs on both sides of the detached cleanup spawn. Despite the name, it works on Unix too. |
 
 ## Prerequisites
 

@@ -20,17 +20,11 @@ Behaviour:
     with Status / Reported / Root Cause (per linter) / Files Affected /
     Prevention sections).
   - Idempotent: computes a fingerprint of the NEW finding set; if an
-    open entry with the same fingerprint already exists, no new entry
-    is appended.
-  - **Auto-resolves stale entries**: any prior open `## NN — CI Lint
-    Failures` entry whose fingerprint marker no longer matches a NEW
-    finding set is rewritten in place — its `Status` line flips to
-    `FIXED (auto-detected …)` so the issues file stays in sync with
-    reality without manual sweeps.
-  - In --dry-run mode (default for PR runs) writes the proposed entry
-    AND the auto-resolved file preview to --out-preview only. In
-    --apply mode (used on main), writes the changes into the issues
-    file in place.
+    open entry with the same fingerprint already exists, the file is
+    left untouched.
+  - In --dry-run mode (default for PR runs) writes the proposed entry to
+    --out-preview only. In --apply mode (used on main), writes the entry
+    into the issues file in place.
 
 Exit codes:
   0  — success (entry appended, skipped as duplicate, or no NEW findings)
@@ -52,12 +46,7 @@ from typing import Iterable
 Finding = tuple[str, int, str, str]  # (file, line, linter, message)
 
 ENTRY_MARKER = "<!-- ci-lint-issue:"
-ENTRY_MARKER_RE = re.compile(
-    r"<!--\s*ci-lint-issue:\s*([0-9a-f]+)\s*-->", re.IGNORECASE)
 SECTION_HEADER_RE = re.compile(r"^## (\d+)\s+—", re.MULTILINE)
-STATUS_LINE_RE = re.compile(
-    r"^(- \*\*Status\*\*:\s*)(.*)$", re.MULTILINE)
-OPEN_STATUS_RE = re.compile(r"^\s*open\b", re.IGNORECASE)
 
 
 def main() -> int:
@@ -77,64 +66,36 @@ def main() -> int:
         log("no baseline yet — skipping issue summary (seeding mode)")
         return 0
 
-    fingerprint = compute_fingerprint(new_findings) if new_findings else ""
-    issues_path = args.issues_file
-    existing_text = read_text_or_empty(issues_path)
-
-    # Auto-resolve any prior open CI-lint entries whose fingerprint is
-    # NOT in the current NEW set. Runs even when there are no NEW
-    # findings, so a clean run can close out previously-tracked entries.
-    active_fingerprints = {fingerprint} if fingerprint else set()
-    resolved_text, resolved_count = mark_resolved_entries(
-        existing_text, active_fingerprints, sha=args.sha,
-        run_url=args.run_url)
-
-    duplicate_entry = bool(fingerprint) and \
-        f"{ENTRY_MARKER} {fingerprint} -->" in existing_text
-
-    if not new_findings and resolved_count == 0:
-        log("no NEW findings, no stale entries — issues file untouched")
+    if not new_findings:
+        log("no NEW findings — issues file untouched")
         return 0
 
-    if duplicate_entry:
-        log(f"entry with fingerprint {fingerprint} already present — "
-            f"skipping append (auto-resolve: {resolved_count})")
+    fingerprint = compute_fingerprint(new_findings)
+    issues_path = args.issues_file
 
-    entry = ""
-    next_number = next_issue_number(resolved_text)
-    if new_findings and not duplicate_entry:
-        entry = render_entry(
-            number=next_number,
-            findings=new_findings,
-            fingerprint=fingerprint,
-            run_url=args.run_url,
-            sha=args.sha,
-        )
+    existing_text = read_text_or_empty(issues_path)
+    if fingerprint and f"{ENTRY_MARKER} {fingerprint} -->" in existing_text:
+        log(f"entry with fingerprint {fingerprint} already present — skipping")
+        return 0
 
-    preview_text = build_preview(resolved_text, entry)
+    next_number = next_issue_number(existing_text)
+    entry = render_entry(
+        number=next_number,
+        findings=new_findings,
+        fingerprint=fingerprint,
+        run_url=args.run_url,
+        sha=args.sha,
+    )
 
     if args.out_preview:
-        write_text(args.out_preview, preview_text)
-        log(f"wrote preview to {args.out_preview} "
-            f"(new_findings={len(new_findings)}, "
-            f"fingerprint={fingerprint or 'n/a'}, "
-            f"auto_resolved={resolved_count})")
+        write_text(args.out_preview, entry)
+        log(f"wrote preview entry to {args.out_preview} "
+            f"({len(new_findings)} NEW findings, fingerprint={fingerprint})")
 
     if args.apply:
-        final_text = resolved_text
-        if entry:
-            final_text = append_entry(final_text, entry)
-        if final_text != existing_text:
-            write_text(issues_path, final_text)
-            applied = []
-            if entry:
-                applied.append(f"appended #{next_number:02d}")
-            if resolved_count:
-                applied.append(f"auto-resolved {resolved_count} entr"
-                               f"{'y' if resolved_count == 1 else 'ies'}")
-            log(f"updated {issues_path}: " + ", ".join(applied))
-        else:
-            log("apply: nothing changed (file already up to date)")
+        appended = append_entry(existing_text, entry)
+        write_text(issues_path, appended)
+        log(f"appended issue #{next_number:02d} to {issues_path}")
     else:
         log("dry-run: issues file not modified "
             "(pass --apply to write in place)")
@@ -333,110 +294,6 @@ def describe_linter(linter: str) -> str:
     return LINTER_DESCRIPTIONS.get(linter,
                                    "violation from this linter; consult "
                                    "its documentation for the exact rule.")
-
-
-# ---------------------------------------------------------------------------
-# Auto-resolve pass — flips Status of prior open entries whose fingerprint
-# is no longer present in the current NEW finding set.
-# ---------------------------------------------------------------------------
-
-def mark_resolved_entries(text: str, active_fingerprints: set[str],
-                          sha: str = "", run_url: str = "") -> tuple[str, int]:
-    """Walk every `## NN — ...` section, find the ci-lint fingerprint
-    marker (if any), and flip the Status line to FIXED when:
-      - the entry is currently `Open …`, AND
-      - its fingerprint is NOT in active_fingerprints (the set of
-        fingerprints produced by the current NEW findings).
-
-    Returns (new_text, resolved_count). When nothing changes, the
-    original text is returned unmodified."""
-    if not text:
-        return text, 0
-
-    sections = split_into_sections(text)
-    resolved = 0
-    rebuilt: list[str] = []
-
-    for section in sections:
-        body = section["body"]
-        if not section["is_entry"]:
-            rebuilt.append(body)
-            continue
-
-        marker_match = ENTRY_MARKER_RE.search(body)
-        if not marker_match:
-            rebuilt.append(body)
-            continue
-
-        fingerprint = marker_match.group(1).lower()
-        if fingerprint in {fp.lower() for fp in active_fingerprints}:
-            rebuilt.append(body)
-            continue
-
-        new_body, changed = flip_status_to_fixed(
-            body, fingerprint=fingerprint, sha=sha, run_url=run_url)
-        if changed:
-            resolved += 1
-        rebuilt.append(new_body)
-
-    return "".join(rebuilt), resolved
-
-
-def split_into_sections(text: str) -> list[dict]:
-    """Split file text into ordered chunks. Each chunk is either a
-    pre-amble (everything before the first `## NN — ...` heading) or
-    one full entry (heading through the line before the next heading
-    / EOF). Preserves all whitespace exactly."""
-    out: list[dict] = []
-    matches = list(SECTION_HEADER_RE.finditer(text))
-    if not matches:
-        return [{"is_entry": False, "body": text}]
-
-    first = matches[0].start()
-    if first > 0:
-        out.append({"is_entry": False, "body": text[:first]})
-
-    for idx, m in enumerate(matches):
-        start = m.start()
-        end = matches[idx + 1].start() if idx + 1 < len(matches) else len(text)
-        out.append({"is_entry": True, "body": text[start:end]})
-
-    return out
-
-
-def flip_status_to_fixed(body: str, fingerprint: str, sha: str,
-                         run_url: str) -> tuple[str, bool]:
-    """Rewrite the first `- **Status**:` line inside the entry body
-    when it is still Open. No-op for already-FIXED entries so re-runs
-    don't keep editing the same line."""
-    match = STATUS_LINE_RE.search(body)
-    if not match:
-        return body, False
-
-    current_status = match.group(2).strip()
-    if not OPEN_STATUS_RE.match(current_status):
-        return body, False
-
-    timestamp = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    suffix_parts = [f"fingerprint `{fingerprint}` cleared {timestamp}"]
-    if sha:
-        suffix_parts.append(f"commit `{sha[:12]}`")
-    if run_url:
-        suffix_parts.append(f"[run log]({run_url})")
-    note = "; ".join(suffix_parts)
-    replacement = (f"{match.group(1)}FIXED (auto-detected by "
-                   f"lint-issue-summary — {note})")
-    new_body = body[:match.start()] + replacement + body[match.end():]
-    return new_body, True
-
-
-def build_preview(resolved_text: str, new_entry: str) -> str:
-    """Compose what the file would look like after this run — the
-    auto-resolved file plus the new entry appended at the end."""
-    if not new_entry:
-        return resolved_text
-    return append_entry(resolved_text, new_entry)
-
 
 
 # ---------------------------------------------------------------------------

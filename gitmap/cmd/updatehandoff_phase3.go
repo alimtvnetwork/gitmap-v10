@@ -37,10 +37,14 @@ import (
 // Best-effort cleanup remains non-fatal, but launch failures are printed
 // to stderr and verbose logs so the user can see what went wrong.
 func scheduleDeployedCleanupHandoff() {
+	dumpDebugWindowsHeader("phase-3 handoff (update-runner)")
+	defer dumpDebugWindowsFooter()
+
 	deployed, source := resolveDeployedBinaryPath()
 	if len(deployed) == 0 {
 		fmt.Fprint(os.Stderr, constants.ErrUpdatePhase3TargetMissing)
 		logUpdatePhase3(constants.UpdatePhase3LogTargetMissing)
+		dumpDebugWindowsNote("target missing — no cleanup child will be spawned")
 
 		return
 	}
@@ -50,6 +54,7 @@ func scheduleDeployedCleanupHandoff() {
 		// We *are* the deployed binary (Unix in-place update). Just
 		// run cleanup directly — no handoff needed.
 		logUpdatePhase3(constants.UpdatePhase3LogInline, deployed)
+		dumpDebugWindowsNote("inline cleanup — self == deployed (%s)", deployed)
 		runUpdateCleanup()
 
 		return
@@ -119,12 +124,14 @@ func spawnDeployedCleanupWindows(deployed, source string) {
 	fmt.Printf(constants.MsgUpdatePhase3Target, deployed)
 	logUpdatePhase3(constants.UpdatePhase3LogResolve, source, deployed)
 
-	cmd := exec.Command(deployed, constants.CmdUpdateCleanup)
+	childArgs := buildCleanupChildArgs()
+	cmd := exec.Command(deployed, childArgs...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = nil
 	setHiddenProcessAttr(cmd)
-	cmd.Env = append(os.Environ(), constants.EnvUpdateCleanupDelayMS+"=1500")
+	cmd.Env = buildCleanupChildEnv()
+	dumpDebugWindowsHandoff(source, deployed, append([]string{deployed}, childArgs...))
 	if err := cmd.Start(); err != nil {
 		fmt.Fprintf(os.Stderr, constants.ErrUpdatePhase3Handoff, deployed, err)
 		logUpdatePhase3(constants.UpdatePhase3LogStartFail, deployed, err)
@@ -134,6 +141,7 @@ func spawnDeployedCleanupWindows(deployed, source string) {
 
 	fmt.Printf(constants.MsgUpdatePhase3Started, cmd.Process.Pid)
 	logUpdatePhase3(constants.UpdatePhase3LogStarted, cmd.Process.Pid, deployed)
+	dumpDebugWindowsChildPID(cmd.Process.Pid)
 }
 
 // spawnDeployedCleanupUnix invokes the deployed binary's update-cleanup
@@ -144,13 +152,40 @@ func spawnDeployedCleanupUnix(deployed, source string) {
 	fmt.Printf(constants.MsgUpdatePhase3Target, deployed)
 	logUpdatePhase3(constants.UpdatePhase3LogResolve, source, deployed)
 
-	cmd := exec.Command(deployed, constants.CmdUpdateCleanup)
+	childArgs := buildCleanupChildArgs()
+	cmd := exec.Command(deployed, childArgs...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	cmd.Env = buildCleanupChildEnv()
+	dumpDebugWindowsHandoff(source, deployed, append([]string{deployed}, childArgs...))
 	if err := cmd.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, constants.ErrUpdatePhase3Handoff, deployed, err)
 		logUpdatePhase3(constants.UpdatePhase3LogStartFail, deployed, err)
 	}
+}
+
+// buildCleanupChildArgs returns the argv for the detached `update-cleanup`
+// child. --debug-windows is forwarded so the child can dump too.
+func buildCleanupChildArgs() []string {
+	args := []string{constants.CmdUpdateCleanup}
+	if isDebugWindowsRequested() {
+		args = append(args, constants.FlagDebugWindows)
+	}
+
+	return args
+}
+
+// buildCleanupChildEnv returns the env for the detached cleanup child.
+// EnvUpdateCleanupDelayMS is always set to give locks time to release.
+// EnvDebugWindows is forwarded so the dump survives even if argv is
+// dropped by an intermediate launcher.
+func buildCleanupChildEnv() []string {
+	env := append(os.Environ(), constants.EnvUpdateCleanupDelayMS+"=1500")
+	if isDebugWindowsRequested() {
+		env = append(env, constants.EnvDebugWindows+"=1")
+	}
+
+	return env
 }
 
 // logUpdatePhase3 writes handoff diagnostics to the shared verbose logger.

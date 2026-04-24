@@ -13,12 +13,16 @@ import (
 // runUpdateCleanup handles the "update-cleanup" subcommand.
 // Removes leftover temp binaries and .old backup files.
 func runUpdateCleanup() {
+	dumpDebugWindowsHeader("update-cleanup (deployed binary)")
+	defer dumpDebugWindowsFooter()
+
 	selfPath := resolveCleanupSelfPath()
 	fmt.Println(constants.MsgUpdateCleanStart)
 	if len(selfPath) > 0 {
 		fmt.Printf(constants.MsgUpdateCleanBinary, selfPath)
 	}
 	logUpdateCleanup(constants.UpdateCleanupLogStart, selfPath)
+	dumpDebugWindowsNote("cleanup self path resolved: %s", selfPath)
 	delayUpdateCleanupIfNeeded()
 
 	ctx := loadUpdateCleanupContext()
@@ -28,6 +32,7 @@ func runUpdateCleanup() {
 	total += cleanupCloneSwapDirs(ctx)
 	printUpdateCleanupResult(total)
 	logUpdateCleanup(constants.UpdateCleanupLogDone, total)
+	dumpDebugWindowsNote("cleanup finished, removed=%d", total)
 }
 
 // delayUpdateCleanupIfNeeded gives the just-exited handoff/update process time
