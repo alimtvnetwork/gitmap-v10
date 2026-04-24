@@ -1,5 +1,46 @@
 # Changelog
 
+## v3.90.0 — (2026-04-24) — Startup version check
+
+### Added
+
+- **`runStartupVersionCheck` runs on every invocation** (with safe-list exceptions). Prints a one-line `[gitmap vX.Y.Z]` banner to **stderr** showing the active binary version, and emits a warning when the typed command, flag, or argument-shape requires a newer binary than the one currently running:
+
+      $ gitmap pending clear        # active is v3.85.0
+      [gitmap v3.85.0]
+        ⚠ pending clear requires gitmap v3.88.0 — active binary is v3.85.0.
+          Run `gitmap update` to upgrade, or pass --no-version-check to silence this warning.
+
+- **`--no-version-check` flag** for per-invocation opt-out (joins existing `--no-banner` and `GITMAP_QUIET=1` suppression channels).
+- **`cmdMinVersions` map** (data-driven, append-only) — the single source of truth for "this feature ships in version X". Keys can be a bare command (`pending`), a sub-verb (`pending clear`), a flag (`update:--debug-windows`), or a behaviour label (`clone:semicolon-separator`). Adding a new requirement is one line.
+- **Behaviour detection for `clone`:** the check inspects argument *shapes* — passing `;` as a separator triggers `clone:semicolon-separator` (v3.89.0+), passing 2+ URLs triggers `clone:multi-url` (v3.80.0+), pasting curly-quote/BOM contamination triggers `clone:smart-quote-strip` (v3.89.0+). The user gets the warning for the most demanding feature on the line, not the noisiest.
+- **`gitmap/helptext/version-check.md`** — full doc covering rationale, suppression, and how to add a new requirement.
+
+### Why
+
+After v3.86–v3.89 added a string of new commands (`pending clear`, `--debug-windows`, semicolon separator, SSH-shorthand recognition), users on older PATH binaries were silently running into "command not found" or quietly getting old behaviour with no signal that the docs / source repo had moved on. The doctor command catches this in a full audit but nobody runs `doctor` proactively. A one-line stderr banner on every invocation surfaces the gap exactly when it matters.
+
+### Design notes
+
+- **STDERR only.** Scriptable commands (`gitmap scan --output json | jq ...`) keep clean stdout.
+- **Pure local — no network, no exec.** Comparing `constants.Version` against the per-feature min-version map is enough; we don't need to inspect the deployed binary at startup (that's `gitmap doctor`'s job).
+- **Never changes the exit code.** Advisory only — a user deliberately running an older binary against a newer source repo must not be blocked.
+- **Safe-list:** `version`, `v`, `help`, `update`, `update-runner`, `update-cleanup`, `doctor`, `self-install`, `self-uninstall` always run silent so the user can recover from a mismatch without the banner getting in the way.
+- **Highest-wins** when multiple requirements match a single invocation. `clone --no-replace url1;url2` reports the semicolon (3.89.0), not `--no-replace` (3.55.0).
+
+### Implementation
+
+- `gitmap/cmd/startupversioncheck.go` (new) — `runStartupVersionCheck`, `cmdMinVersions` map, `startupCheckSafeCommands` set, `requiredVersionFor`, `collectMinVersionMatches`, `startupSubcommandKeys`, `startupBehaviourKeys`, `startupVersionAtLeast`, `parseStartupSemver`, `atoiSafeStartup`. All under 200 lines, all functions under 15.
+- `gitmap/cmd/root.go` — `Run()` calls `runStartupVersionCheck(command, os.Args[2:])` immediately before `dispatch(command)`.
+- `gitmap/constants/constants_doctor.go` — `FlagNoVersionCheck`, `MsgStartupCheckBanner`, `MsgStartupCheckWarn` constants (zero magic strings).
+- `gitmap/helptext/version-check.md` (new) — full user-facing doc.
+- `gitmap/constants/constants.go` — bumped `Version` to `3.90.0`.
+
+### Compatibility
+
+Pure addition. Existing scripts that pipe `gitmap` output to other commands are unaffected because the banner goes to stderr. Existing `--no-banner` and `GITMAP_QUIET=1` suppression continue to work and now also silence the version check.
+
+
 ## v3.89.0 — (2026-04-24) — Robust multi-URL clone parsing (PowerShell + bash)
 
 ### Added
