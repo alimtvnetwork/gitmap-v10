@@ -8,14 +8,23 @@ export type Theme = "light" | "dark";
 
 /** Read the currently applied theme from the <html> element. */
 export function getCurrentTheme(): Theme {
-  if (typeof document === "undefined") return "light";
-  return document.documentElement.classList.contains("dark") ? "dark" : "light";
+  if (typeof document === "undefined") return "dark";
+  if (document.documentElement.classList.contains("light")) return "light";
+  if (document.documentElement.classList.contains("dark")) return "dark";
+  try {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    if (stored === "light" || stored === "dark") return stored;
+  } catch {
+    /* localStorage may be unavailable (private mode, SSR) — silently ignore */
+  }
+  return "dark";
 }
 
 /** Apply a theme to the <html> element AND persist it to localStorage. */
 export function setTheme(theme: Theme): void {
   if (typeof document === "undefined") return;
   document.documentElement.classList.toggle("dark", theme === "dark");
+  document.documentElement.classList.toggle("light", theme === "light");
   try {
     localStorage.setItem(THEME_STORAGE_KEY, theme);
   } catch {

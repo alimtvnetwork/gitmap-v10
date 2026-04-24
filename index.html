@@ -23,9 +23,9 @@
       (function () {
         try {
           var saved = localStorage.getItem('gitmap-theme');
-          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-          var useDark = saved ? saved === 'dark' : prefersDark;
-          if (useDark) document.documentElement.classList.add('dark');
+          var useDark = saved ? saved === 'dark' : true;
+          document.documentElement.classList.toggle('dark', useDark);
+          document.documentElement.classList.toggle('light', !useDark);
         } catch (e) { /* localStorage may be blocked; fall back to default */ }
       })();
     </script>

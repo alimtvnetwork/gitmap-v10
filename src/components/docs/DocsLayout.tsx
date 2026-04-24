@@ -19,13 +19,14 @@ const DocsLayout = ({ children }: DocsLayoutProps) => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen flex w-full bg-background text-foreground">
         <DocsSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-12 flex items-center border-b border-border sticky top-0 bg-background/80 backdrop-blur-sm z-10">
-            <SidebarTrigger className="ml-3" />
-            <span className="ml-3 text-sm font-mono text-muted-foreground">gitmap documentation</span>
-            <span className="ml-2 px-2 py-0.5 text-xs font-mono bg-primary/10 text-foreground border border-primary/20 rounded transition-colors duration-300 hover:border-primary/40 hover:shadow-sm hover:shadow-primary/10 dark:bg-primary/20 dark:text-primary dark:border-primary/40 dark:hover:border-primary/60">
+          <header className="sticky top-0 z-10 flex h-12 items-center border-b border-sidebar-border bg-sidebar/95 backdrop-blur-sm">
+            <SidebarTrigger className="ml-3 rounded-sm border border-sidebar-border bg-sidebar-accent/60 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" />
+            <span className="ml-3 text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground">Explorer</span>
+            <span className="ml-3 text-sm font-mono text-foreground">gitmap docs</span>
+            <span className="ml-2 rounded-sm border border-border bg-card px-2 py-0.5 text-[11px] font-mono text-muted-foreground shadow-sm">
               {VERSION}
             </span>
             <button
@@ -33,7 +34,7 @@ const DocsLayout = ({ children }: DocsLayoutProps) => {
               onClick={() => setDark((d) => !d)}
               aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
               title={dark ? "Switch to light mode" : "Switch to dark mode"}
-              className="ml-2 inline-flex items-center justify-center h-6 w-6 rounded border border-primary/20 bg-primary/10 text-foreground hover:bg-primary/20 hover:border-primary/40 hover:shadow-sm hover:shadow-primary/10 dark:bg-primary/20 dark:text-primary dark:border-primary/40 dark:hover:bg-primary/30 transition-colors duration-300"
+              className="ml-2 inline-flex h-6 w-6 items-center justify-center rounded-sm border border-border bg-card text-muted-foreground transition-colors duration-300 hover:bg-secondary hover:text-foreground"
             >
               {dark ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
             </button>
@@ -41,8 +42,8 @@ const DocsLayout = ({ children }: DocsLayoutProps) => {
               <CommandPalette />
             </div>
           </header>
-          <main className="flex-1 overflow-auto">
-            <div className="max-w-4xl mx-auto px-6 py-8">
+          <main className="flex-1 overflow-auto bg-background">
+            <div className="mx-auto max-w-5xl px-6 py-8">
               {children}
             </div>
           </main>

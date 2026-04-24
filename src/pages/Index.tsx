@@ -8,13 +8,13 @@ import { VERSION } from "@/constants/index";
 const HomePage = () => {
   return (
     <DocsLayout>
-      <section className="aurora-bg py-16 text-center">
+      <section className="py-14 text-center">
         <div className="reveal">
           <div className="flex items-center justify-center gap-3 mb-4">
             <h1 className="text-4xl md:text-6xl font-heading font-bold docs-h1 text-shimmer tracking-tight">
               gitmap
             </h1>
-            <span className="badge-pulse px-2 py-0.5 rounded text-xs font-mono bg-primary/10 text-foreground border border-primary/20 transition-colors duration-300 hover:border-primary/40 hover:shadow-sm hover:shadow-primary/10 dark:bg-primary/20 dark:text-primary dark:border-primary/40 dark:hover:border-primary/60">
+            <span className="rounded-sm border border-border bg-card px-2 py-0.5 text-xs font-mono text-muted-foreground shadow-sm">
               {VERSION}
             </span>
           </div>
@@ -23,7 +23,16 @@ const HomePage = () => {
             re-clone the exact layout on any machine. Track, group, release, and
             manage repositories from a single CLI.
           </p>
-          <div className="mb-8 max-w-3xl mx-auto space-y-6">
+          <div className="mx-auto mb-8 max-w-4xl rounded-lg border border-border bg-card/80 p-5 text-left shadow-sm">
+            <div className="mb-4 flex items-center gap-2 border-b border-border pb-3">
+              <span className="h-2.5 w-2.5 rounded-full bg-destructive/80" />
+              <span className="h-2.5 w-2.5 rounded-full bg-primary/70" />
+              <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/50" />
+              <p className="ml-2 text-xs font-mono uppercase tracking-[0.16em] text-muted-foreground">
+                Terminal quick actions
+              </p>
+            </div>
+            <div className="space-y-6">
             <div className="space-y-2">
               <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
                 Install — Quick
@@ -67,17 +76,18 @@ const HomePage = () => {
                 Pass <code className="font-mono text-foreground">--keep-data</code> to always keep it, or <code className="font-mono text-foreground">-y</code>/<code className="font-mono text-foreground">--yes</code> to skip the prompt.
               </p>
             </div>
+            </div>
           </div>
           <div className="flex gap-4 justify-center">
             <Link
               to="/getting-started"
-              className="cta-glow group relative px-6 py-2.5 rounded-lg bg-primary text-primary-foreground font-heading text-sm font-medium shadow-sm hover:shadow-lg hover:shadow-primary/20 hover:bg-primary/90 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-300"
+              className="group relative rounded-sm border border-primary bg-primary px-6 py-2.5 font-heading text-sm font-medium text-primary-foreground shadow-sm transition-all duration-300 hover:brightness-110 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               Get Started
             </Link>
             <Link
               to="/commands"
-              className="group relative px-6 py-2.5 rounded-lg border border-border text-foreground font-heading text-sm font-medium hover:border-primary/40 hover:bg-muted hover:shadow-lg hover:shadow-primary/5 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-300"
+              className="group relative rounded-sm border border-border bg-card px-6 py-2.5 font-heading text-sm font-medium text-foreground transition-all duration-300 hover:border-primary/40 hover:bg-secondary active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               View Commands
             </Link>

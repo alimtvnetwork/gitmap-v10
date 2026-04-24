@@ -8,6 +8,18 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: "v3.94.0",
+    date: "2026-04-24",
+    subtitle: "docs UI now uses a VS Code-style workbench color grade",
+    items: [
+      "Fixed: the docs frontend now consistently uses a VS Code-style shell instead of mixing generic light/docs styling with partial editor-dark tokens. The header, sidebar, main surfaces, and home page now read like a workbench UI.",
+      "Fixed: `src/components/docs/DocsLayout.tsx` and `DocsSidebar.tsx` now use flatter explorer/header framing, restrained borders, blue accent states, and panel-style controls to match the requested VS-inspired grading.",
+      "Fixed: `src/index.css` semantic tokens were retuned for both light and dark themes, with dark mode centered on VS-like neutrals and blue emphasis rather than the earlier green-heavy palette. `src/lib/theme.ts` now falls back to dark by default so the intended grading shows up first.",
+      "Fixed: `FeatureCard.tsx`, `InstallBlock.tsx`, `CodeBlock.tsx`, and the home hero in `src/pages/Index.tsx` were restyled to remove mismatched decorative treatments and align code/cards with editor-like panels.",
+      "Added: RCA report at `spec/02-app-issues/32-docs-ui-vscode-grading-missed-request.md` documenting why the request was missed repeatedly and how that process failure is prevented going forward.",
+    ],
+  },
+  {
     version: "v3.93.0",
     date: "2026-04-24",
     subtitle: "update-cleanup Phase 3 now logs inner child failures durably",

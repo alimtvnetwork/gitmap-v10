@@ -198,22 +198,22 @@ const CodeBlock = ({ code, language = "bash", title }: CodeBlockProps) => {
     <>
       {fullscreen && (
         <div
-          className="fixed inset-0 z-[998] bg-black/70 backdrop-blur-sm"
+          className="fixed inset-0 z-[998] bg-background/80 backdrop-blur-sm"
           onClick={() => setFullscreen(false)}
         />
       )}
       <div
-        className={`${wrapperClass} border border-[hsl(220,13%,22%)] group transition-all duration-300`}
+        className={`${wrapperClass} group border border-border transition-all duration-300`}
         style={{
           ["--lang-accent" as string]: accent,
-          background: "hsl(220, 14%, 11%)",
+          background: "hsl(var(--terminal))",
           boxShadow: fullscreen
             ? `0 25px 80px hsl(${accent} / 0.25), 0 0 0 1px hsl(${accent} / 0.3)`
             : undefined,
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-2 border-b border-[hsl(220,13%,20%)]" style={{ background: "hsl(220, 14%, 14%)" }}>
+        <div className="flex items-center justify-between border-b border-border bg-card px-4 py-2">
           <div className="flex items-center gap-2">
             <span
               className="w-[7px] h-[7px] rounded-full"
@@ -226,9 +226,9 @@ const CodeBlock = ({ code, language = "bash", title }: CodeBlockProps) => {
               {label}
             </span>
             {title && (
-              <span className="text-xs font-mono text-[hsl(220,10%,50%)] ml-2">— {title}</span>
+              <span className="ml-2 text-xs font-mono text-muted-foreground">— {title}</span>
             )}
-            <span className="text-xs font-mono text-[hsl(220,10%,40%)] ml-2">
+            <span className="ml-2 text-xs font-mono text-muted-foreground/80">
               {hasPinned
                 ? `${pinnedLines.size} selected`
                 : `${lines.length} ${lines.length === 1 ? "line" : "lines"}`}
@@ -236,7 +236,7 @@ const CodeBlock = ({ code, language = "bash", title }: CodeBlockProps) => {
             {hasPinned && (
               <button
                 onClick={() => setPinnedLines(new Set())}
-                className="text-xs font-mono ml-2 px-1.5 py-0.5 rounded hover:bg-white/10 transition-colors"
+                className="ml-2 rounded-sm px-1.5 py-0.5 text-xs font-mono transition-colors hover:bg-secondary"
                 style={{ color: `hsl(${accent})` }}
               >
                 Clear
@@ -246,39 +246,39 @@ const CodeBlock = ({ code, language = "bash", title }: CodeBlockProps) => {
           <div className="flex items-center gap-1">
             <button
               onClick={() => cycleFontSize("down")}
-              className="p-1.5 rounded hover:bg-white/10 text-[hsl(220,10%,50%)] hover:text-white transition-colors"
+              className="rounded-sm p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
               title="Decrease font size"
             >
               <AArrowDown className="h-3.5 w-3.5" />
             </button>
-            <span className="text-[10px] font-mono text-[hsl(220,10%,45%)] min-w-[14px] text-center">
+            <span className="min-w-[14px] text-center text-[10px] font-mono text-muted-foreground/80">
               {FONT_SIZES[fontSizeIdx].label}
             </span>
             <button
               onClick={() => cycleFontSize("up")}
-              className="p-1.5 rounded hover:bg-white/10 text-[hsl(220,10%,50%)] hover:text-white transition-colors"
+              className="rounded-sm p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
               title="Increase font size"
             >
               <AArrowUp className="h-3.5 w-3.5" />
             </button>
-            <div className="w-px h-4 bg-[hsl(220,10%,25%)] mx-0.5" />
+            <div className="mx-0.5 h-4 w-px bg-border" />
             <button
               onClick={handleCopy}
-              className="p-1.5 rounded hover:bg-white/10 text-[hsl(220,10%,50%)] hover:text-white transition-colors"
+              className="rounded-sm p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
               title="Copy"
             >
               {copied ? <Check className="h-3.5 w-3.5 text-primary" /> : <Copy className="h-3.5 w-3.5" />}
             </button>
             <button
               onClick={handleDownload}
-              className="p-1.5 rounded hover:bg-white/10 text-[hsl(220,10%,50%)] hover:text-white transition-colors"
+              className="rounded-sm p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
               title="Download"
             >
               <Download className="h-3.5 w-3.5" />
             </button>
             <button
               onClick={() => setFullscreen(!fullscreen)}
-              className="p-1.5 rounded hover:bg-white/10 text-[hsl(220,10%,50%)] hover:text-white transition-colors"
+              className="rounded-sm p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
               title={fullscreen ? "Exit fullscreen" : "Fullscreen"}
             >
               {fullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
@@ -291,8 +291,8 @@ const CodeBlock = ({ code, language = "bash", title }: CodeBlockProps) => {
           <div className="flex">
             {showLineNumbers && (
               <div
-                className="flex flex-col text-right select-none px-3 py-4 text-xs font-mono border-r border-[hsl(220,13%,18%)] code-line-numbers"
-                style={{ background: "hsl(220, 14%, 9%)", color: "hsl(220, 10%, 35%)" }}
+                className="code-line-numbers flex flex-col select-none border-r border-border px-3 py-4 text-right text-xs font-mono"
+                style={{ background: "hsl(var(--background))", color: "hsl(var(--muted-foreground))" }}
               >
                 {lines.map((_, i) => (
                   <span
@@ -323,7 +323,7 @@ const CodeBlock = ({ code, language = "bash", title }: CodeBlockProps) => {
                       key={i}
                       className={`code-line block px-4 cursor-pointer ${pinnedLines.has(i) ? "code-line-pinned" : ""}`}
                       onClick={(e) => togglePin(i, e)}
-                      style={{ color: "hsl(220, 20%, 92%)" }}
+                      style={{ color: "hsl(var(--terminal-foreground))" }}
                     >
                       {line || "\n"}
                     </span>

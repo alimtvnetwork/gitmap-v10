@@ -1,5 +1,19 @@
 # Changelog
 
+## v3.94.0 — (2026-04-24) — docs UI now uses a VS Code-style workbench color grade
+
+### Fixed
+
+- **Repeated missed UI request:** the docs app no longer mixes default/light marketing-style surfaces with the requested VS Code-inspired dark grading. The main shell now reads like an editor workbench instead of a generic docs template.
+- **`src/components/docs/DocsLayout.tsx` + `DocsSidebar.tsx`** now use a flatter VS-style header/explorer treatment with restrained borders, panelized surfaces, blue accent states, and consistent workbench framing.
+- **`src/index.css` semantic tokens** were retuned so both light and dark themes align with a VS-like palette. Dark mode is now the primary visual target, with editor-style neutrals, subtle borders, and blue selection emphasis replacing the earlier green-heavy look.
+- **Reusable docs surfaces** were brought into the same grading: `FeatureCard.tsx`, `InstallBlock.tsx`, `CodeBlock.tsx`, and the home hero in `src/pages/Index.tsx` now use flatter panel styling instead of decorative aurora/card effects that clashed with the requested direction.
+- **Theme startup/readback** in `src/lib/theme.ts` now falls back to dark more reliably, so the requested VS-style grade is what users see by default unless they explicitly switch.
+
+### Added
+
+- **Root Cause Analysis:** `spec/02-app-issues/32-docs-ui-vscode-grading-missed-request.md` documents why the UI request kept being missed, what visual mismatch remained in the app, and how to prevent that process failure from recurring.
+
 ## v3.93.0 — (2026-04-24) — update-cleanup Phase 3 now logs inner child failures durably
 
 ### Fixed

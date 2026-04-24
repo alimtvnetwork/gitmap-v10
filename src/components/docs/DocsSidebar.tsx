@@ -34,7 +34,6 @@ import {
   GitCompare,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import {
@@ -117,7 +116,6 @@ const navItems = [
 export function DocsSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const location = useLocation();
   const [dark, setDark] = useState(() => getCurrentTheme() === "dark");
 
   useEffect(() => {
@@ -125,23 +123,28 @@ export function DocsSidebar() {
   }, [dark]);
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar">
       <SidebarContent>
         <SidebarGroup>
           {!collapsed && (
-            <div className="px-3 py-4">
+            <div className="border-b border-sidebar-border px-3 py-4">
+              <div className="mb-1 text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+                Workspace
+              </div>
               <div className="flex items-center gap-2">
-                <span className="font-mono font-bold text-lg text-primary">gitmap</span>
-                <span className="text-xs font-mono text-muted-foreground">docs</span>
+                <span className="font-mono text-lg font-bold text-sidebar-primary">gitmap</span>
+                <span className="text-xs font-mono text-sidebar-foreground/70">docs</span>
               </div>
             </div>
           )}
           {collapsed && (
             <div className="flex justify-center py-4">
-              <span className="font-mono font-bold text-lg text-primary">g</span>
+              <span className="font-mono text-lg font-bold text-sidebar-primary">g</span>
             </div>
           )}
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className="px-3 pt-3 text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+            Explorer
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => (
@@ -150,8 +153,8 @@ export function DocsSidebar() {
                     <NavLink
                       to={item.url}
                       end={item.url === "/"}
-                      className="hover:bg-muted/50"
-                      activeClassName="bg-muted text-primary font-medium"
+                      className="flex min-h-8 items-center rounded-sm border border-transparent px-2 text-sm text-sidebar-foreground/85 hover:border-sidebar-border hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      activeClassName="border-sidebar-border bg-sidebar-accent text-sidebar-primary shadow-sm"
                     >
                       <item.icon className="mr-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
@@ -166,7 +169,7 @@ export function DocsSidebar() {
       <SidebarFooter>
         <button
           onClick={() => setDark(!dark)}
-          className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full"
+          className="flex w-full items-center gap-2 rounded-sm border border-sidebar-border px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
         >
           {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           {!collapsed && <span>{dark ? "Light mode" : "Dark mode"}</span>}

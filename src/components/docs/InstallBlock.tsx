@@ -24,7 +24,7 @@ const CopyLine = ({ command }: { command: string }) => {
   return (
     <div
       onClick={handleCopy}
-      className="flex items-start gap-3 px-5 py-3 rounded-lg bg-terminal border border-border cursor-pointer hover:border-primary/40 transition-colors group"
+      className="group flex cursor-pointer items-start gap-3 rounded-sm border border-border bg-terminal px-5 py-3 transition-colors hover:border-primary/40"
     >
       <Terminal className="h-4 w-4 text-primary mt-0.5 shrink-0" />
       <code className="font-mono text-sm text-terminal-foreground break-all leading-relaxed flex-1">
@@ -43,7 +43,7 @@ const InstallBlock = ({ command, tabs }: InstallBlockProps) => {
   if (tabs && tabs.length > 0) {
     return (
       <div className="space-y-2">
-        <div className="flex gap-1 justify-center">
+        <div className="flex justify-center gap-1 rounded-sm border border-border bg-secondary/70 p-1">
           {tabs.map((tab, i) => (
             <button
               key={tab.label}
@@ -51,8 +51,8 @@ const InstallBlock = ({ command, tabs }: InstallBlockProps) => {
               data-active={i === active}
               className={`tab-underline px-3 py-1 rounded-md text-xs font-mono transition-all duration-300 ${
                 i === active
-                  ? "bg-primary text-primary-foreground dark:bg-primary/20 dark:text-primary dark:border dark:border-primary/40"
-                  : "bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/70"
+                  ? "rounded-sm border border-primary/40 bg-card text-primary shadow-sm"
+                  : "rounded-sm border border-transparent bg-transparent text-muted-foreground hover:border-border hover:bg-card hover:text-foreground"
               }`}
             >
               {tab.label}

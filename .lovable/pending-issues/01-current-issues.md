@@ -199,6 +199,36 @@
   3. The handoff log + `--debug-windows-json` sink must evolve in lockstep with new cleanup branches so forensic coverage stays complete.
   4. Every recurrence report for update-cleanup should start by checking the durable handoff log and JSON sink before changing the handoff architecture itself.
 
+## 13 — Docs UI Did Not Switch to VS Code Grading Despite Repeated Requests (FIXED v3.94.0)
+- **Status**: Fixed in v3.94.0
+- **Reported**: User repeatedly asked for the docs UI to use a VS Code-style color grading, but the work kept returning to update-cleanup/root-cause debugging instead of changing the visible frontend shell.
+- **Root Cause**:
+  1. The request was mis-prioritized because the surrounding conversation contained backend/update failures, so implementation focus drifted away from the explicit UI ask.
+  2. The codebase already contained partial VS Code Dark+ inspired tokens in `src/index.css`, which created a false assumption that the visual request was already satisfied.
+  3. The visible app still mixed non-VS styling cues: light/default shell states, green-primary emphasis, aurora hero treatment, and generic cards/buttons that did not read like an editor/workbench UI.
+  4. Theme startup logic did not make the requested dark grading the primary/default docs experience.
+- **Solution**:
+  1. Reworked the docs shell (`DocsLayout`, `DocsSidebar`) into a VS Code-like explorer/header treatment with restrained borders, panel surfaces, blue-primary accents, and flatter controls.
+  2. Retuned semantic tokens in `src/index.css` so both light and dark themes align with a VS/workbench palette, with dark mode now centered on editor-style neutrals and blue highlights.
+  3. Updated the home page hero and reusable docs surfaces (`FeatureCard`, `InstallBlock`, `CodeBlock`) to remove the mismatched decorative styling and align cards/code panels with editor-like framing.
+  4. Updated theme helpers so dark is the default fallback and the applied theme is read more reliably from DOM/storage state.
+  5. Wrote RCA report `spec/02-app-issues/32-docs-ui-vscode-grading-missed-request.md` and synced release metadata.
+- **Files Affected**:
+  - `src/index.css`
+  - `src/lib/theme.ts`
+  - `src/components/docs/DocsLayout.tsx`
+  - `src/components/docs/DocsSidebar.tsx`
+  - `src/components/docs/FeatureCard.tsx`
+  - `src/components/docs/InstallBlock.tsx`
+  - `src/components/docs/CodeBlock.tsx`
+  - `src/pages/Index.tsx`
+  - `spec/02-app-issues/32-docs-ui-vscode-grading-missed-request.md` (new)
+  - `gitmap/constants/constants.go` — version bumped to `3.94.0`
+- **Prevention**:
+  1. Treat explicit UI restyle requests as frontend work first, even if earlier messages involved backend bugs.
+  2. Never infer “already done” from token comments alone; verify the rendered shell actually matches the requested visual direction.
+  3. Sync version + both changelog sources for every user-visible fix so release state stays trustworthy.
+
 ## 14 — `--debug-windows` flag added for self-update handoff diagnostics (FIXED v3.86.0)
 - **Status**: Fixed in v3.86.0
 - **Reported**: Follow-up to #09 / #10. Even with the cleanup-target resolution lines (`→ Cleanup target resolved via: …`, `→ Cleanup target path: …`, `→ Cleanup process started (pid=…)`), the *child* `update-cleanup` process printed almost nothing about its own environment, so when cleanup misbehaved on Windows the user could not tell which env vars, deploy path, or PID the child actually saw. There was also no way to enable richer diagnostics ad-hoc without rebuilding with `--verbose` plumbed through.
