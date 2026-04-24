@@ -53,3 +53,13 @@
   - `gitmap/constants/constants_clone.go` — `MsgCloneInvalidURLFmt`, `MsgCloneSummaryMultiFmt`, `MsgCloneRegisteredInline`, `MsgCloneMultiBegin`, `MsgCloneMultiItem`, `ErrCloneAllInvalid`, `ErrCloneMultiFailedFmt`, `ExitCloneMultiPartialFail`, `ExitCloneMultiAllInvalid`
   - `gitmap/constants/constants.go` — version bumped to `3.80.0`
 - **PowerShell Note**: Even after this fix, users should prefer space-separated URLs in PowerShell to avoid relying on PS's implicit comma-splitting (which differs across PS 5.1 / 7.x). Both forms now work either way.
+
+## 07 — URL Shortcut: `gitmap <url>` Should Auto-Clone (FIXED v3.81.0)
+- **Status**: Fixed in v3.81.0
+- **Reported**: User ran `gitmap https://github.com/...,https://...,https://...` (omitting the `clone` subcommand) and got `Unknown command: https://github.com/...`. Same with single-URL `gitmap <url>` and any GitHub/GitLab/SSH URL.
+- **Root Cause**: `Run()` treated `os.Args[1]` strictly as a subcommand name and dispatched it through `dispatchCore`/`dispatchRelease`/etc. A bare URL has no matching subcommand, so it fell through to `ErrUnknownCommand`. There was no shortcut layer between argv and dispatch.
+- **Solution**: In `gitmap/cmd/root.go` `Run()`, immediately after migration runs, check if `os.Args[1]` looks like a git URL via the existing `isLikelyURL` helper (matches `https://`, `http://`, `git@`). If yes, rewrite argv to `[binary, "clone", <original args...>]` so the existing multi-URL clone pipeline (issue 06) handles it. Single URL, comma-list, or space-separated URLs all work — `runCloneMulti`'s `flattenURLArgs` covers all forms.
+- **Files Affected**:
+  - `gitmap/cmd/root.go` — argv-rewrite shortcut before alias extraction and dispatch
+  - `gitmap/constants/constants.go` — version bumped to `3.81.0`
+- **UX Note**: The shortcut only fires for URLs (HTTPS/SSH git). Local file paths, shorthands (`json`/`csv`/`text`), and all existing subcommands keep their current behaviour.
