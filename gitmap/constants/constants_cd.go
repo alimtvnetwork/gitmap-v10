@@ -53,6 +53,16 @@ const (
 	EnvGitmapWrapperVal = "1"
 )
 
+// Shell-handoff sentinel file env var. Set by the wrapper function to a
+// writable temp file path; commands like clone-next, as, cd write the
+// destination directory to that file, and the wrapper cds to it.
+//
+// Spec: spec/04-generic-cli/21-post-install-shell-activation/01-contract.md
+const EnvGitmapHandoffFile = "GITMAP_HANDOFF_FILE"
+
+// Shell-handoff error format.
+const ErrShellHandoffWriteFmt = "  ⚠ Could not write shell-handoff file %s: %v\n"
+
 // CD wrapper verification messages.
 const (
 	MsgWrapperNotLoaded = "  %s! Shell wrapper not active%s — 'gitmap cd' printed the path but cannot change your directory.\n    Run: %s. $PROFILE%s (PowerShell) or %ssource ~/.bashrc%s / %ssource ~/.zshrc%s, then retry.\n"
