@@ -32,6 +32,7 @@ import {
   Move,
   GitMerge,
   GitCompare,
+  Download,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useEffect, useState } from "react";
