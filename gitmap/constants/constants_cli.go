@@ -87,6 +87,8 @@ const (
 	CmdVSCodePMPathAlias     = "vpath"
 	CmdLFSCommon             = "lfs-common"
 	CmdLFSCommonAlias        = "lfsc"
+	CmdReplace               = "replace"
+	CmdReplaceAlias          = "rpl"
 )
 
 // Usage header.

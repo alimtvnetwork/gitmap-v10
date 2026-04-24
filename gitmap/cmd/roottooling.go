@@ -55,5 +55,6 @@ func toolingDispatchEntries() []dispatchEntry {
 			func() { runUnzipCompact(argsTail()) },
 		},
 		{[]string{constants.CmdZip}, func() { runZip(argsTail()) }},
+		{[]string{constants.CmdReplace, constants.CmdReplaceAlias}, func() { runReplace(argsTail()) }},
 	}
 }

@@ -18,7 +18,7 @@ Clone-next flattens by default (v2.75.0+): clones into base name folder, tracks 
 Clone-next `-f` / `--force` (v3.50.0+): chdir-to-parent before remove when cwd IS target folder; refuses versioned-folder fallback.
 Completion generator uses marker-comment opt-in (v3.0.0+): `// gitmap:cmd top-level` on const block, `// gitmap:cmd skip` per spec. CI `generate-check` enforces drift.
 VS Code Project Manager sync: resolve user-data root per OS first, then append `User/globalStorage/alefragnani.project-manager/projects.json` — never hardcode the full path.
-Current version: v3.50.0.
+Current version: v3.96.0.
 
 ## Memories
 - [Code Constraints](mem://style/code-constraints) — Strict rules for code style, structure, and pull requests
@@ -34,6 +34,7 @@ Current version: v3.50.0.
 - [Move & Merge Commands](mem://features/movemerge) — gitmap mv / merge-both / merge-left / merge-right with L/R/S/A/B/Q prompt + --prefer-* bypass + URL-side commit/push (v2.96.0)
 - [Release Alias](mem://features/release-alias) — gitmap as / release-alias (ra) / release-alias-pull (rap) with auto-stash labeled by alias-version-unixts, label-match pop for concurrent safety (v3.0.0)
 - [Self Install Uninstall](mem://features/self-install-uninstall) — gitmap self-install / self-uninstall manage the binary itself (separate from third-party install/uninstall). Embedded scripts via go:embed, Windows handoff, marker-block PATH cleanup
+- [Replace Command](mem://features/replace-command) — gitmap replace literal "old" "new" / -N / --audit / all bumps `<base>-vN` and `<base>/vN` from git remote URL, interactive confirm before write, atomic temp+rename, binary skip (v3.96.0)
 - [Marker Comments](mem://features/marker-comments) — Decentralized opt-in for completion generator: `// gitmap:cmd top-level` + `// gitmap:cmd skip`, CI drift check enforces sync (v3.0.0)
 - [VS Code Project Manager Sync](mem://features/vscode-project-manager-sync) — gitmap scan auto-syncs and `gitmap code` registers + opens repos in alefragnani.project-manager projects.json (v3.38.0)
 - [Database Architect](mem://tech/database-architecture) — Idempotent SQLite migrations, PascalCase schema helpers
