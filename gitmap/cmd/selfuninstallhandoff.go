@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"syscall"
 
 	"github.com/alimtvnetwork/gitmap-v7/gitmap/constants"
 )
@@ -111,5 +112,6 @@ func scheduleSelfDelete() {
 		"ping", "127.0.0.1", "-n", "2", ">nul", "&", "del", "/F", "/Q", self)
 	cmd.Stdout = nil
 	cmd.Stderr = nil
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	_ = cmd.Start()
 }

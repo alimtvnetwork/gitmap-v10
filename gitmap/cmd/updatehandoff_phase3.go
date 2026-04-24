@@ -18,6 +18,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"syscall"
 
 	"github.com/alimtvnetwork/gitmap-v7/gitmap/constants"
 )
@@ -94,22 +95,23 @@ func deployedBinaryName() string {
 	return constants.GitMapBin
 }
 
-// spawnDeployedCleanupWindows launches a detached cmd.exe that waits ~1.5s
-// (so this handoff process can exit and release its file lock) and then
-// runs `<deployed> update-cleanup`. Output is suppressed because the user
-// already saw the update completion message.
+// spawnDeployedCleanupWindows launches the deployed binary directly in a
+// detached hidden process. We avoid `cmd.exe /C start ...` entirely because
+// its quoting rules are brittle when combined with Go's Windows argument
+// escaping and can surface GUI popups like "Windows cannot find '\\'".
 func spawnDeployedCleanupWindows(deployed string) {
 	fmt.Printf(constants.MsgUpdatePhase3Handoff, filepath.Base(deployed))
+	fmt.Printf(constants.MsgUpdatePhase3Target, deployed)
 
-	// `start "" /B` detaches without opening a new window.
-	// `ping 127.0.0.1 -n 3 >nul` sleeps ~2s using only built-in cmd.
-	const startPrefix = `ping 127.0.0.1 -n 3 >nul & start "" /B `
-	cmdLine := startPrefix + fmt.Sprintf("%q %s", deployed, constants.CmdUpdateCleanup)
-	cmd := exec.Command("cmd.exe", "/C", cmdLine)
-	cmd.Stdout = nil
-	cmd.Stderr = nil
+	cmd := exec.Command(deployed, constants.CmdUpdateCleanup)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	cmd.Stdin = nil
-	_ = cmd.Start()
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	cmd.Env = append(os.Environ(), constants.EnvUpdateCleanupDelayMS+"=1500")
+	if err := cmd.Start(); err != nil {
+		fmt.Fprintf(os.Stderr, constants.ErrUpdatePhase3Handoff, deployed, err)
+	}
 }
 
 // spawnDeployedCleanupUnix invokes the deployed binary's update-cleanup
