@@ -1,12 +1,13 @@
 # gitmap commit-both
 
-> **Status (v3.102.0):** implemented as **two sequential passes**
-> (L→R then R→L), not author-date-interleaved. The interleaved variant
-> from earlier drafts of the spec was deferred — sequential passes give
-> deterministic, auditable summaries and avoid mid-run merge-base drift.
+> **Status (v3.104.0):** sequential default + optional `--interleave`
+> author-date variant. Sequential gives deterministic, auditable
+> per-side summaries; interleave is closer to "what actually happened
+> first" but aborts mid-stream on first error.
 
 Bidirectional commit replay: each side ends up with the union of both
-sides' commit timelines, applied in two ordered passes.
+sides' commit timelines, applied either in two ordered passes
+(default) or in author-date-merged order (`--interleave`).
 
 ## Alias
 
@@ -19,8 +20,9 @@ cmb
 ## Usage
 
     gitmap commit-both LEFT RIGHT [flags]
+    gitmap commit-both LEFT RIGHT --interleave
 
-## Algorithm
+## Algorithm — sequential (default)
 
 1. **Pass 1 — LEFT → RIGHT.** Build plan from LEFT, preview, prompt
    (unless `-y` / `--dry-run`), replay onto RIGHT, push.
@@ -36,23 +38,64 @@ Each pass labels its log lines with a directional suffix
 (`(left→right)` / `(right→left)`) so commit-both output is
 visually attributable.
 
-Same flag set as `commit-right` (see
-[commit-right.md](commit-right.md)).
+## Algorithm — `--interleave` (v3.104.0+)
+
+1. Build BOTH directional plans up front (two `BuildPlan` calls).
+2. Merge the two commit lists into a **single stream sorted by
+   AuthorAt** (stable sort; LEFT-side wins on exact ties).
+3. Print the unified plan with each step labelled `L→R` or `R→L`.
+4. Single confirmation prompt (unless `-y` / `--dry-run`).
+5. Walk the stream and replay each commit onto its **opposite** side
+   in chronological order.
+6. After the stream finishes, push each side that received commits
+   and print a per-side summary.
+
+Tradeoffs vs sequential:
+
+- Faithful to original interleaved-history intent.
+- One prompt instead of two.
+- First per-commit failure aborts mid-stream — leaves whichever side
+  was being written in a partial state. Use `--dry-run` to audit first.
+- No per-direction merge-base re-computation between commits, so a
+  commit replayed mid-stream might re-touch files that the just-prior
+  opposite-direction commit had also touched.
+
+## Flags
+
+Same set as `commit-right` (see [commit-right.md](commit-right.md)),
+plus:
+
+| Flag           | Effect                                            |
+|----------------|---------------------------------------------------|
+| `--interleave` | Switch from sequential to author-date stream      |
+
+`--interleave` is only valid for `commit-both`. Passing it to
+`commit-left` or `commit-right` exits with code 2.
 
 ## Examples
 
+    # Sequential (default)
     gitmap commit-both ./repo-A ./repo-B
 
-Output skeleton:
+    # Author-date interleave with dry-run audit first
+    gitmap commit-both ./repo-A ./repo-B --interleave --dry-run
+
+Sequential output skeleton:
 
     [commit-both] (left→right) replaying 3 commits from ./repo-A onto ./repo-B
     [commit-both] (left→right) [1/3] a3f2c1d  feat: add OAuth flow
     ...
-    [commit-both] (left→right) done: replayed 3, skipped 0
     [commit-both] (right→left) replaying 2 commits from ./repo-B onto ./repo-A
-    [commit-both] (right→left) [1/2] b7e4a9f  fix: typo
     ...
-    [commit-both] (right→left) done: replayed 2, skipped 0
+
+Interleave output skeleton:
+
+    [commit-both] interleave plan: 5 commits in author-date order
+    [commit-both] [1/5] L→R  a3f2c1d  feat: add OAuth flow
+    [commit-both] [2/5] R→L  b7e4a9f  fix: typo
+    [commit-both] [3/5] L→R  c44d1ac  refactor: extract handler
+    [commit-both] [4/5] R→L  d9e2510  docs: update README
+    [commit-both] [5/5] L→R  e1afb20  test: add coverage
 
 ## See Also
 
