@@ -63,14 +63,14 @@ const HomePage = () => {
 
             <div className="space-y-6">
               <div>
-                <p className="mb-3 text-left text-xs font-heading font-semibold uppercase tracking-[0.18em] text-primary">
+                <p className="mb-3 text-center text-xs font-heading font-semibold uppercase tracking-[0.18em] text-primary">
                   Install
                 </p>
                 <InstallBlock tabs={INSTALL_TABS} />
               </div>
 
               <div>
-                <p className="mb-3 text-left text-xs font-heading font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                <p className="mb-3 text-center text-xs font-heading font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                   Uninstall
                 </p>
                 <InstallBlock tabs={UNINSTALL_TABS} />
