@@ -15,24 +15,42 @@ import (
 	"github.com/alimtvnetwork/gitmap-v7/gitmap/model"
 )
 
+// CloneOptions tunes a CloneFromFileWithOptions run. The zero value
+// keeps the historical behavior: sequential, progress-on-stderr.
+//
+// MaxConcurrency:
+//   - <= 1 → sequential (one repo at a time, original ordering).
+//   - >  1 → bounded worker pool (see concurrent.go). Per-repo paths
+//     come from each ScanRecord.RelativePath unchanged, so the on-disk
+//     nested folder hierarchy is preserved regardless of worker count.
+//
+// Quiet suppresses per-repo progress lines but keeps the final summary
+// (matches the legacy CloneFromFileQuiet behavior).
+type CloneOptions struct {
+	SafePull       bool
+	Quiet          bool
+	MaxConcurrency int
+}
+
 // CloneFromFile reads a source file and clones all repos under targetDir.
 func CloneFromFile(sourcePath, targetDir string, safePull bool) (model.CloneSummary, error) {
-	records, err := loadRecords(sourcePath)
-	if err != nil {
-		return model.CloneSummary{}, err
-	}
-
-	return cloneAll(records, targetDir, safePull, false), nil
+	return CloneFromFileWithOptions(sourcePath, targetDir, CloneOptions{SafePull: safePull})
 }
 
 // CloneFromFileQuiet reads a source file and clones with suppressed progress.
 func CloneFromFileQuiet(sourcePath, targetDir string, safePull bool) (model.CloneSummary, error) {
+	return CloneFromFileWithOptions(sourcePath, targetDir, CloneOptions{SafePull: safePull, Quiet: true})
+}
+
+// CloneFromFileWithOptions is the full-control entry point. The legacy
+// helpers above are thin wrappers that fill in CloneOptions defaults.
+func CloneFromFileWithOptions(sourcePath, targetDir string, opts CloneOptions) (model.CloneSummary, error) {
 	records, err := loadRecords(sourcePath)
 	if err != nil {
 		return model.CloneSummary{}, err
 	}
 
-	return cloneAll(records, targetDir, safePull, true), nil
+	return cloneAll(records, targetDir, opts), nil
 }
 
 // loadRecords detects file format and parses records.
