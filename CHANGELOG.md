@@ -1,5 +1,32 @@
 # Changelog
 
+## v3.104.0 — (2026-04-24) — commit-both --interleave (author-date variant)
+
+### Added
+
+- **`gitmap commit-both --interleave`** ships the author-date variant
+  originally drafted in spec §5 and deferred in v3.102.0. It builds
+  both directional plans up front, merges the commit lists into a
+  single chronological stream (stable sort by `AuthorAt`; LEFT-side
+  wins exact ties), prints a unified preview, prompts once, then
+  replays each commit onto its opposite side in author-date order.
+  Use `--dry-run` first — first per-commit failure aborts the stream
+  and leaves the just-written side in a partial state.
+- **`committransfer.RunBothInterleaved`** in `gitmap/committransfer/interleave.go`,
+  composed from helpers under the 15-line/function cap:
+  `buildInterleavedStream`, `executeInterleaveStream`, `printInterleavedPlan`,
+  `replayInterleaveSteps`, `finalizeInterleavePush`.
+- **Sort invariant + tie-breaking pinned** by `TestBuildInterleavedStreamSortsByAuthorDate`,
+  `TestBuildInterleavedStreamStableForTies`, `TestBuildInterleavedStreamEmptyPlans`
+  in `interleave_test.go`.
+- **CLI guard:** `--interleave` is rejected (exit 2) when passed to
+  `commit-left` or `commit-right` — only `commit-both` accepts it.
+- **Spec §5 split into 5.1 (sequential) and 5.2 (--interleave)** with
+  full tradeoff documentation. Helptext (`commit-both.md`) and
+  HelpCommitBoth one-liner updated. HelpCommitLeft promoted from
+  `[scaffold]` to `[LIVE]` (it has been live since v3.102.0).
+
+
 ## v3.103.0 — (2026-04-24) — fix non-functional shell handoff via sentinel-file mechanism
 
 ### Fixed
