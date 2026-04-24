@@ -42,6 +42,14 @@ func removeCleanupPattern(pattern, selfPath string, seen map[string]bool, succes
 	matches, err := filepath.Glob(pattern)
 	if err != nil {
 		logUpdateCleanupGlobError(pattern, err)
+		logHandoffEvent("cleanup", "glob_error", map[string]string{
+			"pattern": pattern,
+			"err":     err.Error(),
+		})
+		emitDebugWindowsJSON("glob_error", map[string]any{
+			"pattern": pattern,
+			"err":     err.Error(),
+		})
 
 		return 0
 	}
@@ -96,17 +104,38 @@ func removeCleanupFile(match, cleanPath, successMsg string) bool {
 		err := os.Remove(match)
 		if err == nil {
 			fmt.Printf(successMsg, filepath.Base(match))
+			logHandoffEvent("cleanup", "remove_ok", map[string]string{
+				"path": cleanPath,
+			})
 
 			return true
 		}
 
 		lastErr = err
 		if attempt < cleanupRemoveMaxAttempts {
+			logHandoffEvent("cleanup", "remove_retry", map[string]string{
+				"path":    cleanPath,
+				"attempt": fmt.Sprintf("%d", attempt),
+				"err":     err.Error(),
+			})
+			emitDebugWindowsJSON("remove_retry", map[string]any{
+				"path":    cleanPath,
+				"attempt": attempt,
+				"err":     err.Error(),
+			})
 			time.Sleep(cleanupRemoveRetryDelay)
 		}
 	}
 
 	logUpdateCleanupRemoveError(cleanPath, lastErr)
+	logHandoffEvent("cleanup", "remove_fail", map[string]string{
+		"path": cleanPath,
+		"err":  lastErr.Error(),
+	})
+	emitDebugWindowsJSON("remove_fail", map[string]any{
+		"path": cleanPath,
+		"err":  lastErr.Error(),
+	})
 
 	return false
 }
