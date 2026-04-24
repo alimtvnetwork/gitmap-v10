@@ -1,6 +1,28 @@
 # Changelog
 
-## v3.91.0 — (2026-04-24) — `--debug-windows-json` writes a structured NDJSON sink alongside the console dump
+## v3.92.0 — (2026-04-24) — Lock the bare-URL → `clone` shortcut behind regression tests + fix duplicate `fileExists` build break
+
+### Fixed
+
+- **Duplicate `fileExists` declaration** in `gitmap/cmd/` blocked every `go test ./cmd/...` run. The original lived in `updaterepo.go` (file-only check); a second copy was added later in `updatedebugwindows.go` (file-or-dir, empty-string-safe). Renamed the debug-dump version to `fileExistsLoose` and updated its two call sites in `dumpDebugWindowsHandoff`. The semantics of each helper now match what its single consumer actually wants.
+
+### Added
+
+- **`gitmap/cmd/root_url_shortcut_test.go`** — pins the bare-URL shortcut against the three exact invocations the user reported as failing with `Unknown command`:
+  - `gitmap https://a,https://b,https://c` (single comma-glued PowerShell paste)
+  - `gitmap https://a, https://b, https://c` (comma-then-space split across argv — bash paste)
+  - `gitmap https://a, https://b https://c` (mixed comma/space separators)
+  - Plus single-URL, leading-flag (`--verbose <url>`), SSH-shorthand (`git@github.com:a/b.git`), and GitLab-URL variants. Also covers the negative cases (known subcommand, folder path, empty argv) so the shortcut never grabs a legitimate command. Three `*testing.T` functions, all under 15 lines per case, no external deps.
+
+### Why
+
+The shortcut logic (`shouldRewriteToClone`, `looksLikeURLToken`, `splitOnComma`) had **zero unit coverage**, so a regression in any of its three cooperating predicates would silently re-introduce the `Unknown command` failure mode. The new tests run in milliseconds and would have caught the duplicate-`fileExists` build break the next time the suite ran.
+
+### Diagnostic note for users still seeing `Unknown command: https://...`
+
+The shortcut has been in source since before v3.91.0, but a **stale deployed binary on `PATH` will not have it**. Run `gitmap doctor` to confirm the active binary version, then `gitmap update` to deploy the current source. The startup version-check banner added in v3.90.0 also surfaces the gap on every invocation.
+
+
 
 ### Added
 

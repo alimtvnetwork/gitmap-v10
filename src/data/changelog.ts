@@ -8,6 +8,17 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: "v3.92.0",
+    date: "2026-04-24",
+    subtitle: "Lock the bare-URL → `clone` shortcut behind regression tests + fix duplicate `fileExists` build break",
+    items: [
+      "Fixed: duplicate `fileExists` declaration in `gitmap/cmd/` blocked `go test ./cmd/...`. Renamed the debug-dump copy in `updatedebugwindows.go` to `fileExistsLoose` (file-or-dir, empty-string-safe) and updated its two callers in `dumpDebugWindowsHandoff`. The original `fileExists` in `updaterepo.go` keeps its strict file-only semantics.",
+      "Added: `gitmap/cmd/root_url_shortcut_test.go` pins the bare-URL shortcut against the three exact `Unknown command` invocations users keep reporting — `gitmap https://a,https://b,https://c` (PowerShell paste), `gitmap https://a, https://b, https://c` (bash paste, comma-then-space), and `gitmap https://a, https://b https://c` (mixed separators). Also covers single-URL, leading-flag (`--verbose <url>`), SSH-shorthand (`git@github.com:a/b.git`), and GitLab variants, plus negative cases (known subcommand, folder path, empty argv) so the shortcut never grabs a legitimate command. Three test functions, all sub-second, no external deps.",
+      "The `shouldRewriteToClone` / `looksLikeURLToken` / `splitOnComma` trio that powers the shortcut had zero unit coverage before this commit, so any regression in any of the three cooperating predicates would silently re-introduce the failure. The new tests would have caught the duplicate-`fileExists` build break the next time the suite ran.",
+      "Diagnostic note for users still hitting `Unknown command: https://...`: the shortcut has been in source since before v3.91.0, but a stale deployed binary on `PATH` will not have it. Run `gitmap doctor` to confirm the active binary version, then `gitmap update` to deploy the current source. The startup version-check banner from v3.90.0 also surfaces this gap on every invocation.",
+    ],
+  },
+  {
     version: "v3.57.0",
     date: "2026-04-23",
     subtitle: "Archive system: `gitmap zip` + `gitmap unzip-compact` (alias `uzc`) with compact-folder normalization, multi-source resolution (local / HTTP / git), and `ArchiveHistory` SQLite persistence",
