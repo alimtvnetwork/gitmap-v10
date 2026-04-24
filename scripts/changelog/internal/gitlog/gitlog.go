@@ -37,19 +37,43 @@ func CommitsSinceLastTag(repoRoot string) ([]Commit, string, error) {
 		return nil, "", err
 	}
 
-	rev := "HEAD"
-	if tag != "" {
-		rev = tag + "..HEAD"
-	}
-
-	commits, err := readCommits(repoRoot, rev)
+	commits, err := CommitsInRange(repoRoot, tag, "")
 	if err != nil {
 		return nil, "", err
 	}
 
+	return commits, tag, nil
+}
+
+// CommitsInRange returns commits in `since..until` order. Empty `since`
+// means "from the repository start"; empty `until` means HEAD. Used by
+// the runner when --since / --release-tag explicitly bound the range.
+func CommitsInRange(repoRoot, since, until string) ([]Commit, error) {
+	rev := buildRev(since, until)
+
+	commits, err := readCommits(repoRoot, rev)
+	if err != nil {
+		return nil, err
+	}
+
 	sortCommits(commits)
 
-	return commits, tag, nil
+	return commits, nil
+}
+
+// buildRev assembles the `<since>..<until>` token git log expects,
+// collapsing each empty bound to its sane default (start of history,
+// HEAD).
+func buildRev(since, until string) string {
+	if until == "" {
+		until = "HEAD"
+	}
+
+	if since == "" {
+		return until
+	}
+
+	return since + ".." + until
 }
 
 // highestSemverTag returns the tag with the highest semver, not the
