@@ -69,3 +69,54 @@ func classifyURLs(flat []string) (valid, invalid []string) {
 
 	return valid, invalid
 }
+
+// executeDirectCloneOne is the non-fatal sibling of executeDirectClone:
+// it clones a single URL, persists to the DB, optionally registers with
+// GitHub Desktop, and returns any error instead of calling os.Exit.
+// Folder name is auto-derived (versioned URLs flatten via clonenext).
+func executeDirectCloneOne(url, folderName string, ghDesktopFlag, noReplace bool) error {
+	repoName := repoNameFromURL(url)
+	folderName = resolveCloneFolder(repoName, folderName)
+
+	absPath, err := filepath.Abs(folderName)
+	if err != nil {
+		return fmt.Errorf("resolve abs path for %s: %w", folderName, err)
+	}
+
+	if noReplace {
+		if _, statErr := os.Stat(absPath); statErr == nil {
+			return fmt.Errorf("target exists: %s (use without --no-replace to replace)", absPath)
+		}
+		if cloneErr := runCloneCommand(url, absPath); cloneErr != nil {
+			return fmt.Errorf("git clone: %w", cloneErr)
+		}
+	} else {
+		if _, replaceErr := cloneReplacing(url, absPath); replaceErr != nil {
+			return fmt.Errorf("clone-replace: %w", replaceErr)
+		}
+	}
+
+	upsertDirectClone(url, repoName, folderName, absPath)
+
+	if ghDesktopFlag {
+		registerSingleDesktop(repoName, absPath)
+		fmt.Printf(constants.MsgCloneRegisteredInline, repoName)
+	}
+
+	return nil
+}
+
+// resolveCloneFolder derives the destination folder name when none is given,
+// auto-flattening versioned URLs (e.g., wp-onboarding-v13 → wp-onboarding/).
+func resolveCloneFolder(repoName, folderName string) string {
+	if len(folderName) > 0 {
+		return folderName
+	}
+
+	parsed := clonenext.ParseRepoName(repoName)
+	if parsed.HasVersion {
+		return parsed.BaseName
+	}
+
+	return repoName
+}
