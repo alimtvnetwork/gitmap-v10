@@ -950,6 +950,8 @@ gitmap clone gitmap.json --target-dir D:\wp-work --github-desktop --safe-pull
 
 ---
 
+> **One-stop reference**: see [`spec/01-app/108-cross-platform-install-update.md`](spec/01-app/108-cross-platform-install-update.md) (or the [`/install-gitmap`](https://github.com/alimtvnetwork/gitmap-v7) docs page) for the full Windows / macOS / Linux install + update + uninstall + verify matrix. The snippets below are the same ones the spec lists.
+
 
 <div align="center">
 
