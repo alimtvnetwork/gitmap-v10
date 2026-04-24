@@ -51,18 +51,19 @@ All three pieces share the existing resolver / merge / marker-block primitives. 
 - [ ] Helptext: `gitmap/helptext/templatesinit.md` (markdown, picked up by pretty renderer).
 - [ ] Register alias `ti`.
 
-### Phase 3 — `templates diff`
+### Phase 3 — `templates diff` ✅ (v3.108.0)
 
-- [ ] `gitmap/cmd/templatesdiff.go` — flags: `--lang <name>`, `--kind ignore|attributes` (default both), `--cwd <path>`.
-- [ ] `gitmap/templates/diff.go` — marker-block aware diff:
-  - Compute "would-be" file via the same merge pipeline as `add`.
-  - Emit unified-style hunks (`@@`, `+`, `-`, ` `) restricted to changed regions.
-  - No external diff dep — implement Myers-lite over line slices (small, ≤200 LOC).
-- [ ] `diff_test.go` fixtures in `templates/testdata/diff/case-NNN.{current,template,want.diff}`.
-- [ ] TTY-aware coloring: route through `render.RenderANSI`-style replacer for `+`/`-`/`@` lines.
-- [ ] Exit code: `0` if no diff, `1` if diff present (script-friendly), `2` on error.
-- [ ] Helptext: `gitmap/helptext/templatesdiff.md`.
-- [ ] Register alias `td`.
+- [x] `gitmap/cmd/templatesdiff.go` — flags: `--lang <name>`, `--kind ignore|attributes` (default both), `--cwd <path>`.
+- [x] `gitmap/templates/diff.go` — marker-block aware, pure (never writes).
+  Status enum (NoChange / MissingFile / MissingBlock / BlockChanged) drives exit codes.
+  Reuses `blockRegex(tag)` from `merge.go` so parser can't drift from writer.
+  Hand-rolled (no Myers / no external diff dep) — block bodies are small enough
+  that a flat removal-then-addition is honest and ≤180 LOC.
+- [x] `diff_test.go` — 5 cases pinning all 4 branches + blank-line preservation.
+- [x] TTY-aware coloring via `render.HighlightQuotesANSI` (cyan `+`, yellow `-`, dim `@@`).
+- [x] Exit codes mirror `diff(1)`: `0` no change, `1` differences, `2` error.
+- [x] Helptext `gitmap/helptext/templates-diff.md` with exit-code table + pre-commit example.
+- [x] Alias `td` registered alongside `diff`.
 
 ### Phase 4 — Wiring + docs
 

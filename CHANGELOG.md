@@ -1,5 +1,58 @@
 # Changelog
 
+## v3.108.0 — (2026-04-24) — `gitmap templates diff` (alias `td`)
+
+### Added
+
+- **`gitmap templates diff --lang <name> [--kind ignore|attributes] [--cwd <path>]`**
+  shows what `add ignore <lang>` / `add attributes <lang>` would change
+  in the current repo without writing to disk. Alias: `td` (e.g.
+  `gitmap tpl td --lang go`).
+- **Standard `diff(1)` exit codes** for script-friendliness:
+  - `0` → on-disk gitmap block matches template (no changes).
+  - `1` → block missing or body differs (changes pending).
+  - `2` → bad flag, unknown language, or I/O failure.
+- **Block-scoped diffing** — only the gitmap-managed marker block
+  participates. Hand edits OUTSIDE `# >>> gitmap:<tag> >>>` …
+  `# <<< gitmap:<tag> <<<` are invisible (matches `add`'s contract).
+- **Unified-style hunks** with banner lines (`@@ gitmap:<tag> @@`),
+  `+` for would-be additions, `-` for current content. TTY-aware:
+  cyan `+`, yellow `-`, dim `@@` via the existing
+  `render.HighlightQuotesANSI` token replacer. Pipes/redirects keep
+  raw output for downstream parsers.
+
+### Internals
+
+- New `gitmap/templates/diff.go` (~170 LOC):
+  - `Diff(targetPath, tag, body) (DiffResult, error)` is pure — it
+    never writes — so `add --dry-run` could later reuse it without
+    touching disk.
+  - Status enum (`DiffNoChange / DiffMissingFile / DiffMissingBlock
+    / DiffBlockChanged`) drives the CLI exit codes.
+  - `extractBlockBody` reuses the existing `blockRegex(tag)` from
+    `merge.go` so the parser can never drift from the writer.
+  - `splitDiffLines` deliberately preserves intra-body blank lines
+    so visual separators in templates show up as `+` / `-`.
+- New `gitmap/cmd/templatesdiff.go` — flag parsing, kind expansion
+  (`""` → both kinds), per-kind dispatch, ANSI decoration. All
+  helpers under the 15-line rule.
+- `dispatchTemplates` extended with `diff` / `td` cases; usage
+  banner gains a "Flags (diff)" section + 2 new examples.
+
+### Tests
+
+- `gitmap/templates/diff_test.go` (5 cases) pins all four
+  `DiffStatus` branches plus the blank-line preservation invariant.
+
+### Files
+
+- New: `gitmap/templates/diff.go`, `gitmap/templates/diff_test.go`,
+  `gitmap/cmd/templatesdiff.go`, `gitmap/helptext/templates-diff.md`
+- Edited: `gitmap/cmd/templatescli.go` (dispatch + usage banner),
+  `gitmap/constants/constants.go` (v3.108.0), `CHANGELOG.md`,
+  `.lovable/memory/index.md`,
+  `.lovable/memory/plans/05-templates-polish-plan.md` (Phase 3 → done)
+
 ## v3.107.0 — (2026-04-24) — Pretty renderer fixture corpus expansion
 
 ### Added
