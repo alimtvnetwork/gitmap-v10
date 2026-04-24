@@ -19,7 +19,31 @@ c
 | --safe-pull | false | Pull existing repos with retry + diagnostics |
 | --github-desktop | false | Auto-register with GitHub Desktop (no prompt) |
 | --audit | false | Validate planned git clone commands and print a diff-style summary; never executes |
+| --max-concurrency \<N\> | 1 | Run up to N clones in parallel (1 = sequential). Hierarchy is preserved at any N. |
 | --verbose | false | Write detailed debug log |
+
+## Hierarchy preservation
+
+Every record is cloned into `<target-dir>/<RelativePath>` exactly as
+captured by `gitmap scan` — no flattening, no path rewriting. A scan
+that recorded `group-a/sub/repo-x` reproduces `<target>/group-a/sub/repo-x`
+on clone. This holds for every runner mode (sequential, parallel) and
+for every input format (CSV, JSON, text).
+
+## Parallel execution (`--max-concurrency`)
+
+By default `gitmap clone` runs one repo at a time so the per-repo
+progress lines on stderr stay strictly ordered. Pass `--max-concurrency N`
+(N ≥ 2) to dispatch the per-record clone work across N goroutines:
+
+    gitmap clone json --max-concurrency 8
+
+When parallel mode is active gitmap prints a single header line
+(`↪ parallel clone enabled: 8 workers`) before the per-repo lines so
+you know it engaged. Progress lines arrive in completion order rather
+than input order; the on-disk hierarchy is unaffected. The clone-cache
+fingerprint, audit short-circuit, and safe-pull retry behavior all
+operate identically regardless of N.
 
 ## Audit mode
 
