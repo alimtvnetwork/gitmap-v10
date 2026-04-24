@@ -8,6 +8,18 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: "v3.95.0",
+    date: "2026-04-24",
+    subtitle: "Refuse to build URL-shaped folder paths + lock multi-URL routing behind regression tests",
+    items: [
+      "Fixed: root cause of the recurring `pending task already exists ... \\https:\\github.com\\...` + `fatal: could not create leading directories` failure for `gitmap clone <url1> <url2>` is that the user's deployed `gitmap.exe` on PATH is older than v3.80.0 and does not contain the multi-URL routing fix. Current source already routes 2+ URLs to `runCloneMulti` via `shouldUseMultiClone(cf)` — but the stale binary still reaches `executeDirectClone(url, folderName=<second URL>, ...)`, builds the impossible Windows path `D:\\...\\https:\\github.com\\...`, and crashes git.",
+      "Fixed: `gitmap/cmd/clone.go` `executeDirectClone` now refuses URL-shaped folder names early with an actionable message that names the exact recovery commands: `gitmap doctor`, `gitmap update`, `gitmap pending clear --yes`, and the reminder to open a NEW terminal so PATH refreshes. This shape is impossible in current source, so the guard fires only when a stale binary is in use — and the message tells the user exactly that, instead of letting git fail with `Invalid argument`.",
+      "Added: `gitmap/cmd/clone_stale_binary_test.go` pins all three reported PowerShell argv shapes (`url1,url2,url3` comma-glued, `url1 url2 url3` PowerShell-split, comma+space mixed) plus the URL detector and the recovery message contents. Regressions in any of the three cooperating predicates now fail CI before the broken binary can ship.",
+      "Added: RCA `spec/02-app-issues/33-stale-binary-clone-folder-url-guard.md` with the full evidence trail proving the deployed binary is stale, why every retry hits the same code path, and the prevention rules.",
+      "Action required: the source is correct, but your PATH binary must be replaced. Run `gitmap doctor` to confirm the active version, `gitmap update` to redeploy, open a NEW terminal so PATH refreshes, then `gitmap pending clear --yes` to drop the orphaned row, and retry the clone — it works space- or comma-separated on PowerShell and bash.",
+    ],
+  },
+  {
     version: "v3.94.0",
     date: "2026-04-24",
     subtitle: "docs UI now uses a VS Code-style workbench color grade",

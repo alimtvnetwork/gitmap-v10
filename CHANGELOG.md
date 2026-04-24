@@ -1,5 +1,32 @@
 # Changelog
 
+## v3.95.0 — (2026-04-24) — refuse to build URL-shaped folder paths + lock multi-URL routing behind regression tests
+
+### Fixed
+
+- **Root cause of the recurring `pending task already exists ... \https:\github.com\...` + `fatal: could not create leading directories` failure for `gitmap clone <url1> <url2>`:** the user's deployed `gitmap.exe` on PATH is older than v3.80.0 and does not contain the multi-URL routing fix. Current source already routes 2+ URL invocations to `runCloneMulti` via `shouldUseMultiClone(cf)` — but the *deployed* binary still reaches `executeDirectClone(url, folderName=<second URL>, ...)`, builds the impossible path `D:\...\https:\github.com\...`, and crashes git. Repeated `gitmap update` runs have been failing in Phase 3 cleanup (issues #09 / #10 / #12), so the freshly built binary never replaces the stale one on PATH.
+- **`gitmap/cmd/clone.go` `executeDirectClone` now refuses URL-shaped folder names early** with an actionable message that names the exact recovery commands: `gitmap doctor`, `gitmap update`, `gitmap pending clear --yes`, and the reminder to open a NEW terminal so PATH refreshes. This shape is impossible in current source, so the guard fires only when a stale binary is in use — and the message tells the user exactly that instead of letting git fail with `Invalid argument`.
+- **`gitmap/constants/constants_clone.go`** adds `ErrCloneStaleBinaryFolderURL` so the guidance text lives in constants per the project's no-magic-strings rule.
+
+### Added
+
+- **Regression tests** in `gitmap/cmd/clone_stale_binary_test.go` pinning all three exact PowerShell argv shapes the user has reported (`url1,url2,url3` comma-glued, `url1 url2 url3` PowerShell-split, comma+space mixed). They prove `shouldUseMultiClone` routes every reported shape to `runCloneMulti` in current source, and the third test pins the recovery message contents so `gitmap update` / `gitmap doctor` / `gitmap pending clear` can never silently disappear from the guidance.
+- **Root Cause Analysis:** `spec/02-app-issues/33-stale-binary-clone-folder-url-guard.md` — full evidence trail proving the deployed binary is stale, why every retry hits the same code path, and the prevention rules.
+
+### Validation
+
+- `go test ./cmd -run "TestShouldUseMultiCloneCoversReportedInvocation|TestIsDirectURLAcceptsAllReportedShapes|TestStaleBinaryGuardMessageMentionsRecoverySteps" -v -count=1`
+
+### Action required by the user
+
+The source is correct and the new guard ships in `v3.95.0`, but **the binary on your PATH must be replaced** before either takes effect on your machine:
+
+1. `gitmap doctor` — confirm the active binary version (will show <3.80.0).
+2. `gitmap update` — rebuild + redeploy from current source. If Phase 3 cleanup still fails, the on-disk handoff log under `<TMP>/gitmap-update-handoff-*.log` (v3.87.0+) and the `--debug-windows-json` sink (v3.91.0+) now record exact branch-level evidence.
+3. **Open a NEW terminal** so PATH refreshes.
+4. `gitmap pending clear --yes` — drop the orphaned row blocking your retries.
+5. Retry: `gitmap clone https://.../email-creator-v1 https://.../email-reader-v3 https://.../account-automator` works in either comma- or space-separated form on PowerShell and bash.
+
 ## v3.94.0 — (2026-04-24) — docs UI now uses a VS Code-style workbench color grade
 
 ### Fixed

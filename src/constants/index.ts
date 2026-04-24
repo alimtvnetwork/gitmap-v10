@@ -35,4 +35,4 @@ export const ROOT_RELATIVE_PATH = ".";
 export const ROOT_RELATIVE_LABEL = "(root)";
 
 /** Application version — single source of truth. */
-export const VERSION = "v3.94.0";
+export const VERSION = "v3.95.0";
