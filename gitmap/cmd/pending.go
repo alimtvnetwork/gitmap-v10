@@ -7,9 +7,18 @@ import (
 	"github.com/alimtvnetwork/gitmap-v7/gitmap/constants"
 )
 
-// runPending displays all pending tasks from the database.
+// runPending displays all pending tasks from the database, OR
+// dispatches `gitmap pending clear ...` to the cleanup subcommand
+// when the first positional arg is "clear".
 func runPending() {
-	checkHelp("pending", os.Args[2:])
+	args := os.Args[2:]
+	if len(args) > 0 && args[0] == "clear" {
+		checkHelp("pending-clear", args[1:])
+		runPendingClear(args[1:])
+
+		return
+	}
+	checkHelp("pending", args)
 
 	db, err := openDB()
 	if err != nil {
