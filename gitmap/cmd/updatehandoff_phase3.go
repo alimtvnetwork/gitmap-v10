@@ -138,6 +138,7 @@ func spawnDeployedCleanupWindows(deployed, source string) {
 	setHiddenProcessAttr(cmd)
 	cmd.Env = buildCleanupChildEnv()
 	dumpDebugWindowsHandoff(source, deployed, append([]string{deployed}, childArgs...))
+	dumpDebugWindowsCommandPlan(deployed, childArgs)
 	if err := cmd.Start(); err != nil {
 		fmt.Fprintf(os.Stderr, constants.ErrUpdatePhase3Handoff, deployed, err)
 		logUpdatePhase3(constants.UpdatePhase3LogStartFail, deployed, err)
@@ -173,6 +174,7 @@ func spawnDeployedCleanupUnix(deployed, source string) {
 	cmd.Stderr = os.Stderr
 	cmd.Env = buildCleanupChildEnv()
 	dumpDebugWindowsHandoff(source, deployed, append([]string{deployed}, childArgs...))
+	dumpDebugWindowsCommandPlan(deployed, childArgs)
 	if err := cmd.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, constants.ErrUpdatePhase3Handoff, deployed, err)
 		logUpdatePhase3(constants.UpdatePhase3LogStartFail, deployed, err)
