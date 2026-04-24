@@ -39,11 +39,13 @@ import (
 func scheduleDeployedCleanupHandoff() {
 	dumpDebugWindowsHeader("phase-3 handoff (update-runner)")
 	defer dumpDebugWindowsFooter()
+	fmt.Printf(constants.MsgUpdatePhase3LogFile, handoffLogPath())
 
 	deployed, source := resolveDeployedBinaryPath()
 	if len(deployed) == 0 {
 		fmt.Fprint(os.Stderr, constants.ErrUpdatePhase3TargetMissing)
 		logUpdatePhase3(constants.UpdatePhase3LogTargetMissing)
+		logHandoffEvent("phase-3", "target_missing", nil)
 		dumpDebugWindowsNote("target missing — no cleanup child will be spawned")
 
 		return
@@ -54,6 +56,8 @@ func scheduleDeployedCleanupHandoff() {
 		// We *are* the deployed binary (Unix in-place update). Just
 		// run cleanup directly — no handoff needed.
 		logUpdatePhase3(constants.UpdatePhase3LogInline, deployed)
+		logHandoffEvent("phase-3", "inline",
+			map[string]string{"target": deployed, "source": source})
 		dumpDebugWindowsNote("inline cleanup — self == deployed (%s)", deployed)
 		runUpdateCleanup()
 
@@ -123,6 +127,8 @@ func spawnDeployedCleanupWindows(deployed, source string) {
 	fmt.Printf(constants.MsgUpdatePhase3Resolve, source)
 	fmt.Printf(constants.MsgUpdatePhase3Target, deployed)
 	logUpdatePhase3(constants.UpdatePhase3LogResolve, source, deployed)
+	logHandoffEvent("phase-3", "resolve",
+		map[string]string{"source": source, "target": deployed})
 
 	childArgs := buildCleanupChildArgs()
 	cmd := exec.Command(deployed, childArgs...)
@@ -135,12 +141,19 @@ func spawnDeployedCleanupWindows(deployed, source string) {
 	if err := cmd.Start(); err != nil {
 		fmt.Fprintf(os.Stderr, constants.ErrUpdatePhase3Handoff, deployed, err)
 		logUpdatePhase3(constants.UpdatePhase3LogStartFail, deployed, err)
+		logHandoffEvent("phase-3", "start_fail", map[string]string{
+			"target": deployed, "err": err.Error(),
+		})
 
 		return
 	}
 
 	fmt.Printf(constants.MsgUpdatePhase3Started, cmd.Process.Pid)
 	logUpdatePhase3(constants.UpdatePhase3LogStarted, cmd.Process.Pid, deployed)
+	logHandoffEvent("phase-3", "start_ok", map[string]string{
+		"target": deployed,
+		"pid":    fmt.Sprintf("%d", cmd.Process.Pid),
+	})
 	dumpDebugWindowsChildPID(cmd.Process.Pid)
 }
 
@@ -151,6 +164,8 @@ func spawnDeployedCleanupUnix(deployed, source string) {
 	fmt.Printf(constants.MsgUpdatePhase3Resolve, source)
 	fmt.Printf(constants.MsgUpdatePhase3Target, deployed)
 	logUpdatePhase3(constants.UpdatePhase3LogResolve, source, deployed)
+	logHandoffEvent("phase-3", "resolve",
+		map[string]string{"source": source, "target": deployed})
 
 	childArgs := buildCleanupChildArgs()
 	cmd := exec.Command(deployed, childArgs...)
@@ -161,7 +176,14 @@ func spawnDeployedCleanupUnix(deployed, source string) {
 	if err := cmd.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, constants.ErrUpdatePhase3Handoff, deployed, err)
 		logUpdatePhase3(constants.UpdatePhase3LogStartFail, deployed, err)
+		logHandoffEvent("phase-3", "run_fail", map[string]string{
+			"target": deployed, "err": err.Error(),
+		})
+
+		return
 	}
+	logHandoffEvent("phase-3", "run_ok",
+		map[string]string{"target": deployed})
 }
 
 // buildCleanupChildArgs returns the argv for the detached `update-cleanup`

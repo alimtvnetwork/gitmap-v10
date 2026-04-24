@@ -27,6 +27,7 @@ const (
 	EnvReportErrorsFormat  = "GITMAP_REPORT_ERRORS"
 	EnvReportErrorsFile    = "GITMAP_REPORT_ERRORS_FILE"
 	EnvUpdateCleanupDelayMS = "GITMAP_UPDATE_CLEANUP_DELAY_MS"
+	UpdateHandoffLogNameFmt = "gitmap-update-handoff-%s.log"
 	ReportErrorsFilePrefix = "gitmap-update-report-"
 	ReportErrorsFileSuffix = ".jsonl"
 )
@@ -69,6 +70,7 @@ const (
 	MsgUpdatePhase3Resolve = "  → Cleanup target resolved via: %s\n"
 	MsgUpdatePhase3Target  = "  → Cleanup target path: %s\n"
 	MsgUpdatePhase3Started = "  → Cleanup process started (pid=%d)\n"
+	MsgUpdatePhase3LogFile = "  → Handoff log file: %s\n"
 	UpdateRunnerLogStart   = "update-runner starting, repo=%s"
 	UpdateScriptLogExec    = "executing update script: %s"
 	UpdateScriptLogExit    = "update script exited: err=%v"
@@ -93,6 +95,7 @@ const (
 	MsgDebugWinSelf       = "[debug-windows] self executable  : %s\n"
 	MsgDebugWinPID        = "[debug-windows] self pid         : %d\n"
 	MsgDebugWinPPID       = "[debug-windows] parent pid       : %d\n"
+	MsgDebugWinLogFile    = "[debug-windows] handoff log file : %s\n"
 	MsgDebugWinSource     = "[debug-windows] resolution source: %s\n"
 	MsgDebugWinTarget     = "[debug-windows] resolved target  : %s\n"
 	MsgDebugWinTargetExists = "[debug-windows] target exists    : %t\n"

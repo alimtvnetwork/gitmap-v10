@@ -1,5 +1,32 @@
 # Changelog
 
+## v3.87.0 — (2026-04-24) — Durable on-disk handoff log for self-update cleanup
+
+### Added
+
+- **Always-on handoff log file** at `<TMP>/gitmap-update-handoff-YYYYMMDD.log`. Phase 3 dispatcher and the deployed-binary cleanup child both append structured key=value events here regardless of `--verbose` / `--debug-windows`. The file survives swallowed stdout/stderr (hidden Windows processes, detached spawns, run.ps1 wrappers).
+- **Events recorded**: `phase-3 resolve` (source + target), `phase-3 start_ok` (target + child pid), `phase-3 start_fail` (target + err), `phase-3 run_ok` / `run_fail` (Unix), `phase-3 inline`, `phase-3 target_missing`, `cleanup start` (self), `cleanup delay` / `cleanup delay_invalid`, `cleanup done` (removed count). Every line carries `pid`, `ppid`, `goos`, RFC3339 UTC timestamp.
+- **Log path surfaced in two places**: `→ Handoff log file: <path>` always prints once at the start of Phase 3 dispatch, and the `[debug-windows]` dump now prints `handoff log file : <path>` in its header so the path is one click away whether or not the flag is on.
+
+### Implementation
+
+- `gitmap/cmd/updatehandofflog.go` (new) — `handoffLogPath()`, `logHandoffEvent(phase, event, fields)`, `formatHandoffLogLine`, mutex-serialized append-mode writer; failures degrade silently so logging can never disturb the update flow.
+- `gitmap/cmd/updatehandoff_phase3.go` — `logHandoffEvent` calls at every lifecycle branch in `scheduleDeployedCleanupHandoff`, `spawnDeployedCleanupWindows`, `spawnDeployedCleanupUnix`; `→ Handoff log file:` line printed at top of dispatch.
+- `gitmap/cmd/updatecleanup.go` — `logHandoffEvent` calls in `runUpdateCleanup` (`start`, `done`) and `delayUpdateCleanupIfNeeded` (`delay`, `delay_invalid`).
+- `gitmap/cmd/updatedebugwindows.go` — header dump now includes `handoff log file` line.
+- `gitmap/constants/constants_update.go` — `UpdateHandoffLogNameFmt`, `MsgUpdatePhase3LogFile`, `MsgDebugWinLogFile`.
+- `gitmap/helptext/update.md` — new "Handoff log file" section with example log lines.
+- `gitmap/constants/constants.go` — version bumped to `3.87.0`.
+
+### Why
+
+Even after `--debug-windows` (v3.86.0), failures during the detached Windows cleanup spawn could still vanish if an intermediate launcher discarded stdout/stderr. The handoff log writes to disk before/after each lifecycle event, so a forensic trail always exists for bug reports.
+
+### Compatibility
+
+Pure addition. The log file is at most a few KB per update run, daily-named, and never rotated (the daily filename keeps it bounded for the typical update cadence). Logging failures (read-only volume, etc.) are swallowed without disturbing the update.
+
+
 ## v3.86.0 — (2026-04-24) — `--debug-windows` for self-update cleanup handoff
 
 ### Added

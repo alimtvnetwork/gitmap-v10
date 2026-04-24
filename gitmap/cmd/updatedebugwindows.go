@@ -66,6 +66,7 @@ func dumpDebugWindowsHeader(phase string) {
 	fmt.Fprintf(os.Stderr, constants.MsgDebugWinSelf, self)
 	fmt.Fprintf(os.Stderr, constants.MsgDebugWinPID, os.Getpid())
 	fmt.Fprintf(os.Stderr, constants.MsgDebugWinPPID, os.Getppid())
+	fmt.Fprintf(os.Stderr, constants.MsgDebugWinLogFile, handoffLogPath())
 }
 
 // dumpDebugWindowsFooter closes a dump block. Symmetric with

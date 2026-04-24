@@ -22,6 +22,8 @@ func runUpdateCleanup() {
 		fmt.Printf(constants.MsgUpdateCleanBinary, selfPath)
 	}
 	logUpdateCleanup(constants.UpdateCleanupLogStart, selfPath)
+	logHandoffEvent("cleanup", "start",
+		map[string]string{"self": selfPath})
 	dumpDebugWindowsNote("cleanup self path resolved: %s", selfPath)
 	delayUpdateCleanupIfNeeded()
 
@@ -32,6 +34,8 @@ func runUpdateCleanup() {
 	total += cleanupCloneSwapDirs(ctx)
 	printUpdateCleanupResult(total)
 	logUpdateCleanup(constants.UpdateCleanupLogDone, total)
+	logHandoffEvent("cleanup", "done",
+		map[string]string{"removed": fmt.Sprintf("%d", total)})
 	dumpDebugWindowsNote("cleanup finished, removed=%d", total)
 }
 
@@ -46,10 +50,14 @@ func delayUpdateCleanupIfNeeded() {
 	if err != nil || ms <= 0 {
 		fmt.Fprintf(os.Stderr, constants.ErrUpdateCleanDelayInvalid, raw)
 		logUpdateCleanup(constants.UpdateCleanupLogDelayInvalid, raw)
+		logHandoffEvent("cleanup", "delay_invalid",
+			map[string]string{"raw": raw})
 
 		return
 	}
 	fmt.Printf(constants.MsgUpdateCleanDelay, ms)
+	logHandoffEvent("cleanup", "delay",
+		map[string]string{"ms": fmt.Sprintf("%d", ms)})
 	time.Sleep(time.Duration(ms) * time.Millisecond)
 }
 

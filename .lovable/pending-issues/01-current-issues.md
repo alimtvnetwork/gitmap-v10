@@ -209,3 +209,28 @@
   2. Diagnostic env-key lists must be hand-curated, never `os.Environ()` in full — that would leak credentials into bug-report pastes.
   3. Any future addition to the cleanup handoff (extra phases, extra spawns) must extend the `[debug-windows]` dump in lockstep so the trace stays complete.
 
+## 15 — Durable on-disk handoff log for self-update cleanup (FIXED v3.87.0)
+- **Status**: Fixed in v3.87.0
+- **Reported**: Follow-up to #14. Even with `--debug-windows`, failures during the detached Windows cleanup spawn could still vanish if an intermediate launcher (run.ps1 wrapper, hidden process attr, third-party AV) discarded stdout/stderr. There was no on-disk forensic trail for the dispatcher's resolution decision or the child's start status.
+- **Root Cause**:
+  1. Phase 3 dispatcher and the cleanup child only wrote to stdout/stderr and to the optional `--verbose` log. When stdout/stderr was redirected to NUL (or the verbose log wasn't enabled) every diagnostic disappeared.
+  2. The verbose log is opt-in and per-process — there was no shared sink that both the dispatcher and the spawned child wrote to, so even with `--verbose` you'd get two separate files and have to correlate them by timestamp.
+- **Solution**:
+  1. New `gitmap/cmd/updatehandofflog.go` — daily, append-mode, mutex-serialized writer at `<TMP>/gitmap-update-handoff-YYYYMMDD.log`. Always-on; failures swallowed so logging can never disturb the update flow.
+  2. Every Phase 3 lifecycle branch (`resolve`, `start_ok`, `start_fail`, `inline`, `target_missing`, `run_ok`/`run_fail` on Unix) and every cleanup-child branch (`start`, `delay`, `delay_invalid`, `done`) calls `logHandoffEvent(phase, event, fields)`.
+  3. Each line carries `pid`, `ppid`, `goos`, RFC3339 UTC timestamp + sorted key=value fields, so dispatcher + child entries interleave cleanly in one file and can be diffed across runs.
+  4. Path is surfaced in TWO always-visible places: `→ Handoff log file: <path>` printed once at the start of Phase 3, and `[debug-windows] handoff log file : <path>` inside the `--debug-windows` dump header.
+- **Files Affected**:
+  - `gitmap/cmd/updatehandofflog.go` (new)
+  - `gitmap/cmd/updatehandoff_phase3.go` — `logHandoffEvent` calls + log-path print at top of dispatch
+  - `gitmap/cmd/updatecleanup.go` — `logHandoffEvent` calls in cleanup + delay branches
+  - `gitmap/cmd/updatedebugwindows.go` — log file path added to dump header
+  - `gitmap/constants/constants_update.go` — `UpdateHandoffLogNameFmt`, `MsgUpdatePhase3LogFile`, `MsgDebugWinLogFile`
+  - `gitmap/helptext/update.md` — new "Handoff log file" section with example log lines
+  - `gitmap/constants/constants.go` — version bumped to `3.87.0`
+- **Prevention**:
+  1. Any handoff that crosses a process boundary needs a durable, always-on, shared on-disk sink — stdout/stderr alone is not forensically sufficient.
+  2. Log file paths must be discoverable without reading source: print at runtime, document in helptext.
+  3. Logger writes must never block or fail the caller; degrade silently on disk errors.
+  4. Daily-named log files keep the file bounded without needing rotation logic.
+
