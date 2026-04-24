@@ -19,7 +19,9 @@ write.
 
 ## Flags
 
-`--yes`/`-y`, `--dry-run`, `--quiet`/`-q`.
+`--yes`/`-y`, `--dry-run`, `--quiet`/`-q`, `--ext` (comma-separated
+extension allow-list, leading dot optional, case-insensitive,
+deduplicated; empty = no filter). v3.97.0+.
 
 ## Exclusions
 
