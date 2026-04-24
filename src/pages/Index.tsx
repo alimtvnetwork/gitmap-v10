@@ -127,6 +127,8 @@ const HomePage = () => {
         />
       </section>
 
+      <CommandBubbles />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
