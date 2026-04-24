@@ -41,24 +41,86 @@ func applySSHKey(name string) {
 // runClone handles the "clone" subcommand.
 func runClone(args []string) {
 	checkHelp("clone", args)
-	source, folderName, targetDir, sshKeyName, safePull, ghDesktop, noReplace, verboseMode := parseCloneFlags(args)
-	if len(source) == 0 {
+	cf := parseCloneFlags(args)
+	if len(cf.Source) == 0 {
 		fmt.Fprintln(os.Stderr, constants.ErrSourceRequired)
 		fmt.Fprintln(os.Stderr, constants.ErrCloneUsage)
 		os.Exit(1)
 	}
-	initCloneVerbose(verboseMode)
+	initCloneVerbose(cf.Verbose)
 	requireOnline()
-	applySSHKey(sshKeyName)
+	applySSHKey(cf.SSHKeyName)
 
-	if isDirectURL(source) {
-		executeDirectClone(source, folderName, ghDesktop, noReplace)
+	// Multi-URL form: any positional arg containing a comma, OR 2+ positional
+	// args where the second one looks like a URL. This catches PowerShell's
+	// silent comma-splitting of unquoted args (root cause of v3.78 regression).
+	if shouldUseMultiClone(cf) {
+		runCloneMulti(cf)
 
 		return
 	}
 
-	source = resolveCloneShorthand(source)
-	executeClone(source, targetDir, safePull, ghDesktop)
+	if isDirectURL(cf.Source) {
+		executeDirectClone(cf.Source, cf.FolderName, cf.GHDesktop, cf.NoReplace)
+
+		return
+	}
+
+	source := resolveCloneShorthand(cf.Source)
+	executeClone(source, cf.TargetDir, cf.SafePull, cf.GHDesktop)
+}
+
+// shouldUseMultiClone returns true when the positional args describe a
+// batch of URLs rather than a single source + optional folder name.
+func shouldUseMultiClone(cf CloneFlags) bool {
+	for _, p := range cf.Positional {
+		if strings.Contains(p, ",") {
+			return true
+		}
+	}
+	if len(cf.Positional) >= 2 && isDirectURL(cf.Positional[0]) && isDirectURL(cf.Positional[1]) {
+		return true
+	}
+
+	return false
+}
+
+// runCloneMulti clones every URL in the flattened positional list, continuing
+// on per-URL failure. Folder name is ignored in this mode (each repo lands in
+// its own auto-derived folder). Exit codes follow mem://features/clone-multi.
+func runCloneMulti(cf CloneFlags) {
+	flat := flattenURLArgs(cf.Positional)
+	urls, invalid := classifyURLs(flat)
+
+	if len(urls) == 0 {
+		fmt.Fprint(os.Stderr, constants.ErrCloneAllInvalid)
+		os.Exit(constants.ExitCloneMultiAllInvalid)
+	}
+
+	fmt.Printf(constants.MsgCloneMultiBegin, len(urls))
+
+	succeeded := 0
+	failed := 0
+
+	for idx, url := range urls {
+		fmt.Printf(constants.MsgCloneMultiItem, idx+1, len(urls), url)
+
+		if err := executeDirectCloneOne(url, "", cf.GHDesktop, cf.NoReplace); err != nil {
+			fmt.Fprintf(os.Stderr, constants.ErrCloneMultiFailedFmt, idx+1, len(urls), url, err)
+			failed++
+
+			continue
+		}
+		succeeded++
+	}
+
+	failed += len(invalid)
+
+	fmt.Printf(constants.MsgCloneSummaryMultiFmt, succeeded, failed, len(urls)+len(invalid))
+
+	if failed > 0 {
+		os.Exit(constants.ExitCloneMultiPartialFail)
+	}
 }
 
 // isDirectURL returns true when source is a git URL (not a file path).
