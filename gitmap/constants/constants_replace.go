@@ -7,8 +7,15 @@ const (
 	ReplaceFlagDryRun  = "dry-run"
 	ReplaceFlagQuiet   = "quiet"
 	ReplaceFlagQuietS  = "q"
+	ReplaceFlagExt     = "ext"
 	ReplaceSubcmdAudit = "--audit"
 	ReplaceSubcmdAll   = "all"
+)
+
+// Replace --ext flag description and value separator.
+const (
+	FlagDescReplaceExt = "Comma-separated extension allow-list (e.g. \".go,.md\"). Leading dot optional."
+	ReplaceExtSep      = ","
 )
 
 // Replace command messages and errors. All user-facing text lives here

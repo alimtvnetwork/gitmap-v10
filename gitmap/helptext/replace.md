@@ -23,6 +23,7 @@ gitmap replace all                  # bump v1..v(K-1) → vK
 | `--yes` `-y` | Skip the y/N confirmation prompt                  |
 | `--dry-run`  | Print summary only, never write                   |
 | `--quiet` `-q` | Suppress per-file diff lines                    |
+| `--ext`      | Comma-separated extension allow-list (e.g. `.go,.md`). Leading dot optional. |
 
 ## Examples
 

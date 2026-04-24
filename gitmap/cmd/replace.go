@@ -29,7 +29,7 @@ func dispatchReplaceMode(mode replaceMode, positional []string, opts replaceOpts
 	case replaceModeLiteral:
 		runReplaceLiteral(positional[0], positional[1], opts)
 	case replaceModeAudit:
-		runReplaceAudit()
+		runReplaceAudit(opts)
 	case replaceModeAll:
 		runReplaceVersion(0, opts, true)
 	case replaceModeVersionN:

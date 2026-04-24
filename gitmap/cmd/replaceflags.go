@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"flag"
+	"strings"
 
 	"github.com/alimtvnetwork/gitmap-v7/gitmap/constants"
 )
@@ -14,6 +15,7 @@ type replaceOpts struct {
 	dryRun bool
 	quiet  bool
 	audit  bool
+	exts   []string // normalized: lowercase, leading dot. Empty = no filter.
 }
 
 // parseReplaceFlags consumes flag tokens (in any position) and returns
@@ -30,6 +32,7 @@ func parseReplaceFlags(args []string) (replaceOpts, []string, error) {
 	dry := fs.Bool(constants.ReplaceFlagDryRun, false, constants.FlagDescDryRun)
 	quiet := fs.Bool(constants.ReplaceFlagQuiet, false, "Suppress per-file diff lines")
 	quietShort := fs.Bool(constants.ReplaceFlagQuietS, false, "Alias for --quiet")
+	ext := fs.String(constants.ReplaceFlagExt, "", constants.FlagDescReplaceExt)
 
 	flags, positional := splitReplaceFlagsAndArgs(rest)
 	if err := fs.Parse(flags); err != nil {
@@ -39,6 +42,7 @@ func parseReplaceFlags(args []string) (replaceOpts, []string, error) {
 	opts.yes = *yes || *yesShort
 	opts.dryRun = *dry
 	opts.quiet = *quiet || *quietShort
+	opts.exts = normalizeExtList(*ext)
 
 	return opts, positional, nil
 }
@@ -60,16 +64,35 @@ func stripAuditToken(args []string) (replaceOpts, []string) {
 // splitReplaceFlagsAndArgs partitions args so flag.Parse only sees
 // flag-like tokens. Anything else (including `-N` and `all`) is a
 // positional. We treat tokens beginning with `--` or `-X`/`-XX`
-// (letters) as flags.
+// (letters) as flags. A flag's value (`--ext .go,.md`) sticks to its
+// flag token via the previous-token lookback.
 func splitReplaceFlagsAndArgs(args []string) (flags, positional []string) {
+	expectValue := false
 	for _, a := range args {
+		if expectValue {
+			flags = append(flags, a)
+			expectValue = false
+			continue
+		}
 		if isReplaceFlag(a) {
 			flags = append(flags, a)
-		} else {
-			positional = append(positional, a)
+			expectValue = needsValue(a)
+			continue
 		}
+		positional = append(positional, a)
 	}
 	return
+}
+
+// needsValue reports whether a flag token consumes the next arg as its
+// value. Boolean replace flags do not; --ext does. We don't need to
+// handle `--ext=.go,.md` because flag.Parse splits that itself.
+func needsValue(token string) bool {
+	if strings.Contains(token, "=") {
+		return false
+	}
+	name := strings.TrimLeft(token, "-")
+	return name == constants.ReplaceFlagExt
 }
 
 // isReplaceFlag returns true for `--xxx`, `-y`, `-q`. It deliberately
@@ -81,7 +104,41 @@ func isReplaceFlag(s string) bool {
 	if s[1] == '-' {
 		return true
 	}
-	// single-dash: a flag iff the next char is a letter.
 	c := s[1]
 	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
+}
+
+// normalizeExtList parses the --ext value into a deduplicated list of
+// lowercase extensions with leading dots. Empty input returns nil so
+// the walker can short-circuit the "no filter" case.
+func normalizeExtList(raw string) []string {
+	if raw == "" {
+		return nil
+	}
+	seen := make(map[string]struct{}, 4)
+	out := make([]string, 0, 4)
+	for _, piece := range strings.Split(raw, constants.ReplaceExtSep) {
+		ext := normalizeOneExt(piece)
+		if ext == "" {
+			continue
+		}
+		if _, dup := seen[ext]; dup {
+			continue
+		}
+		seen[ext] = struct{}{}
+		out = append(out, ext)
+	}
+	return out
+}
+
+// normalizeOneExt trims spaces, lowercases, and ensures the leading dot.
+func normalizeOneExt(piece string) string {
+	piece = strings.ToLower(strings.TrimSpace(piece))
+	if piece == "" || piece == "." {
+		return ""
+	}
+	if piece[0] != '.' {
+		piece = "." + piece
+	}
+	return piece
 }

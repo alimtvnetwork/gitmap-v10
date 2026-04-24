@@ -14,7 +14,7 @@ func runReplaceLiteral(oldS, newS string, opts replaceOpts) {
 		os.Exit(1)
 	}
 	root := repoRoot()
-	files := loadRepoFiles(root)
+	files := loadRepoFiles(root, opts.exts)
 
 	pair := replacePair{old: oldS, new: newS}
 	hits, total := scanReplacements(files, []replacePair{pair})
@@ -40,7 +40,7 @@ func runReplaceVersion(n int, opts replaceOpts, isAll bool) {
 		return
 	}
 	root := repoRoot()
-	files := loadRepoFiles(root)
+	files := loadRepoFiles(root, opts.exts)
 
 	hits, total := scanVersionTargets(files, base, k, targets, opts.quiet)
 	fmt.Printf(constants.MsgReplaceSummary, len(hits), total)
@@ -72,8 +72,9 @@ func scanVersionTargets(
 }
 
 // loadRepoFiles wraps walkRepoFiles with the standardized error exit.
-func loadRepoFiles(root string) []string {
-	files, err := walkRepoFiles(root)
+// The exts allow-list comes from --ext (nil = include every text file).
+func loadRepoFiles(root string, exts []string) []string {
+	files, err := walkRepoFiles(root, exts)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, constants.ErrReplaceWalk, err)
 		os.Exit(2)

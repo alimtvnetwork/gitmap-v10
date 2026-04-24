@@ -59,7 +59,7 @@ func TestWalkRepoFilesSkipsExclusionsAndBinaries(t *testing.T) {
 	)
 	mustWriteFile(t, filepath.Join(root, "image.png"), []byte("PNG\x00\x01\x02binary"))
 
-	got, err := walkRepoFiles(root)
+	got, err := walkRepoFiles(root, nil)
 	if err != nil {
 		t.Fatalf("walkRepoFiles: %v", err)
 	}
