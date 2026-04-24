@@ -41,6 +41,10 @@ func runAs(args []string) {
 	rec := buildSingleRepoRecord(root)
 	upsertSingleRepo(rec)
 	registerAlias(aliasName, rec, force)
+
+	// Shell handoff: cd the parent shell to the alias root if invoked
+	// via the wrapper function (e.g. `gitmap as foo` from elsewhere).
+	WriteShellHandoff(root)
 }
 
 // parseAsArgs extracts the optional alias-name positional and --force flag.
