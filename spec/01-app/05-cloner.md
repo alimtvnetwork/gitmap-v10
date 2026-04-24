@@ -26,6 +26,25 @@ repository directly from a Git URL.
 4. Upsert the repo record into the database.
 5. Prompt to register with GitHub Desktop.
 
+## Audit Mode
+
+When `--audit` is passed, the cloner runs read-only:
+
+1. Parse the source manifest as it would for a real clone run.
+2. For each record, compute the exact `git clone` (or `git pull`) command
+   that would be invoked, using the same branch-selection strategy as
+   the live path (`pickCloneStrategy`).
+3. Stat the destination to classify each record as one of:
+   - `clone` (`+`) — target path does not exist yet
+   - `pull` (`~`) — target is a git repository
+   - `cached` (`=`) — clone-cache fingerprint matches local HEAD
+   - `conflict` (`?`) — target exists but is not a git repo
+   - `invalid` (`!`) — record has no `HTTPSUrl` / `SSHUrl`
+4. Print a diff-style report to stdout and exit 0. Never invoke git,
+   never write outside stdout, never touch the network.
+
+Audit refuses direct-URL invocations (it only operates on manifests).
+
 ## Error Handling
 
 - If a clone fails (network, auth, etc.), log the error and continue.
