@@ -1,6 +1,6 @@
 # Plan 05: Templates Polish — More Languages, `init`, `diff`
 
-Spec: TBD (`spec/01-app/110-templates-polish.md` — to be drafted in Phase 0)
+Spec: `spec/01-app/110-templates-polish.md` ✅ (v3.108.0)
 Memory: `mem://features/templates-ignore-attributes` (extend), new `mem://features/templates-init-diff`
 Builds on: Plan 04 (templates infrastructure, merge engine, pretty renderer)
 
