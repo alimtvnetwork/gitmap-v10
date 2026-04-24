@@ -11,7 +11,8 @@ import (
 // runReplaceAudit implements `gitmap replace --audit`. It scans every
 // eligible file for any older `<base>-vT` or `<base>/vT` reference and
 // prints `path:line: matched-text` per occurrence. Never writes.
-func runReplaceAudit() {
+// Honors --ext to restrict the scan surface.
+func runReplaceAudit(opts replaceOpts) {
 	base, k := detectVersion()
 	targets := versionTargets(k, 0)
 	if len(targets) == 0 {
@@ -19,7 +20,7 @@ func runReplaceAudit() {
 		return
 	}
 	root := repoRoot()
-	files := loadRepoFiles(root)
+	files := loadRepoFiles(root, opts.exts)
 
 	needles := buildAuditNeedles(base, targets)
 	totalHits := scanAudit(files, needles)
