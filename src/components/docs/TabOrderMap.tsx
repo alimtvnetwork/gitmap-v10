@@ -293,30 +293,48 @@ const TabOrderMap = () => {
                         {group.section}
                       </div>
                       <ol className="space-y-1.5 list-none p-0 m-0">
-                        {group.items.map((e) => (
-                          <li
-                            key={e.step}
-                            className="flex items-center gap-3 rounded-md border border-border bg-card/60 px-3 py-2"
-                          >
-                            <span
-                              aria-hidden="true"
-                              className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-mono font-bold text-primary-foreground shadow-sm"
+                        {group.items.map((e) => {
+                          const isActive = focusedStep === e.step;
+                          return (
+                            <li
+                              key={e.step}
+                              aria-current={isActive ? "true" : undefined}
+                              className={[
+                                "flex items-center gap-3 rounded-md border px-3 py-2 transition-colors",
+                                isActive
+                                  ? "border-primary bg-primary/10 ring-2 ring-primary/40 shadow-[0_0_0_3px_hsl(var(--primary)/0.15)]"
+                                  : "border-border bg-card/60",
+                              ].join(" ")}
                             >
-                              {e.step}
-                            </span>
-                            <div className="min-w-0 flex-1">
-                              <div className="font-sans text-sm text-foreground truncate">
-                                {e.label}
-                                {e.isSelf && (
-                                  <span className="ml-2 rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
-                                    self
-                                  </span>
-                                )}
+                              <span
+                                aria-hidden="true"
+                                className={[
+                                  "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-mono font-bold shadow-sm",
+                                  isActive
+                                    ? "bg-primary text-primary-foreground ring-2 ring-primary/50 ring-offset-1 ring-offset-card scale-110"
+                                    : "bg-primary text-primary-foreground",
+                                ].join(" ")}
+                              >
+                                {e.step}
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <div className="font-sans text-sm text-foreground truncate">
+                                  {e.label}
+                                  {e.isSelf && (
+                                    <span className="ml-2 rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+                                      self
+                                    </span>
+                                  )}
+                                  {isActive && (
+                                    <span className="ml-2 rounded bg-primary/20 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-primary">
+                                      focused
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="font-mono text-[11px] text-muted-foreground">
+                                  &lt;{e.tag}&gt; · tabindex={e.tabIndex}
+                                </div>
                               </div>
-                              <div className="font-mono text-[11px] text-muted-foreground">
-                                &lt;{e.tag}&gt; · tabindex={e.tabIndex}
-                              </div>
-                            </div>
                           </li>
                         ))}
                       </ol>
