@@ -537,19 +537,35 @@
     overflow: hidden;
     isolation: isolate;
     transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1),
-                box-shadow 1s cubic-bezier(0.16, 1, 0.3, 1),
                 border-color 1s cubic-bezier(0.16, 1, 0.3, 1),
                 background-color 1s cubic-bezier(0.16, 1, 0.3, 1),
                 color 1s cubic-bezier(0.16, 1, 0.3, 1),
                 filter 1s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Outline + focus-ring box-shadow are intentionally NOT in the
+       transition list above — keyboard focus must paint instantly. */
   }
   /* Strong, motion-independent focus ring for keyboard navigation.
      Uses outline (not box-shadow) so it stays crisp on rounded pills,
-     and a contrasting offset color so it reads on any surface. */
+     and a contrasting offset color so it reads on any surface.
+     The ring appears instantly because outline / box-shadow are excluded
+     from the .btn-slide transition list, and we belt-and-braces it here
+     by zeroing transition on outline-* and box-shadow for the focused
+     state. We also suppress the hover-lift translate while keyboard
+     focus is active so the ring doesn't shift mid-paint. */
   .btn-slide:focus-visible {
     outline: 3px solid hsl(var(--ring));
     outline-offset: 3px;
     box-shadow: 0 0 0 1px hsl(var(--background));
+    transition-property: transform, border-color, background-color, color, filter;
+  }
+  .btn-slide:focus-visible:hover {
+    transform: none;
+  }
+  .btn-slide:focus-visible::before {
+    /* Hide the slide-shine sweep while focused so it doesn't draw
+       attention away from the focus ring. */
+    opacity: 0;
+    transition: none;
   }
   .btn-slide::before {
     content: "";
