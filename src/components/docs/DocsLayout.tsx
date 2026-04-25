@@ -34,7 +34,7 @@ const DocsLayout = ({ children }: DocsLayoutProps) => {
                 type="button"
                 role="radio"
                 aria-checked={dark}
-                onClick={() => setDark(true)}
+                onClick={() => setTheme("dark")}
                 className={[
                   "inline-flex items-center gap-1.5 rounded-[3px] px-2 py-0.5 text-[11px] font-sans font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-card",
                   dark
@@ -49,7 +49,7 @@ const DocsLayout = ({ children }: DocsLayoutProps) => {
                 type="button"
                 role="radio"
                 aria-checked={!dark}
-                onClick={() => setDark(false)}
+                onClick={() => setTheme("light")}
                 className={[
                   "inline-flex items-center gap-1.5 rounded-[3px] px-2 py-0.5 text-[11px] font-sans font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-card",
                   !dark
