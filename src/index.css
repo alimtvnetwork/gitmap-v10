@@ -705,66 +705,74 @@
   to { transform: rotate(360deg); }
 }
 
-/* Highlight.js — github-dark inspired token colors */
+/* ─────────────────────────────────────────────────────────────────────────────
+   Highlight.js — VS Code Dark+ token palette (per spec).
+   6-color base:
+     keyword  #C586C0 hsl(300 30% 64%)  — pink/magenta
+     control  #569CD6 hsl(207 61% 59%)  — blue
+     string   #CE9178 hsl(17  47% 64%)  — orange/salmon
+     number   #B5CEA8 hsl(95  38% 73%)  — light green
+     function #DCDCAA hsl(60  29% 77%)  — pale yellow
+     variable #9CDCFE hsl(201 92% 80%)  — light blue
+     comment  #6A9955 hsl(101 29% 47%)  — gray-green
+   ───────────────────────────────────────────────────────────────────────── */
 .hljs {
-  color: hsl(220, 20%, 92%);
+  color: hsl(0, 0%, 80%);              /* #CCCCCC editor text */
 }
 .hljs-keyword,
-.hljs-type,
-.hljs-built_in,
 .hljs-selector-tag {
-  color: hsl(207, 82%, 66%);
+  color: hsl(300, 30%, 64%);           /* keyword pink */
+}
+.hljs-built_in,
+.hljs-type,
+.hljs-literal,
+.hljs-symbol {
+  color: hsl(207, 61%, 59%);           /* control blue */
 }
 .hljs-string,
-.hljs-attr,
-.hljs-property {
-  color: hsl(95, 38%, 62%);
+.hljs-attr {
+  color: hsl(17, 47%, 64%);            /* string orange */
 }
 .hljs-number,
-.hljs-variable,
-.hljs-regexp,
-.hljs-template-variable {
-  color: hsl(29, 54%, 61%);
+.hljs-regexp {
+  color: hsl(95, 38%, 73%);            /* number light green */
 }
 .hljs-comment,
 .hljs-quote {
-  color: hsl(220, 10%, 45%);
+  color: hsl(101, 29%, 47%);           /* comment gray-green */
   font-style: italic;
 }
 .hljs-title,
 .hljs-section,
 .hljs-tag {
-  color: hsl(220, 20%, 85%);
+  color: hsl(0, 0%, 80%);
 }
 .hljs-title.function_,
-.hljs-title.class_ {
-  color: hsl(39, 67%, 69%);
+.hljs-title.class_,
+.hljs-attribute {
+  color: hsl(60, 29%, 77%);            /* function pale yellow */
 }
-.hljs-literal,
-.hljs-symbol {
-  color: hsl(207, 82%, 66%);
+.hljs-variable,
+.hljs-template-variable,
+.hljs-property,
+.hljs-params {
+  color: hsl(201, 92%, 80%);           /* variable light blue */
 }
 .hljs-meta,
 .hljs-meta .hljs-keyword {
-  color: hsl(355, 65%, 65%);
-}
-.hljs-params {
-  color: hsl(220, 20%, 92%);
-}
-.hljs-attribute {
-  color: hsl(39, 67%, 69%);
+  color: hsl(300, 30%, 64%);
 }
 .hljs-selector-class,
 .hljs-selector-id {
-  color: hsl(95, 38%, 62%);
+  color: hsl(60, 29%, 77%);
 }
 .hljs-addition {
-  color: hsl(135, 52%, 60%);
-  background: hsl(135, 52%, 60% / 0.1);
+  color: hsl(101, 29%, 60%);
+  background: hsl(101, 29%, 47% / 0.15);
 }
 .hljs-deletion {
   color: hsl(355, 65%, 65%);
-  background: hsl(355, 65%, 65% / 0.1);
+  background: hsl(355, 65%, 65% / 0.12);
 }
 
 /* Code line hover highlight */
