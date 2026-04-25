@@ -65,6 +65,12 @@ const DocsLayout = ({ children }: DocsLayoutProps) => {
                 Light
               </button>
             </div>
+            <span
+              className="ml-2 hidden sm:inline text-[11px] font-mono text-muted-foreground"
+              aria-live="polite"
+            >
+              {dark ? "VS Code Dark+" : "VS Code Light+"}
+            </span>
             <div className="ml-auto mr-3">
               <CommandPalette />
             </div>
