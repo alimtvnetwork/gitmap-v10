@@ -125,10 +125,13 @@ export const getTabOrder = (root: ParentNode = document.body): HTMLElement[] => 
 const TabOrderMap = () => {
   const [open, setOpen] = useState(false);
   const [entries, setEntries] = useState<FocusEntry[]>([]);
+  const [focusedStep, setFocusedStep] = useState<number | null>(null);
   const selfRef = useRef<HTMLElement | null>(null);
+  const elementsRef = useRef<HTMLElement[]>([]);
 
   const refresh = useCallback(() => {
     const els = getTabOrder(document.body);
+    elementsRef.current = els;
     const list: FocusEntry[] = els.map((el, idx) => ({
       step: idx + 1,
       label: labelFor(el),
@@ -138,6 +141,10 @@ const TabOrderMap = () => {
       isSelf: !!selfRef.current && selfRef.current.contains(el),
     }));
     setEntries(list);
+    // Re-resolve focused step against the newly-collected element list.
+    const active = document.activeElement as HTMLElement | null;
+    const idx = active ? els.indexOf(active) : -1;
+    setFocusedStep(idx >= 0 ? idx + 1 : null);
   }, []);
 
   // Recompute on open + on DOM mutations + on resize while open.
@@ -165,6 +172,38 @@ const TabOrderMap = () => {
       window.removeEventListener("resize", schedule);
     };
   }, [open, refresh]);
+
+  // Track focus globally while the panel is open. Uses focusin/focusout
+  // (which bubble, unlike focus/blur) so we catch every change.
+  useEffect(() => {
+    if (!open) return;
+    const onFocusIn = (e: FocusEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) {
+        setFocusedStep(null);
+        return;
+      }
+      const idx = elementsRef.current.indexOf(target);
+      setFocusedStep(idx >= 0 ? idx + 1 : null);
+    };
+    const onFocusOut = () => {
+      // Defer so the next focusin (if any) wins this frame.
+      requestAnimationFrame(() => {
+        const active = document.activeElement as HTMLElement | null;
+        if (!active || active === document.body) {
+          setFocusedStep(null);
+        }
+      });
+    };
+    document.addEventListener("focusin", onFocusIn);
+    document.addEventListener("focusout", onFocusOut);
+    // Seed with whatever currently has focus.
+    onFocusIn({ target: document.activeElement } as unknown as FocusEvent);
+    return () => {
+      document.removeEventListener("focusin", onFocusIn);
+      document.removeEventListener("focusout", onFocusOut);
+    };
+  }, [open]);
 
   // Group entries by section for readability while keeping global numbering.
   const grouped = useMemo(() => {
@@ -223,7 +262,16 @@ const TabOrderMap = () => {
             <div className="mt-4 rounded-lg border border-border bg-muted/20 p-5">
               <p className="mb-4 font-sans text-xs text-muted-foreground">
                 Derived live from the DOM ({entries.length} focusable element
-                {entries.length === 1 ? "" : "s"}). Use{" "}
+                {entries.length === 1 ? "" : "s"}
+                {focusedStep !== null && (
+                  <>
+                    {" · currently focused: "}
+                    <span className="font-mono font-semibold text-primary">
+                      #{focusedStep}
+                    </span>
+                  </>
+                )}
+                ). Use{" "}
                 <kbd className="rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px]">Tab</kbd>{" "}
                 /{" "}
                 <kbd className="rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px]">Shift+Tab</kbd>{" "}
@@ -245,32 +293,51 @@ const TabOrderMap = () => {
                         {group.section}
                       </div>
                       <ol className="space-y-1.5 list-none p-0 m-0">
-                        {group.items.map((e) => (
-                          <li
-                            key={e.step}
-                            className="flex items-center gap-3 rounded-md border border-border bg-card/60 px-3 py-2"
-                          >
-                            <span
-                              aria-hidden="true"
-                              className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-mono font-bold text-primary-foreground shadow-sm"
+                        {group.items.map((e) => {
+                          const isActive = focusedStep === e.step;
+                          return (
+                            <li
+                              key={e.step}
+                              aria-current={isActive ? "true" : undefined}
+                              className={[
+                                "flex items-center gap-3 rounded-md border px-3 py-2 transition-colors",
+                                isActive
+                                  ? "border-primary bg-primary/10 ring-2 ring-primary/40 shadow-[0_0_0_3px_hsl(var(--primary)/0.15)]"
+                                  : "border-border bg-card/60",
+                              ].join(" ")}
                             >
-                              {e.step}
-                            </span>
-                            <div className="min-w-0 flex-1">
-                              <div className="font-sans text-sm text-foreground truncate">
-                                {e.label}
-                                {e.isSelf && (
-                                  <span className="ml-2 rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
-                                    self
-                                  </span>
-                                )}
+                              <span
+                                aria-hidden="true"
+                                className={[
+                                  "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-mono font-bold shadow-sm",
+                                  isActive
+                                    ? "bg-primary text-primary-foreground ring-2 ring-primary/50 ring-offset-1 ring-offset-card scale-110"
+                                    : "bg-primary text-primary-foreground",
+                                ].join(" ")}
+                              >
+                                {e.step}
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <div className="font-sans text-sm text-foreground truncate">
+                                  {e.label}
+                                  {e.isSelf && (
+                                    <span className="ml-2 rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+                                      self
+                                    </span>
+                                  )}
+                                  {isActive && (
+                                    <span className="ml-2 rounded bg-primary/20 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-primary">
+                                      focused
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="font-mono text-[11px] text-muted-foreground">
+                                  &lt;{e.tag}&gt; · tabindex={e.tabIndex}
+                                </div>
                               </div>
-                              <div className="font-mono text-[11px] text-muted-foreground">
-                                &lt;{e.tag}&gt; · tabindex={e.tabIndex}
-                              </div>
-                            </div>
-                          </li>
-                        ))}
+                            </li>
+                          );
+                        })}
                       </ol>
                     </div>
                   ))}
