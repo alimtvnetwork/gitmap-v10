@@ -30,7 +30,7 @@ const CommandBubbles = () => {
         </h2>
         <Link
           to="/commands"
-          className="text-xs font-sans text-muted-foreground hover:text-primary transition-colors"
+          className="rounded-sm text-xs font-sans text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           View all →
         </Link>
@@ -42,6 +42,7 @@ const CommandBubbles = () => {
             key={b.name}
             to="/commands"
             title={b.description}
+            aria-label={`${b.name} — ${b.description}`}
             className="btn-slide btn-slide-ghost group inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-sans text-foreground hover:border-primary/50 hover:bg-secondary"
           >
             <code className="font-mono text-sm text-primary">{b.name}</code>

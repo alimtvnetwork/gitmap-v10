@@ -543,6 +543,14 @@
                 color 1s cubic-bezier(0.16, 1, 0.3, 1),
                 filter 1s cubic-bezier(0.16, 1, 0.3, 1);
   }
+  /* Strong, motion-independent focus ring for keyboard navigation.
+     Uses outline (not box-shadow) so it stays crisp on rounded pills,
+     and a contrasting offset color so it reads on any surface. */
+  .btn-slide:focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 3px;
+    box-shadow: 0 0 0 1px hsl(var(--background));
+  }
   .btn-slide::before {
     content: "";
     position: absolute;
