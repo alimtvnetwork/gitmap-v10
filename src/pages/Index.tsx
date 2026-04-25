@@ -5,6 +5,7 @@ import DocsLayout from "@/components/docs/DocsLayout";
 import FeatureCard from "@/components/docs/FeatureCard";
 import InstallBlock from "@/components/docs/InstallBlock";
 import CommandBubbles from "@/components/docs/CommandBubbles";
+import TabOrderMap from "@/components/docs/TabOrderMap";
 import { VERSION } from "@/constants/index";
 
 const INSTALL_TABS = [
@@ -128,6 +129,8 @@ const HomePage = () => {
       </section>
 
       <CommandBubbles />
+
+      <TabOrderMap />
 
       <script
         type="application/ld+json"
