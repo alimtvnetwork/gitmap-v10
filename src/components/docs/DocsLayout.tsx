@@ -11,7 +11,7 @@ interface DocsLayoutProps {
 }
 
 const DocsLayout = ({ children }: DocsLayoutProps) => {
-  const { isDark, setTheme } = useTheme();
+  const { isDark, isSystem, setTheme } = useTheme();
   const dark = isDark;
 
   return (
@@ -68,6 +68,14 @@ const DocsLayout = ({ children }: DocsLayoutProps) => {
             >
               {dark ? "VS Code Dark+" : "VS Code Light+"}
             </span>
+            {isSystem && (
+              <span
+                className="ml-1.5 hidden sm:inline rounded-sm border border-border bg-card px-1.5 py-0.5 text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground shadow-sm"
+                title="Following OS prefers-color-scheme — pick Dark or Light to override"
+              >
+                System
+              </span>
+            )}
             <CopyPaletteButton />
             <div className="ml-auto mr-3">
               <CommandPalette />
