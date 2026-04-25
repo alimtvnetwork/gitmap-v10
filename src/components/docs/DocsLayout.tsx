@@ -29,15 +29,42 @@ const DocsLayout = ({ children }: DocsLayoutProps) => {
             <span className="ml-2 rounded-sm border border-border bg-card px-2 py-0.5 text-[11px] font-mono text-muted-foreground shadow-sm">
               {VERSION}
             </span>
-            <button
-              type="button"
-              onClick={() => setDark((d) => !d)}
-              aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
-              title={dark ? "Switch to light mode" : "Switch to dark mode"}
-              className="ml-2 inline-flex h-6 w-6 items-center justify-center rounded-sm border border-border bg-card text-muted-foreground transition-colors duration-300 hover:bg-secondary hover:text-foreground"
+            <div
+              role="radiogroup"
+              aria-label="Color theme"
+              className="ml-2 inline-flex items-center rounded-sm border border-border bg-card p-0.5 shadow-sm"
             >
-              {dark ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
-            </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={dark}
+                onClick={() => setDark(true)}
+                className={[
+                  "inline-flex items-center gap-1.5 rounded-[3px] px-2 py-0.5 text-[11px] font-sans font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-card",
+                  dark
+                    ? "bg-secondary text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                ].join(" ")}
+              >
+                <Moon className="h-3 w-3" aria-hidden="true" />
+                Dark
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={!dark}
+                onClick={() => setDark(false)}
+                className={[
+                  "inline-flex items-center gap-1.5 rounded-[3px] px-2 py-0.5 text-[11px] font-sans font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-card",
+                  !dark
+                    ? "bg-secondary text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                ].join(" ")}
+              >
+                <Sun className="h-3 w-3" aria-hidden="true" />
+                Light
+              </button>
+            </div>
             <div className="ml-auto mr-3">
               <CommandPalette />
             </div>
