@@ -38,17 +38,66 @@ const FOCUSABLE_SELECTOR = [
   "[contenteditable]:not([contenteditable='false'])",
 ].join(",");
 
-/** True if the element is rendered (non-zero box) and not aria-hidden. */
+/**
+ * True when the element is rendered AND interactable. Filters out:
+ *   - `disabled` / `aria-hidden` / hidden subtrees
+ *   - zero-size boxes
+ *   - `display:none` / `visibility:hidden` (self or ancestor)
+ *   - `opacity: 0` anywhere in the ancestor chain (Radix overlay pattern)
+ *   - elements covered by another overlay (modal backdrop, popover, etc.)
+ */
 const isVisible = (el: HTMLElement): boolean => {
   if (el.hasAttribute("disabled")) return false;
   if (el.getAttribute("aria-hidden") === "true") return false;
   if (el.closest("[aria-hidden='true']")) return false;
+
   const rects = el.getClientRects();
   if (rects.length === 0) return false;
-  const style = window.getComputedStyle(el);
-  if (style.visibility === "hidden" || style.display === "none") return false;
-  return true;
+
+  // Walk ancestors checking display/visibility/opacity. An ancestor with
+  // `opacity:0` or `visibility:hidden` makes the descendant non-interactable
+  // even though the descendant's own computed style may still report 1.
+  let node: HTMLElement | null = el;
+  while (node && node !== document.body) {
+    const s = window.getComputedStyle(node);
+    if (s.display === "none") return false;
+    if (s.visibility === "hidden" || s.visibility === "collapse") return false;
+    if (parseFloat(s.opacity) === 0) return false;
+    if (s.pointerEvents === "none" && node === el) {
+      // Only block when the element itself opts out; ancestors with
+      // pointer-events:none + a child that re-enables them are valid.
+      return false;
+    }
+    node = node.parentElement;
+  }
+
+  // Overlay/cover detection — sample a few points within the element's
+  // first rect and require at least one to hit the element (or a
+  // descendant of it). If every sample resolves to an unrelated node
+  // higher in the paint stack, treat it as covered.
+  const r = rects[0];
+  if (r.width < 1 || r.height < 1) return false;
+  const samples: [number, number][] = [
+    [r.left + r.width / 2, r.top + r.height / 2], // center
+    [r.left + 2, r.top + 2],                       // top-left
+    [r.right - 2, r.bottom - 2],                   // bottom-right
+  ];
+  const inViewport = samples.some(
+    ([x, y]) => x >= 0 && y >= 0 && x <= window.innerWidth && y <= window.innerHeight,
+  );
+  if (!inViewport) {
+    // Off-screen elements (e.g. below the fold) are still focusable; skip
+    // the overlay test rather than wrongly excluding them.
+    return true;
+  }
+  const isHitOrDescendant = samples.some(([x, y]) => {
+    if (x < 0 || y < 0 || x > window.innerWidth || y > window.innerHeight) return false;
+    const top = document.elementFromPoint(x, y);
+    return !!top && (top === el || el.contains(top));
+  });
+  return isHitOrDescendant;
 };
+
 
 /** Resolve a space-separated id-list reference (aria-labelledby / aria-describedby). */
 const resolveIdRefs = (ids: string | null): string => {
