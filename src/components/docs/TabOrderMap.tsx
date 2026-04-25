@@ -14,6 +14,8 @@ import { motion, AnimatePresence } from "framer-motion";
 interface FocusEntry {
   step: number;
   label: string;
+  /** Optional secondary text — usually from aria-describedby / aria-description. */
+  sublabel?: string;
   tag: string;
   tabIndex: number;
   section: string;
