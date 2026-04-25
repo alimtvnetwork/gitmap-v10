@@ -5,107 +5,120 @@
 @tailwind utilities;
 
 @layer base {
+  /* ───── VS Code Light+ inspired palette ─────
+     Editor bg     #FFFFFF ≈ hsl(0 0% 100%)
+     Sidebar bg    #F8F8F8 ≈ hsl(0 0% 97%)
+     Title bar     #DDDDDD ≈ hsl(0 0% 87%)
+     Status bar    #0078D4 (kept for code accents only — primary stays amber)
+     Borders       #E5E5E5 ≈ hsl(0 0% 90%)
+     Text          #3B3B3B ≈ hsl(0 0% 23%)
+     Muted text    #6C6C6C ≈ hsl(0 0% 42%)
+  */
   :root {
-    --background: 220 14% 96%;
-    --foreground: 222 16% 18%;
+    --background: 0 0% 100%;          /* editor bg */
+    --foreground: 0 0% 23%;            /* primary text */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 16% 18%;
+    --card: 0 0% 97%;                  /* sidebar / surface tier */
+    --card-foreground: 0 0% 23%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 16% 18%;
+    --popover-foreground: 0 0% 23%;
 
-    --primary: 38 92% 50%;
-    --primary-foreground: 222 16% 12%;
+    --primary: 38 92% 50%;             /* amber — kept per design decision */
+    --primary-foreground: 0 0% 12%;
 
-    --secondary: 220 13% 91%;
-    --secondary-foreground: 222 16% 18%;
+    --secondary: 0 0% 93%;             /* hover row */
+    --secondary-foreground: 0 0% 23%;
 
-    --muted: 220 13% 92%;
-    --muted-foreground: 220 9% 42%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 42%;
 
-    --accent: 220 13% 91%;
-    --accent-foreground: 222 16% 18%;
+    --accent: 0 0% 92%;                /* selected row */
+    --accent-foreground: 0 0% 23%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 11% 84%;
-    --input: 220 11% 84%;
+    --border: 0 0% 90%;                /* dividers */
+    --input: 0 0% 90%;
     --ring: 38 92% 50%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 220 15% 94%;
-    --sidebar-foreground: 222 14% 24%;
+    --sidebar-background: 0 0% 97%;
+    --sidebar-foreground: 0 0% 23%;
     --sidebar-primary: 38 92% 45%;
-    --sidebar-primary-foreground: 222 16% 12%;
-    --sidebar-accent: 220 13% 90%;
-    --sidebar-accent-foreground: 222 16% 18%;
-    --sidebar-border: 220 12% 84%;
+    --sidebar-primary-foreground: 0 0% 12%;
+    --sidebar-accent: 0 0% 92%;
+    --sidebar-accent-foreground: 0 0% 23%;
+    --sidebar-border: 0 0% 90%;
     --sidebar-ring: 38 92% 50%;
 
-    --terminal: 222 18% 12%;
+    --terminal: 0 0% 12%;              /* terminal stays dark per spec */
     --terminal-foreground: 0 0% 92%;
-    --code-bg: 220 16% 93%;
+    --code-bg: 0 0% 95%;
 
-    /* Semantic success accent — used for install CTAs in hero card.
-       Light mode is a slightly deeper emerald for contrast on white. */
+    /* Semantic success accent — used for install CTAs in hero card. */
     --accent-success: 158 64% 38%;
     --accent-success-bg: 158 64% 38% / 0.12;
     --accent-success-border: 158 64% 38% / 0.5;
   }
 
-  /* ───── VS Code Dark+ inspired palette ─────
-     Editor bg #1e1e1e ≈ hsl(0 0% 12%)
-     Sidebar  #252526 ≈ hsl(240 2% 15%)
-     Title    #333333 ≈ hsl(0 0% 20%)
-     Text     #d4d4d4 ≈ hsl(0 0% 83%)
-     Accent   #569cd6 ≈ hsl(207 61% 59%)
-     Hover    #2a2d2e ≈ hsl(210 6% 17%)
-     Borders  #3c3c3c ≈ hsl(0 0% 24%)
+  /* ───── VS Code Dark+ palette (per spec) ─────
+     3-tier surface system:
+       Activity bar  #181818 ≈ hsl(0 0% 9%)
+       Sidebar       #181818 ≈ hsl(0 0% 9%)
+       Editor        #1E1E1E ≈ hsl(0 0% 12%)   ← --background
+     Title bar       #1F1F1F ≈ hsl(0 0% 12%)
+     Dividers        #2B2B2B ≈ hsl(0 0% 17%)   ← --border
+     Hover row       #2A2D2E ≈ hsl(210 6% 17%)
+     Selected row    #37373D ≈ hsl(240 5% 23%)
+     Primary text    #CCCCCC ≈ hsl(0 0% 80%)   ← --foreground
+     Muted text      #858585 ≈ hsl(0 0% 52%)
+     Find match box  #623315 ≈ hsl(22 64% 23%)
+     VS Code blue    #0078D4 ≈ hsl(207 100% 42%) — kept on side accents only
   */
   .dark {
-    --background: 0 0% 12%;
-    --foreground: 0 0% 86%;
+    --background: 0 0% 12%;            /* editor */
+    --foreground: 0 0% 80%;            /* primary text #CCCCCC */
 
-    --card: 240 2% 15%;
-    --card-foreground: 0 0% 86%;
+    --card: 0 0% 9%;                   /* sidebar / activity bar */
+    --card-foreground: 0 0% 80%;
 
-    --popover: 240 2% 15%;
-    --popover-foreground: 0 0% 86%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 80%;
 
-    --primary: 41 96% 56%;
-    --primary-foreground: 222 16% 10%;
+    --primary: 41 96% 56%;             /* amber — kept */
+    --primary-foreground: 0 0% 8%;
 
-    --secondary: 0 0% 17%;
-    --secondary-foreground: 0 0% 86%;
+    --secondary: 210 6% 17%;           /* hover row #2A2D2E */
+    --secondary-foreground: 0 0% 80%;
 
-    --muted: 0 0% 17%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 0 0% 12%;                 /* matches editor; subtle panels */
+    --muted-foreground: 0 0% 52%;      /* #858585 */
 
-    --accent: 210 6% 17%;
+    --accent: 240 5% 23%;              /* selected row #37373D */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 22%;
-    --input: 0 0% 22%;
+    --border: 0 0% 17%;                /* divider #2B2B2B */
+    --input: 0 0% 17%;
     --ring: 41 96% 56%;
 
-    --sidebar-background: 240 2% 15%;
+    --sidebar-background: 0 0% 9%;
     --sidebar-foreground: 0 0% 80%;
     --sidebar-primary: 41 96% 56%;
-    --sidebar-primary-foreground: 222 16% 10%;
+    --sidebar-primary-foreground: 0 0% 8%;
     --sidebar-accent: 210 6% 17%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 0 0% 22%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 17%;
     --sidebar-ring: 41 96% 56%;
 
-    --terminal: 0 0% 10%;
-    --terminal-foreground: 0 0% 88%;
-    --code-bg: 0 0% 14%;
+    --terminal: 0 0% 9%;               /* terminal panel #181818 */
+    --terminal-foreground: 0 0% 80%;
+    --code-bg: 0 0% 12%;
 
     /* Semantic success accent — brighter emerald for dark surfaces. */
     --accent-success: 152 76% 60%;
@@ -692,66 +705,74 @@
   to { transform: rotate(360deg); }
 }
 
-/* Highlight.js — github-dark inspired token colors */
+/* ─────────────────────────────────────────────────────────────────────────────
+   Highlight.js — VS Code Dark+ token palette (per spec).
+   6-color base:
+     keyword  #C586C0 hsl(300 30% 64%)  — pink/magenta
+     control  #569CD6 hsl(207 61% 59%)  — blue
+     string   #CE9178 hsl(17  47% 64%)  — orange/salmon
+     number   #B5CEA8 hsl(95  38% 73%)  — light green
+     function #DCDCAA hsl(60  29% 77%)  — pale yellow
+     variable #9CDCFE hsl(201 92% 80%)  — light blue
+     comment  #6A9955 hsl(101 29% 47%)  — gray-green
+   ───────────────────────────────────────────────────────────────────────── */
 .hljs {
-  color: hsl(220, 20%, 92%);
+  color: hsl(0, 0%, 80%);              /* #CCCCCC editor text */
 }
 .hljs-keyword,
-.hljs-type,
-.hljs-built_in,
 .hljs-selector-tag {
-  color: hsl(207, 82%, 66%);
+  color: hsl(300, 30%, 64%);           /* keyword pink */
+}
+.hljs-built_in,
+.hljs-type,
+.hljs-literal,
+.hljs-symbol {
+  color: hsl(207, 61%, 59%);           /* control blue */
 }
 .hljs-string,
-.hljs-attr,
-.hljs-property {
-  color: hsl(95, 38%, 62%);
+.hljs-attr {
+  color: hsl(17, 47%, 64%);            /* string orange */
 }
 .hljs-number,
-.hljs-variable,
-.hljs-regexp,
-.hljs-template-variable {
-  color: hsl(29, 54%, 61%);
+.hljs-regexp {
+  color: hsl(95, 38%, 73%);            /* number light green */
 }
 .hljs-comment,
 .hljs-quote {
-  color: hsl(220, 10%, 45%);
+  color: hsl(101, 29%, 47%);           /* comment gray-green */
   font-style: italic;
 }
 .hljs-title,
 .hljs-section,
 .hljs-tag {
-  color: hsl(220, 20%, 85%);
+  color: hsl(0, 0%, 80%);
 }
 .hljs-title.function_,
-.hljs-title.class_ {
-  color: hsl(39, 67%, 69%);
+.hljs-title.class_,
+.hljs-attribute {
+  color: hsl(60, 29%, 77%);            /* function pale yellow */
 }
-.hljs-literal,
-.hljs-symbol {
-  color: hsl(207, 82%, 66%);
+.hljs-variable,
+.hljs-template-variable,
+.hljs-property,
+.hljs-params {
+  color: hsl(201, 92%, 80%);           /* variable light blue */
 }
 .hljs-meta,
 .hljs-meta .hljs-keyword {
-  color: hsl(355, 65%, 65%);
-}
-.hljs-params {
-  color: hsl(220, 20%, 92%);
-}
-.hljs-attribute {
-  color: hsl(39, 67%, 69%);
+  color: hsl(300, 30%, 64%);
 }
 .hljs-selector-class,
 .hljs-selector-id {
-  color: hsl(95, 38%, 62%);
+  color: hsl(60, 29%, 77%);
 }
 .hljs-addition {
-  color: hsl(135, 52%, 60%);
-  background: hsl(135, 52%, 60% / 0.1);
+  color: hsl(101, 29%, 60%);
+  background: hsl(101, 29%, 47% / 0.15);
 }
 .hljs-deletion {
   color: hsl(355, 65%, 65%);
-  background: hsl(355, 65%, 65% / 0.1);
+  background: hsl(355, 65%, 65% / 0.12);
 }
 
 /* Code line hover highlight */
