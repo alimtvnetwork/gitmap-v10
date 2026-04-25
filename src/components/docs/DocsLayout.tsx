@@ -2,6 +2,7 @@ import { Sun, Moon } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { DocsSidebar } from "@/components/docs/DocsSidebar";
 import CommandPalette from "@/components/docs/CommandPalette";
+import CopyPaletteButton from "@/components/docs/CopyPaletteButton";
 import { VERSION } from "@/constants/index";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -67,6 +68,7 @@ const DocsLayout = ({ children }: DocsLayoutProps) => {
             >
               {dark ? "VS Code Dark+" : "VS Code Light+"}
             </span>
+            <CopyPaletteButton />
             <div className="ml-auto mr-3">
               <CommandPalette />
             </div>
