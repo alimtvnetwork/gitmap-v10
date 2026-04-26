@@ -119,8 +119,15 @@ const (
 	// process exit).
 	ScanProbeFlagNoWait = "no-probe-wait"
 	// ScanProbeFlagConcurrency sets the worker-pool size for the
-	// background probe runner.
+	// background probe runner. Deprecated alias for ScanProbeFlagProbeWorkers.
 	ScanProbeFlagConcurrency = "probe-concurrency"
+	// ScanProbeFlagProbeWorkers is the unified spelling shared with
+	// `gitmap probe --probe-workers`. Same semantics as
+	// ScanProbeFlagConcurrency; either is accepted.
+	ScanProbeFlagProbeWorkers = "probe-workers"
+	// ScanProbeFlagProbeDepth controls the `git clone --depth N`
+	// passed to the shallow-clone fallback (v3.135.0+).
+	ScanProbeFlagProbeDepth = "probe-depth"
 
 	// ScanProbeDefaultConcurrency caps the background pool. Three
 	// workers is the documented sweet spot: parallel enough to
@@ -129,15 +136,22 @@ const (
 	ScanProbeDefaultConcurrency = 3
 	// ScanProbeAutoTriggerCeiling is the repo-count threshold under
 	// which background probing fires automatically. Above it the
-	// user must opt in by passing --probe-concurrency explicitly.
+	// user must opt in by passing --probe-workers explicitly.
 	ScanProbeAutoTriggerCeiling = 50
 
-	// FlagDescScanProbeDisable, FlagDescScanProbeNoWait, and
-	// FlagDescScanProbeConcurrency are the help strings shown by
+	// FlagDescScanProbeDisable, FlagDescScanProbeNoWait,
+	// FlagDescScanProbeConcurrency, FlagDescScanProbeProbeWorkers, and
+	// FlagDescScanProbeProbeDepth are the help strings shown by
 	// `gitmap help scan`.
-	FlagDescScanProbeDisable     = "Skip the background version probe entirely (offline / air-gapped runs)"
-	FlagDescScanProbeNoWait      = "Return as soon as scan finishes; let probes keep running in the background"
-	FlagDescScanProbeConcurrency = "Worker count for the background probe pool (default 3, 0 = disable)"
+	FlagDescScanProbeDisable      = "Skip the background version probe entirely (offline / air-gapped runs)"
+	FlagDescScanProbeNoWait       = "Return as soon as scan finishes; let probes keep running in the background"
+	FlagDescScanProbeConcurrency  = "(deprecated, use --probe-workers) Worker count for the background probe pool"
+	FlagDescScanProbeProbeWorkers = "Worker count for the background probe pool (default 3, 0 = disable)"
+	FlagDescScanProbeProbeDepth   = "Shallow-clone depth used by the probe fallback (default 1)"
+
+	// MsgScanProbeConcurrencyAlias warns when the deprecated
+	// --probe-concurrency spelling is used at the scan command line.
+	MsgScanProbeConcurrencyAlias = "  · --probe-concurrency is deprecated; use --probe-workers instead\n"
 )
 
 // Background probe runtime messages.
