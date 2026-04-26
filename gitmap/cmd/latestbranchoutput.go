@@ -108,61 +108,7 @@ func buildTopItems(items []gitutil.RemoteBranchInfo, top int) []latestBranchTopI
 	return topItems
 }
 
-// printLatestCSV outputs the latest branch result as CSV to stdout.
-func printLatestCSV(items []gitutil.RemoteBranchInfo, remote string, top int) {
-	if err := encodeLatestBranchCSV(os.Stdout, items, remote, top); err != nil {
-		fmt.Fprintf(os.Stderr, "  ✗ Failed to write CSV: %v\n", err)
-	}
-}
-
-// encodeLatestBranchCSV writes the CSV to w. CRLF line endings are
-// forced for cross-platform byte-identical output (RFC 4180); pinned
-// by gitmap/cmd/csvcrlf_contract_test.go. Split out from
-// printLatestCSV so contract tests can capture bytes into a buffer.
-func encodeLatestBranchCSV(
-	w io.Writer, items []gitutil.RemoteBranchInfo, remote string, top int,
-) error {
-	count := resolveTopCount(top, len(items))
-	cw := csv.NewWriter(w)
-	cw.UseCRLF = true
-	if err := cw.Write(constants.LatestBranchCSVHeaders); err != nil {
-
-		return err
-	}
-	for _, item := range items[:count] {
-		writeCSVRow(cw, item, remote)
-	}
-	cw.Flush()
-
-	return cw.Error()
-}
-
-// resolveTopCount determines how many items to display.
-func resolveTopCount(top, total int) int {
-	count := 1
-	if top > 0 {
-		count = top
-	}
-	if count > total {
-		count = total
-	}
-
-	return count
-}
-
-// writeCSVRow writes a single CSV row for a branch item.
-func writeCSVRow(w *csv.Writer, item gitutil.RemoteBranchInfo, remote string) {
-	if err := w.Write([]string{
-		gitutil.StripRemotePrefix(item.RemoteRef),
-		remote,
-		gitutil.TruncSha(item.Sha),
-		gitutil.FormatDisplayDate(item.CommitDate),
-		item.Subject,
-		item.RemoteRef,
-	}); err != nil {
-		fmt.Fprintf(os.Stderr, "  ✗ Failed to write CSV row: %v\n", err)
-	}
-}
+// CSV output lives in latestbranchcsv.go (file-size budget split).
 
 // printLatestTerminal outputs the latest branch result as text.
 func printLatestTerminal(result latestBranchResult, items []gitutil.RemoteBranchInfo, top int) {
