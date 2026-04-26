@@ -560,6 +560,98 @@ A `depth` value equal to the cap (`4` under defaults) in your CSV is
 the diagnostic signal: those rows sit on the boundary and are the
 candidates to investigate when something seems missing.
 
+#### CSV column reference — the 10 columns, in order
+
+The CSV header is **stable across releases** (locked by
+[`gitmap/formatter/csv_header_contract_test.go`](gitmap/formatter/csv_header_contract_test.go))
+and produced by [`ScanRecord` in `gitmap/model/record.go`](gitmap/model/record.go).
+Line endings are always `\r\n` (RFC 4180), the separator is a comma,
+and fields containing commas, quotes, or newlines are double-quoted
+per RFC 4180 — never escaped with backslashes.
+
+```csv
+repoName,httpsUrl,sshUrl,branch,branchSource,relativePath,absolutePath,cloneInstruction,notes,depth
+```
+
+| # | Column | Type | Source / meaning |
+|---|---|---|---|
+| 1 | `repoName` | string | Basename of the repo's working tree directory. For `~/code/alpha/.git/` this is `alpha`. |
+| 2 | `httpsUrl` | string | `https://…` form of `origin`. Empty if the repo has no `origin` remote. |
+| 3 | `sshUrl` | string | `git@host:owner/repo.git` form of `origin`. Empty if no `origin` remote. |
+| 4 | `branch` | string | The branch we'd clone / check out: the remote `HEAD` target if known, otherwise the local `HEAD` branch, otherwise empty. |
+| 5 | `branchSource` | enum | How column 4 was determined: `remote-head` (preferred), `head` (fallback to local `HEAD`), or empty when neither resolved. |
+| 6 | `relativePath` | string | Path from the scan root to the repo. `team-a/service-x` for a repo at depth 2. |
+| 7 | `absolutePath` | string | OS-absolute path. On Windows, drive-letter form (`C:\…`); separators are the host's native form. |
+| 8 | `cloneInstruction` | string | Ready-to-paste `git clone -b <branch> <url> <relativePath>` command. The `-b <branch>` segment is included when columns 4–5 resolved a branch; the URL form follows the scan's `--mode` (`https` by default, `ssh` with `--mode ssh`). |
+| 9 | `notes` | string | Free-text diagnostics. Empty for clean rows. May contain commas → will be quoted. |
+| 10 | `depth` | integer | Directory level relative to the scan root: `0` = root, `1` = immediate child, capped at `DefaultMaxDepth = 4` unless `ScanOptions.MaxDepth` was overridden. |
+
+#### Skipped non-repos and marker-like edge cases — what does NOT appear in CSV
+
+`gitmap scan` is silent about everything it skips. The table below
+makes that silence explicit: each row is a directory layout that
+might *look* like a repo, the reason it was rejected, and a worked
+example of the CSV that the scan produced (showing only the
+neighbours that DID match, with the `depth` column called out).
+
+Layout:
+
+```text
+~/edge/                                                  depth 0
+├── real-repo/             .git/                         depth 1  ← FOUND
+├── stray-text/            .git  (file: "hello world")   depth 1  ← skipped (no gitdir: prefix)
+├── empty-dotgit/          .git  (file: 0 bytes)         depth 1  ← skipped (empty file != gitdir:)
+├── uppercase/             .Git/                         depth 1  ← skipped (case-sensitive name match)
+├── trailing-dotgit/       myrepo.git/                   depth 1  ← skipped (only literal ".git" qualifies)
+├── bare-mirror.git/       HEAD, refs/, config           depth 1  ← skipped (bare repos are not catalogued)
+├── broken-symlink/        .git -> /missing/path         depth 1  ← skipped (unresolvable symlink)
+├── unreadable/            .git/  (chmod 000)            depth 1  ← skipped (read error treated as "no marker")
+├── nested-under-real/                                   depth 1
+│   └── inner/             .git/                         depth 2  ← FOUND (parent has no .git of its own)
+├── worktree-link/         .git  (file: "gitdir: ...")   depth 1  ← FOUND (worktree marker)
+└── deep/a/b/c/d/          .git/                         depth 5  ← skipped (past 4-level cap)
+```
+
+```bash
+gitmap scan ~/edge --output csv
+```
+
+```csv
+repoName,httpsUrl,sshUrl,branch,branchSource,relativePath,absolutePath,cloneInstruction,notes,depth
+real-repo,https://github.com/u/real-repo.git,git@github.com:u/real-repo.git,main,head,real-repo,/home/u/edge/real-repo,git clone -b main https://github.com/u/real-repo.git real-repo,,1
+inner,https://github.com/u/inner.git,git@github.com:u/inner.git,main,head,nested-under-real/inner,/home/u/edge/nested-under-real/inner,git clone -b main https://github.com/u/inner.git nested-under-real/inner,,2
+worktree-link,https://github.com/u/main-repo.git,git@github.com:u/main-repo.git,feature-x,head,worktree-link,/home/u/edge/worktree-link,git clone -b feature-x https://github.com/u/main-repo.git worktree-link,,1
+```
+
+Why each skipped row was rejected — match the row to the rules in
+the §1 bullet list above:
+
+| Layout | Reason it's NOT in the CSV | Rule reference |
+|---|---|---|
+| `stray-text/.git` | File contents do not start with `gitdir:` | §1 bullet 3 |
+| `empty-dotgit/.git` | Empty file — no `gitdir:` prefix to match | §1 bullet 3 |
+| `uppercase/.Git/` | The marker name is case-sensitive (`.git`, lowercase) | §1 bullet 6 |
+| `trailing-dotgit/myrepo.git/` | Only an entry named **exactly** `.git` qualifies | §1 bullet 6 |
+| `bare-mirror.git/` | Bare repos and `*.git` mirror folders are out of scope | §1 bullet 6 |
+| `broken-symlink/.git` | Symlink target does not exist → ignored | §1 bullet 4 |
+| `unreadable/.git/` | Permission denied → treated as "no marker", not as an error | §1 bullet 5 |
+| `deep/a/b/c/d/.git/` | Depth 5 exceeds `DefaultMaxDepth = 4` | §3 (depth cap) |
+
+**Note on `nested-under-real/inner`**: it *is* discovered (depth 2)
+because `nested-under-real/` itself is **not** a repo — it has no
+`.git` of its own — so rule 2 ("no descent into a discovered repo")
+does not fire. Rule 2 only stops descent under a directory that is
+itself recorded as a repo. This is the most common source of
+"why did gitmap find / miss this checkout?" confusion: check the
+`depth` column and the parent's status, in that order.
+
+**`notes` column for skipped rows**: the `notes` field is empty for
+clean rows in the example above. A future change that surfaces *why*
+a directory was skipped (e.g. emitting a row with
+`notes="skipped: gitdir prefix missing"` and an otherwise empty
+record) is tracked but **not yet implemented**; today, silence is
+the contract and the CSV contains only successful discoveries.
+
 #### `rescan` and the depth cap — what survives, what disappears, what's newly found
 
 `gitmap rescan` is **not** an incremental diff against the database.
