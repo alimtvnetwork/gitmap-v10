@@ -17,13 +17,11 @@ package clonefrom
 // header) so users can grep their input file directly.
 
 import (
-	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 
 	"github.com/alimtvnetwork/gitmap-v7/gitmap/constants"
