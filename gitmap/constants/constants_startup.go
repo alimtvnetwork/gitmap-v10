@@ -72,14 +72,14 @@ const (
 // powershell-encoding even though this is a Linux command — keeps
 // the message style uniform across the whole CLI).
 const (
-	MsgStartupListHeader     = "Linux/Unix autostart entries managed by gitmap (%s):\n"
-	MsgStartupListEmpty      = "  (none — no gitmap-managed autostart entries found)\n"
-	MsgStartupListRow        = "  • %s  →  %s\n"
-	MsgStartupListFooter     = "\nTotal: %d entry(ies). Remove one with: gitmap startup-remove <name>\n"
-	MsgStartupRemoveOK       = "✓ Removed gitmap-managed autostart entry: %s\n"
-	MsgStartupRemoveNoOp     = "  (no-op) no gitmap-managed entry named %q found\n"
-	MsgStartupRemoveNotOurs  = "  (refused) %q exists but was NOT created by gitmap — skipping\n"
-	MsgStartupRemoveBadName  = "  (refused) name %q is empty or contains a path separator\n"
+	MsgStartupListHeader    = "Linux/Unix autostart entries managed by gitmap (%s):\n"
+	MsgStartupListEmpty     = "  (none — no gitmap-managed autostart entries found)\n"
+	MsgStartupListRow       = "  • %s  →  %s\n"
+	MsgStartupListFooter    = "\nTotal: %d entry(ies). Remove one with: gitmap startup-remove <name>\n"
+	MsgStartupRemoveOK      = "✓ Removed gitmap-managed autostart entry: %s\n"
+	MsgStartupRemoveNoOp    = "  (no-op) no gitmap-managed entry named %q found\n"
+	MsgStartupRemoveNotOurs = "  (refused) %q exists but was NOT created by gitmap — skipping\n"
+	MsgStartupRemoveBadName = "  (refused) name %q is empty or contains a path separator\n"
 	// startup-remove --dry-run mirror messages. Same four outcomes,
 	// each prefixed with `(dry-run)` so log-scrapers can tell a
 	// preview from a real action without parsing flags.
@@ -111,18 +111,18 @@ const (
 // constants_cli.go) so all startup-related strings live together and
 // the flag parser file imports just one constants block.
 const (
-	FlagStartupAddName        = "name"
-	FlagStartupAddExec        = "exec"
-	FlagStartupAddDisplay     = "display-name"
-	FlagStartupAddComment     = "comment"
-	FlagStartupAddNoDisplay   = "no-display"
-	FlagStartupAddForce       = "force"
-	FlagDescStartupAddName    = "Logical name for the entry (filename becomes gitmap-<name>.desktop). Required."
-	FlagDescStartupAddExec    = "Command to run at login (default: path to the running gitmap binary)"
-	FlagDescStartupAddDisplay = "Override the Name= field shown in desktop session managers"
-	FlagDescStartupAddComment = "Optional Comment= field text"
+	FlagStartupAddName          = "name"
+	FlagStartupAddExec          = "exec"
+	FlagStartupAddDisplay       = "display-name"
+	FlagStartupAddComment       = "comment"
+	FlagStartupAddNoDisplay     = "no-display"
+	FlagStartupAddForce         = "force"
+	FlagDescStartupAddName      = "Logical name for the entry (filename becomes gitmap-<name>.desktop). Required."
+	FlagDescStartupAddExec      = "Command to run at login (default: path to the running gitmap binary)"
+	FlagDescStartupAddDisplay   = "Override the Name= field shown in desktop session managers"
+	FlagDescStartupAddComment   = "Optional Comment= field text"
 	FlagDescStartupAddNoDisplay = "Set NoDisplay=true so the entry stays out of app menus"
-	FlagDescStartupAddForce   = "Overwrite an existing gitmap-managed entry (never overwrites third-party files)"
+	FlagDescStartupAddForce     = "Overwrite an existing gitmap-managed entry (never overwrites third-party files)"
 )
 
 // startup-list CLI flag. Reuses the project-wide OutputTerminal/CSV/
@@ -130,9 +130,15 @@ const (
 // default human-readable rendering ("terminal" works too).
 const (
 	FlagStartupListFormat     = "format"
-	FlagDescStartupListFormat = "Output format: table (default), json, or csv"
+	FlagDescStartupListFormat = "Output format: table (default), json, jsonl, or csv"
 	StartupListFormatTable    = "table"
-	ErrStartupListBadFormat   = "startup-list: unknown --format %q (expected: table, json, csv)"
+	// StartupListFormatJSONL is the jq/fluentd/BigQuery-friendly
+	// line-oriented variant of --format=json: one compact object
+	// per line, no array wrapper, empty list emits zero bytes.
+	// Stable key order within each object is guaranteed via
+	// stablejson.WriteJSONLines (same Field-slice contract as JSON).
+	StartupListFormatJSONL  = "jsonl"
+	ErrStartupListBadFormat = "startup-list: unknown --format %q (expected: table, json, jsonl, csv)"
 	// CSV header row for `--format csv`. Kept here so the column
 	// order is centralized and tests can reference it.
 	StartupListCSVHeader = "name,path,exec"

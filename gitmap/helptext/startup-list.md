@@ -7,6 +7,7 @@ List user-scoped autostart entries created and managed by gitmap.
 ```
 gitmap startup-list
 gitmap startup-list --format=json
+gitmap startup-list --format=jsonl
 gitmap startup-list --format=csv
 gitmap sl --format=table
 ```
@@ -30,7 +31,7 @@ have to open every unrelated file in the directory.
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--format` | `table` | Output format: `table`, `json`, or `csv` |
+| `--format` | `table` | Output format: `table`, `json`, `jsonl`, or `csv` |
 
 `table` (alias: `terminal`) is the legacy human-readable rendering.
 Unknown values exit with code 2 so scripts catch typos immediately.
@@ -66,6 +67,20 @@ the `exec` field is the space-joined `ProgramArguments` array (or
     "exec": "/usr/local/bin/gitmap watch ~/projects"
   }
 ]
+```
+
+### `--format=jsonl`
+
+One compact JSON object per line, terminated by `\n`. Same field
+order as `--format=json` (name, path, exec). Empty results emit
+**zero bytes** (NOT `\n`, NOT `[]`) so `wc -l` of the stream equals
+the entry count exactly — the contract every line-oriented pipeline
+(jq `--compact-output`, fluentd, BigQuery, DuckDB `read_json_auto`)
+relies on.
+
+```
+{"name":"gitmap-sync-watcher","path":"/home/user/.config/autostart/gitmap-sync-watcher.desktop","exec":"/usr/local/bin/gitmap watch ~/projects"}
+{"name":"gitmap-status-tray","path":"/home/user/.config/autostart/gitmap-status-tray.desktop","exec":"/usr/local/bin/gitmap-tray"}
 ```
 
 ### `--format=csv`

@@ -11,13 +11,13 @@
 // today — this is documented but informally so. Three forces could
 // break that contract:
 //
-//   1. Go 2 / encoding/json/v2 has been actively discussed; an early
-//      proposal floated alphabetical key ordering. Even if rejected,
-//      relying on the v1 quirk leaves us exposed.
-//   2. Reflection-based field walks change subtly when fields are
-//      added, removed, embedded, or marked omitempty.
-//   3. Code-mod tools (gofmt, IDE refactors, generated code) routinely
-//      reorder struct fields without warning.
+//  1. Go 2 / encoding/json/v2 has been actively discussed; an early
+//     proposal floated alphabetical key ordering. Even if rejected,
+//     relying on the v1 quirk leaves us exposed.
+//  2. Reflection-based field walks change subtly when fields are
+//     added, removed, embedded, or marked omitempty.
+//  3. Code-mod tools (gofmt, IDE refactors, generated code) routinely
+//     reorder struct fields without warning.
 //
 // stablejson sidesteps all three by NEVER reflecting on a struct.
 // The caller hands in an ordered slice of (key, value) pairs and the
@@ -98,6 +98,68 @@ func WriteArray(w io.Writer, items [][]Field) error {
 	_, err := w.Write(buf.Bytes())
 
 	return err
+}
+
+// WriteJSONLines writes `items` as JSON Lines: one compact object
+// per line, terminated by `\n` (the de-facto `jsonl` format consumed
+// by jq, fluentd, BigQuery, DuckDB).
+//
+// Field order within each object follows the slice order verbatim,
+// identical to WriteArray. The difference is purely framing —
+// WriteArray pretty-prints a single `[…]` document; WriteJSONLines
+// emits one compact `{…}` per line with no array wrapper.
+//
+// Empty `items` writes ZERO bytes (NOT `\n`, NOT `[]`) so a consumer
+// that does `wc -l` on the stream sees `0` for an empty list. Each
+// line ends with `\n` (including the last) so concatenating two
+// WriteJSONLines outputs produces a valid combined stream.
+func WriteJSONLines(w io.Writer, items [][]Field) error {
+	if len(items) == 0 {
+
+		return nil
+	}
+	var buf bytes.Buffer
+	for _, obj := range items {
+		if err := writeCompactObject(&buf, obj); err != nil {
+
+			return err
+		}
+		buf.WriteByte('\n')
+	}
+	_, err := w.Write(buf.Bytes())
+
+	return err
+}
+
+// writeCompactObject writes a single `{"k":v,"k2":v2}` block (no
+// whitespace between tokens) into buf. Key order follows the slice.
+// Each value is JSON-marshalled in isolation so a malformed value
+// fails the WHOLE call rather than emitting half a corrupt line —
+// critical for JSONL because a half-written line would desync every
+// downstream parser that splits on `\n`.
+func writeCompactObject(buf *bytes.Buffer, fields []Field) error {
+	buf.WriteByte('{')
+	for i, f := range fields {
+		if i > 0 {
+			buf.WriteByte(',')
+		}
+		keyBytes, err := json.Marshal(f.Key)
+		if err != nil {
+
+			return fmt.Errorf("stablejson: encode key %q: %w", f.Key, err)
+		}
+		buf.Write(keyBytes)
+		buf.WriteByte(':')
+		valBytes, err := json.Marshal(f.Value)
+		if err != nil {
+
+			return fmt.Errorf("stablejson: encode value for key %q: %w", f.Key, err)
+		}
+		buf.Write(valBytes)
+	}
+	buf.WriteByte('}')
+
+	return nil
 }
 
 // writeObject writes a single `{ ... }` block at array-item
