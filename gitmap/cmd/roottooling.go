@@ -41,6 +41,8 @@ func toolingDispatchEntries() []dispatchEntry {
 		{[]string{constants.CmdEnv, constants.CmdEnvAlias}, func() { runEnv(argsTail()) }},
 		{[]string{constants.CmdInstall, constants.CmdInstallAlias}, func() { runInstall(argsTail()) }},
 		{[]string{constants.CmdUninstall, constants.CmdUninstallAlias}, func() { runUninstall(argsTail()) }},
+		{[]string{constants.CmdStartupList, constants.CmdStartupListAlias}, func() { runStartupList(argsTail()) }},
+		{[]string{constants.CmdStartupRemove, constants.CmdStartupRemoveAlias}, func() { runStartupRemove(argsTail()) }},
 		{[]string{constants.CmdSelfInstall}, func() { runSelfInstall(argsTail()) }},
 		{[]string{constants.CmdSelfUninstall}, func() { runSelfUninstall(argsTail()) }},
 		{[]string{constants.CmdSelfUninstallRunner}, func() { runSelfUninstallRunner() }},

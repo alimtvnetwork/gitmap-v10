@@ -49,6 +49,7 @@ Commit-both --interleave (v3.104.0+): author-date merged stream variant via `Run
 - [Move & Merge Commands](mem://features/movemerge) — gitmap mv / merge-both / merge-left / merge-right with L/R/S/A/B/Q prompt + --prefer-* bypass + URL-side commit/push (v2.96.0)
 - [Release Alias](mem://features/release-alias) — gitmap as / release-alias (ra) / release-alias-pull (rap) with auto-stash labeled by alias-version-unixts, label-match pop for concurrent safety (v3.0.0)
 - [Self Install Uninstall](mem://features/self-install-uninstall) — gitmap self-install / self-uninstall manage the binary itself (separate from third-party install/uninstall). Embedded scripts via go:embed, Windows handoff, marker-block PATH cleanup
+- [Startup Management Unix](mem://features/startup-management-unix) — Linux/Unix `startup-list` (sl) + `startup-remove` (sr) for XDG autostart entries, scoped to `gitmap-` prefix + `X-Gitmap-Managed=true` marker (v3.133.0)
 - [Replace Command](mem://features/replace-command) — gitmap replace literal "old" "new" / -N / --audit / all bumps `<base>-vN` and `<base>/vN` from git remote URL, interactive confirm before write, atomic temp+rename, binary skip (v3.96.0)
 - [Marker Comments](mem://features/marker-comments) — Decentralized opt-in for completion generator: `// gitmap:cmd top-level` + `// gitmap:cmd skip`, CI drift check enforces sync (v3.0.0)
 - [VS Code Project Manager Sync](mem://features/vscode-project-manager-sync) — gitmap scan auto-syncs and `gitmap code` registers + opens repos in alefragnani.project-manager projects.json (v3.38.0)
