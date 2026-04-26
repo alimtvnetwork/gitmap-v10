@@ -27,7 +27,7 @@ type ScanProbeOptions struct {
 }
 
 // parseScanFlags parses flags for the scan command.
-func parseScanFlags(args []string) (dir, configPath, mode, output, outFile, outputPath, relativeRoot string, ghDesktop, openFolder, quiet, noVSCodeSync, noAutoTags bool, workers, maxDepth int, probeOpts ScanProbeOptions) {
+func parseScanFlags(args []string) (dir, configPath, mode, output, outFile, outputPath, relativeRoot string, ghDesktop, openFolder, quiet, noVSCodeSync, noAutoTags, reportErrors bool, workers, maxDepth int, probeOpts ScanProbeOptions) {
 	fs := flag.NewFlagSet(constants.CmdScan, flag.ExitOnError)
 	cfgFlag := fs.String("config", constants.DefaultConfigPath, constants.FlagDescConfig)
 	modeFlag := fs.String("mode", "", constants.FlagDescMode)
@@ -40,6 +40,7 @@ func parseScanFlags(args []string) (dir, configPath, mode, output, outFile, outp
 	noAutoTagsFlag := fs.Bool(constants.FlagNoAutoTags, false, constants.FlagDescNoAutoTags)
 	workersFlag := fs.Int(constants.FlagScanWorkers, constants.DefaultScanWorkers, constants.FlagDescScanWorkers)
 	maxDepthFlag := fs.Int(constants.FlagScanMaxDepth, constants.DefaultScanMaxDepth, constants.FlagDescScanMaxDepth)
+	reportErrFlag := fs.Bool(constants.FlagScanReportErrors, false, constants.FlagDescScanReportErrors)
 	noProbeFlag := fs.Bool(constants.ScanProbeFlagDisable, false, constants.FlagDescScanProbeDisable)
 	noProbeWaitFlag := fs.Bool(constants.ScanProbeFlagNoWait, false, constants.FlagDescScanProbeNoWait)
 	probeConcFlag := fs.Int(constants.ScanProbeFlagConcurrency,
@@ -54,7 +55,7 @@ func parseScanFlags(args []string) (dir, configPath, mode, output, outFile, outp
 		ConcurrencySet: wasFlagPassed(fs, constants.ScanProbeFlagConcurrency),
 	}
 
-	return dir, *cfgFlag, *modeFlag, *outputFlag, *outFileFlag, *outputPathFlag, *relRootFlag, *ghDesktopFlag, *openFlag, *quietFlag, *noVSCodeSyncFlag, *noAutoTagsFlag, *workersFlag, *maxDepthFlag, probeOpts
+	return dir, *cfgFlag, *modeFlag, *outputFlag, *outFileFlag, *outputPathFlag, *relRootFlag, *ghDesktopFlag, *openFlag, *quietFlag, *noVSCodeSyncFlag, *noAutoTagsFlag, *reportErrFlag, *workersFlag, *maxDepthFlag, probeOpts
 }
 
 // wasFlagPassed reports whether the named flag was explicitly set on

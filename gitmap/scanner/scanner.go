@@ -113,6 +113,14 @@ type ScanOptions struct {
 	// subtree as before — the cap only matters for paths that have NOT
 	// hit a `.git` marker yet.
 	MaxDepth int
+	// OnDirError, when non-nil, is invoked once per directory whose
+	// ReadDir fails. Receives the absolute directory path and the
+	// underlying error. Called from worker goroutines — implementations
+	// MUST be goroutine-safe. Independent of the legacy first-error
+	// return value, which is preserved for backward compat: callers
+	// that want PER-DIR attribution use this callback; callers that
+	// just want "did anything go wrong" keep using the err return.
+	OnDirError func(path string, err error)
 }
 
 // ScanDir walks root recursively and returns all Git repo paths found.
@@ -149,6 +157,7 @@ func ScanDirWithOptions(root string, opts ScanOptions) ([]RepoInfo, error) {
 		resolveWorkerCount(opts.Workers),
 		resolveMaxDepth(opts.MaxDepth),
 		opts.Progress,
+		opts.OnDirError,
 	)
 }
 
@@ -215,10 +224,13 @@ type scanState struct {
 	repos    []RepoInfo
 	firstErr error
 
-	// Atomic counters fuel the live progress callback. They are
-	// updated on the hot path (one increment per processed dir / one
-	// per recorded repo) and read by the throttled emitter goroutine
-	// — so atomic.LoadInt64 is the only safe access pattern.
+	// onDirError, when non-nil, is invoked from recordErr with the
+	// failing directory path and its error. Set from ScanOptions —
+	// see the field doc there for the contract. Stored on the state
+	// (rather than passed through every helper) because the callback
+	// is invoked from the deepest leaf of the call graph.
+	onDirError func(path string, err error)
+
 	dirsWalked atomic.Int64
 	reposFound atomic.Int64
 }
@@ -238,11 +250,12 @@ func (st *scanState) snapshot(final bool) ScanProgress {
 // from an unbounded-capacity FIFO and enqueues child directories back.
 // The queue is closed when wg drops to zero — i.e. every dispatched
 // directory has been fully processed and produced no new work.
-func walkParallel(root string, exclude map[string]bool, workers, maxDepth int, progress func(ScanProgress)) ([]RepoInfo, error) {
+func walkParallel(root string, exclude map[string]bool, workers, maxDepth int, progress func(ScanProgress), onDirError func(string, error)) ([]RepoInfo, error) {
 	st := &scanState{
-		root:     root,
-		exclude:  exclude,
-		maxDepth: maxDepth,
+		root:       root,
+		exclude:    exclude,
+		maxDepth:   maxDepth,
+		onDirError: onDirError,
 		// Buffer sized generously so workers rarely block on enqueue.
 		// A bounded buffer is fine — if it fills, workers backpressure
 		// each other, which is acceptable; deadlock is impossible
@@ -299,7 +312,7 @@ func (st *scanState) processDir(job dirJob) {
 	entries, err := os.ReadDir(job.path)
 	st.dirsWalked.Add(1)
 	if err != nil {
-		st.recordErr(err)
+		st.recordDirErr(job.path, err)
 
 		return
 	}
@@ -403,7 +416,7 @@ func (st *scanState) enqueue(job dirJob) {
 func (st *scanState) recordRepo(repoPath string) {
 	rel, err := filepath.Rel(st.root, repoPath)
 	if err != nil {
-		st.recordErr(err)
+		st.recordDirErr(repoPath, err)
 
 		return
 	}
@@ -416,12 +429,26 @@ func (st *scanState) recordRepo(repoPath string) {
 	st.reposFound.Add(1)
 }
 
-// recordErr stores the FIRST error to occur. Later errors are dropped to
-// keep the public signature single-error and avoid a noisy multi-error.
+// recordErr stores the FIRST error to occur. Later errors are dropped
+// to keep the public signature single-error and avoid a noisy
+// multi-error. Prefer recordDirErr where a path is available so the
+// optional OnDirError callback gets per-dir attribution.
 func (st *scanState) recordErr(err error) {
 	st.mu.Lock()
 	if st.firstErr == nil {
 		st.firstErr = err
 	}
 	st.mu.Unlock()
+}
+
+// recordDirErr captures err under the same first-error policy AND
+// fires the optional OnDirError callback so callers can build a
+// per-directory failure list. The callback runs OUTSIDE the state
+// mutex to keep contention low and to let user callbacks block on
+// their own collectors without serializing the whole walker.
+func (st *scanState) recordDirErr(path string, err error) {
+	st.recordErr(err)
+	if st.onDirError != nil {
+		st.onDirError(path, err)
+	}
 }

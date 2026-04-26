@@ -21,7 +21,7 @@ import (
 // runScan handles the "scan" subcommand.
 func runScan(args []string) {
 	checkHelp("scan", args)
-	dir, cfgPath, mode, output, outFile, outputPath, relativeRoot, ghDesktop, openFolder, quiet, noVSCodeSync, noAutoTags, workers, maxDepth, probeOpts := parseScanFlags(args)
+	dir, cfgPath, mode, output, outFile, outputPath, relativeRoot, ghDesktop, openFolder, quiet, noVSCodeSync, noAutoTags, reportErrors, workers, maxDepth, probeOpts := parseScanFlags(args)
 	cfg, err := config.LoadFromFile(cfgPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, constants.ErrConfigLoad, cfgPath, err)
@@ -33,7 +33,7 @@ func runScan(args []string) {
 		OutFile: outFile, OutputPath: outputPath,
 		GithubDesktop: ghDesktop, OpenFolder: openFolder, Quiet: quiet,
 	}
-	executeScan(dir, cfg, outFile, ghDesktop, openFolder, quiet, noVSCodeSync, noAutoTags, workers, maxDepth, cache, probeOpts, relativeRoot)
+	executeScan(dir, cfg, outFile, ghDesktop, openFolder, quiet, noVSCodeSync, noAutoTags, reportErrors, workers, maxDepth, cache, probeOpts, relativeRoot)
 }
 
 // executeScan performs the directory scan and outputs results.
@@ -43,7 +43,7 @@ func runScan(args []string) {
 // stage. This is the file users should attach when reporting "scan is
 // slow" — it pinpoints which phase (walk, DB upsert, project detection,
 // release import, desktop sync, …) actually consumed the time.
-func executeScan(dir string, cfg model.Config, outFile string, ghDesktop, openFolder, quiet, noVSCodeSync, noAutoTags bool, workers, maxDepth int, cache model.ScanCache, probeOpts ScanProbeOptions, relativeRoot string) {
+func executeScan(dir string, cfg model.Config, outFile string, ghDesktop, openFolder, quiet, noVSCodeSync, noAutoTags, reportErrors bool, workers, maxDepth int, cache model.ScanCache, probeOpts ScanProbeOptions, relativeRoot string) {
 	absDir := resolveScanTarget(dir)
 
 	bench := newScanBenchmark(absDir)
@@ -63,6 +63,7 @@ func executeScan(dir string, cfg model.Config, outFile string, ghDesktop, openFo
 	}
 
 	progress := newScanProgressRenderer(quiet)
+	errCollector := newScanCollector(reportErrors)
 	var repos []scanner.RepoInfo
 	var err error
 	bench.Phase("scan.walk", func() {
@@ -71,6 +72,7 @@ func executeScan(dir string, cfg model.Config, outFile string, ghDesktop, openFo
 			Workers:     workers,
 			MaxDepth:    maxDepth,
 			Progress:    progress.Callback(),
+			OnDirError:  scanDirErrorCallback(errCollector),
 		})
 	})
 	if err != nil {
@@ -104,7 +106,7 @@ func executeScan(dir string, cfg model.Config, outFile string, ghDesktop, openFo
 	// Background probe: kicked off here so it runs concurrently with
 	// the project-detection / desktop-sync phases below. Drained
 	// before the "Done" banner unless --no-probe-wait was passed.
-	probeRunner := startBackgroundProbe(records, probeOpts, quiet)
+	probeRunner := startBackgroundProbe(records, probeOpts, quiet, errCollector)
 	fmt.Print(constants.MsgSectionProjects)
 	var detected []detector.DetectionResult
 	bench.Phase("scan.detectProjects", func() {
@@ -133,6 +135,7 @@ func executeScan(dir string, cfg model.Config, outFile string, ghDesktop, openFo
 	bench.Phase("scan.backgroundProbeWait", func() {
 		drainBackgroundProbe(probeRunner, probeOpts, quiet)
 	})
+	finalizeErrorReport(errCollector, quiet)
 	fmt.Print(constants.MsgSectionDone)
 
 	// Mark scan task as completed after all steps succeed.

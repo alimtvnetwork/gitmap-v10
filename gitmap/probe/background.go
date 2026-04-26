@@ -49,6 +49,28 @@ type BackgroundRunner struct {
 	closed  bool
 	closeMu sync.Mutex
 	stats   runnerStats
+
+	// onFailure, when non-nil, is invoked from the worker goroutine
+	// for every probe whose Result.Error is non-empty. Receives the
+	// originating ScanRecord (so the caller can read RelativePath /
+	// CloneURL / etc.) plus the probe result. Implementations MUST be
+	// goroutine-safe — multiple workers may call it concurrently.
+	// Set via SetFailureHook BEFORE the first Start so the workers
+	// observe the assignment without a data race.
+	onFailure func(record model.ScanRecord, result Result)
+}
+
+// SetFailureHook installs a per-failure callback. Must be called
+// BEFORE the first Start — the runner does not synchronize the read
+// in workerLoop, since the typical wiring (scan command) sets the
+// hook immediately after construction and the workers don't begin
+// pulling jobs until Start enqueues the first record. A nil receiver
+// is a silent no-op so call sites can chain unconditionally.
+func (r *BackgroundRunner) SetFailureHook(hook func(model.ScanRecord, Result)) {
+	if r == nil {
+		return
+	}
+	r.onFailure = hook
 }
 
 // runnerStats tracks per-bucket counters under its own mutex.
@@ -163,6 +185,9 @@ func (r *BackgroundRunner) workerLoop() {
 		result := r.probeOne(record)
 		if r.sink != nil {
 			r.sink(record, result)
+		}
+		if len(result.Error) > 0 && r.onFailure != nil {
+			r.onFailure(record, result)
 		}
 		r.tally(result)
 	}

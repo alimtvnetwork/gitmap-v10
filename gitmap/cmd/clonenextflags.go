@@ -37,6 +37,10 @@ type CloneNextFlags struct {
 	// (ok/failed/skipped totals) always prints regardless. Default
 	// false so users get progress feedback out-of-the-box.
 	NoProgress bool
+	// ReportErrors enables a JSON failure report at command exit
+	// when any per-repo clone fails. Off by default; mirrors the
+	// `gitmap scan --errors-report` flag for consistent UX.
+	ReportErrors bool
 }
 
 // parseCloneNextFlags parses flags for the clone-next command.
@@ -63,6 +67,7 @@ func parseCloneNextFlags(args []string) CloneNextFlags {
 		constants.CloneDefaultMaxConcurrency, constants.FlagDescCloneMaxConcurrency)
 	noProgressFlag := fs.Bool(constants.FlagCloneNextNoProgress, false,
 		constants.FlagDescCloneNextNoProgress)
+	reportErrFlag := fs.Bool(constants.FlagScanReportErrors, false, constants.FlagDescScanReportErrors)
 	// Reorder so flags placed AFTER the positional version (e.g.
 	// `gitmap cn v+1 -f`) are still recognized. Go's stdlib flag
 	// parser stops at the first non-flag arg, so without this the
@@ -81,6 +86,7 @@ func parseCloneNextFlags(args []string) CloneNextFlags {
 		Force:          *forceFlag,
 		MaxConcurrency: *maxConcFlag,
 		NoProgress:     *noProgressFlag,
+		ReportErrors:   *reportErrFlag,
 	}
 	if fs.NArg() > 0 {
 		out.VersionArg = fs.Arg(0)

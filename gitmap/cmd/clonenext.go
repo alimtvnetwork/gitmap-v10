@@ -49,7 +49,7 @@ func runCloneNext(args []string) {
 	// but has git subdirs one level down) triggers the multi-repo
 	// dispatcher. See shouldRunBatch for the priority order.
 	if shouldRunBatch(cnFlags, currentWorkingDir()) {
-		runCloneNextBatch(cnFlags.CSVPath, cnFlags.All, cnFlags.MaxConcurrency, cnFlags.NoProgress)
+		runCloneNextBatch(cnFlags.CSVPath, cnFlags.All, cnFlags.MaxConcurrency, cnFlags.NoProgress, cnFlags.ReportErrors)
 
 		return
 	}
