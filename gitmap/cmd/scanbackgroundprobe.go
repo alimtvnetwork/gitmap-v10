@@ -34,7 +34,7 @@ import (
 // connection-pool restriction (`SetMaxOpenConns(1)`) means we want
 // the background pool to share a single dedicated connection rather
 // than fight with the foreground for the main handle.
-func startBackgroundProbe(records []model.ScanRecord, opts ScanProbeOptions, quiet bool) *probe.BackgroundRunner {
+func startBackgroundProbe(records []model.ScanRecord, opts ScanProbeOptions, quiet bool, errCollector *errreport.Collector) *probe.BackgroundRunner {
 	workers := resolveProbeWorkers(records, opts, quiet)
 	if workers < 1 {
 		return nil
@@ -58,6 +58,10 @@ func startBackgroundProbe(records []model.ScanRecord, opts ScanProbeOptions, qui
 		func(rec model.ScanRecord, res probe.Result) {
 			recordProbeResult(db, rec, res)
 		})
+	// Install the failure hook BEFORE enqueueing jobs so workers
+	// observe a non-nil hook on every dequeue. Setting it after
+	// Start would race with the first probe completion.
+	installProbeFailureHook(runner, errCollector)
 
 	enqueueProbeJobs(runner, records)
 	if !quiet {
