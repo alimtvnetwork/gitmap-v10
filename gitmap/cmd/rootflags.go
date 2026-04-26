@@ -7,8 +7,27 @@ import (
 	"github.com/alimtvnetwork/gitmap-v7/gitmap/constants"
 )
 
+// ScanProbeOptions bundles the flags that govern the optional
+// background version-probe pass scan kicks off after upserting repos.
+// Bundling them keeps parseScanFlags's return list manageable and
+// makes the runner-wiring call site read as a single cohesive object.
+type ScanProbeOptions struct {
+	// Disable suppresses the background probe entirely. Set via --no-probe.
+	Disable bool
+	// NoWait makes scan return immediately after dispatching jobs;
+	// the runner keeps draining in the background until process exit.
+	NoWait bool
+	// Concurrency overrides the worker count. 0 = use the documented
+	// default; negative values disable the runner the same as --no-probe.
+	Concurrency int
+	// ConcurrencySet records whether the user explicitly passed
+	// --probe-concurrency. Used to bypass the auto-trigger ceiling
+	// for power users who clearly opted in.
+	ConcurrencySet bool
+}
+
 // parseScanFlags parses flags for the scan command.
-func parseScanFlags(args []string) (dir, configPath, mode, output, outFile, outputPath string, ghDesktop, openFolder, quiet, noVSCodeSync, noAutoTags bool, workers int) {
+func parseScanFlags(args []string) (dir, configPath, mode, output, outFile, outputPath string, ghDesktop, openFolder, quiet, noVSCodeSync, noAutoTags bool, workers int, probeOpts ScanProbeOptions) {
 	fs := flag.NewFlagSet(constants.CmdScan, flag.ExitOnError)
 	cfgFlag := fs.String("config", constants.DefaultConfigPath, constants.FlagDescConfig)
 	modeFlag := fs.String("mode", "", constants.FlagDescMode)
@@ -19,11 +38,35 @@ func parseScanFlags(args []string) (dir, configPath, mode, output, outFile, outp
 	noVSCodeSyncFlag := fs.Bool(constants.FlagNoVSCodeSync, false, constants.FlagDescNoVSCodeSync)
 	noAutoTagsFlag := fs.Bool(constants.FlagNoAutoTags, false, constants.FlagDescNoAutoTags)
 	workersFlag := fs.Int(constants.FlagScanWorkers, constants.DefaultScanWorkers, constants.FlagDescScanWorkers)
+	noProbeFlag := fs.Bool(constants.ScanProbeFlagDisable, false, constants.FlagDescScanProbeDisable)
+	noProbeWaitFlag := fs.Bool(constants.ScanProbeFlagNoWait, false, constants.FlagDescScanProbeNoWait)
+	probeConcFlag := fs.Int(constants.ScanProbeFlagConcurrency,
+		constants.ScanProbeDefaultConcurrency, constants.FlagDescScanProbeConcurrency)
 	fs.Parse(args)
 
 	dir = resolveScanDir(fs)
+	probeOpts = ScanProbeOptions{
+		Disable:        *noProbeFlag,
+		NoWait:         *noProbeWaitFlag,
+		Concurrency:    *probeConcFlag,
+		ConcurrencySet: wasFlagPassed(fs, constants.ScanProbeFlagConcurrency),
+	}
 
-	return dir, *cfgFlag, *modeFlag, *outputFlag, *outFileFlag, *outputPathFlag, *ghDesktopFlag, *openFlag, *quietFlag, *noVSCodeSyncFlag, *noAutoTagsFlag, *workersFlag
+	return dir, *cfgFlag, *modeFlag, *outputFlag, *outFileFlag, *outputPathFlag, *ghDesktopFlag, *openFlag, *quietFlag, *noVSCodeSyncFlag, *noAutoTagsFlag, *workersFlag, probeOpts
+}
+
+// wasFlagPassed reports whether the named flag was explicitly set on
+// the command line (vs left at its default). Go's stdlib flag package
+// doesn't surface this directly, so we walk Visit to find out.
+func wasFlagPassed(fs *flag.FlagSet, name string) bool {
+	seen := false
+	fs.Visit(func(f *flag.Flag) {
+		if f.Name == name {
+			seen = true
+		}
+	})
+
+	return seen
 }
 
 // registerScanBoolFlags registers boolean flags for the scan command.
