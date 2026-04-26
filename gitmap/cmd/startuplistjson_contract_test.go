@@ -40,6 +40,23 @@ func TestStartupListJSONContract_EmptyIsArrayNotNull(t *testing.T) {
 	assertGoldenBytes(t, "startup_list_empty.json", buf.Bytes())
 }
 
+// TestStartupListJSONContract_EmptyNonNilSliceAlsoIsArray covers
+// the second way "empty" reaches the encoder: a non-nil slice with
+// length 0 (e.g., a filter that matched no rows but still allocated
+// the result). Go's encoding/json renders a nil slice as `null` by
+// default; only the explicit `[]Entry{}` case proves the encoder
+// also normalizes the non-nil-but-empty case to `[]\n`. Without
+// this test, a future refactor that drops the nil-normalization
+// step would still pass EmptyIsArrayNotNull but silently break
+// callers that pass a pre-allocated empty slice.
+func TestStartupListJSONContract_EmptyNonNilSliceAlsoIsArray(t *testing.T) {
+	var buf bytes.Buffer
+	if err := encodeStartupListJSON(&buf, []startup.Entry{}); err != nil {
+		t.Fatalf("encode: %v", err)
+	}
+	assertGoldenBytes(t, "startup_list_empty.json", buf.Bytes())
+}
+
 // TestStartupListJSONContract_CanonicalEntry pins the exact bytes
 // for a known single entry. Any change to indentation, key order,
 // tag names, or trailing-newline behavior breaks this test.
