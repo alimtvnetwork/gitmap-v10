@@ -55,41 +55,143 @@ func CurrentBranch(repoPath string) (string, error) {
 }
 
 // DetectBranch returns the branch name and a label describing how it was
-// detected. Resolution order:
-//  1. HEAD via `git rev-parse --abbrev-ref HEAD` — labeled "HEAD" when on a
-//     named branch, or "detached" when HEAD points directly at a commit.
-//  2. Remote-tracking branch via `git symbolic-ref refs/remotes/origin/HEAD`
-//     — labeled "remote-tracking".
-//  3. Built-in default branch — labeled "default".
-// If no resolution succeeds the returned source is "unknown".
+// detected. Resolution order (each step falls through to the next on miss):
+//
+//  1. HEAD via `git rev-parse --abbrev-ref HEAD` → "HEAD" when on a named
+//     branch. NOTE: a detached HEAD or empty result no longer terminates
+//     resolution — we fall through to the remote-default lookups so the
+//     returned name is always usable for `git clone -b` when possible.
+//  2. Local remote-tracking ref via `git symbolic-ref refs/remotes/origin/
+//     HEAD` → "remote-tracking". Works when the repo was cloned with
+//     `--single-branch` skipped (the common case).
+//  3. Live remote query via `git ls-remote --symref origin HEAD` →
+//     "remote-tracking". Covers single-branch clones and shallow mirrors
+//     where step 2's local ref is absent.
+//  4. Built-in `constants.DefaultBranch` → "default". Last-resort guess so
+//     callers always have SOMETHING to attempt.
+//
+// Only when every step fails does the function return ("HEAD", "detached")
+// for an actual detached HEAD or ("", "unknown") for a totally opaque repo —
+// preserving the original sentinels for downstream consumers (cloner/strategy.go)
+// that branch on BranchSource.
 func DetectBranch(repoPath string) (branch, source string) {
-	out, err := runGit(repoPath,
-		constants.GitRevParse, constants.GitAbbrevRef, constants.GitHEAD)
-	if err == nil {
-		name := strings.TrimSpace(out)
-		if name == constants.GitHEAD {
-			return name, BranchSourceDetached
-		}
-		if len(name) > 0 {
-			return name, BranchSourceHEAD
-		}
+	if name, ok := detectFromLocalHEAD(repoPath); ok {
+		return name, BranchSourceHEAD
 	}
-
-	out, err = runGit(repoPath,
-		"symbolic-ref", "refs/remotes/origin/HEAD")
-	if err == nil {
-		ref := strings.TrimSpace(out)
-		const prefix = "refs/remotes/origin/"
-		if strings.HasPrefix(ref, prefix) {
-			return strings.TrimPrefix(ref, prefix), BranchSourceRemoteTracking
-		}
+	if name, ok := detectFromLocalRemoteRef(repoPath); ok {
+		return name, BranchSourceRemoteTracking
 	}
-
+	if name, ok := detectFromLiveRemote(repoPath); ok {
+		return name, BranchSourceRemoteTracking
+	}
 	if len(constants.DefaultBranch) > 0 {
 		return constants.DefaultBranch, BranchSourceDefault
 	}
+	if isDetachedHEAD(repoPath) {
+
+		return constants.GitHEAD, BranchSourceDetached
+	}
 
 	return "", BranchSourceUnknown
+}
+
+// detectFromLocalHEAD reads the named branch from `git rev-parse
+// --abbrev-ref HEAD`. Returns ok=false for detached HEAD (literal "HEAD")
+// or empty output so the caller can fall through to remote-default lookups.
+func detectFromLocalHEAD(repoPath string) (string, bool) {
+	out, err := runGit(repoPath,
+		constants.GitRevParse, constants.GitAbbrevRef, constants.GitHEAD)
+	if err != nil {
+
+		return "", false
+	}
+	name := strings.TrimSpace(out)
+	if len(name) == 0 || name == constants.GitHEAD {
+
+		return "", false
+	}
+
+	return name, true
+}
+
+// detectFromLocalRemoteRef reads the locally-tracked default via
+// `git symbolic-ref refs/remotes/origin/HEAD`. Returns ok=false when the
+// ref is missing (single-branch / mirror clones) so the caller can fall
+// through to a live `ls-remote` query.
+func detectFromLocalRemoteRef(repoPath string) (string, bool) {
+	out, err := runGit(repoPath,
+		"symbolic-ref", "refs/remotes/origin/HEAD")
+	if err != nil {
+
+		return "", false
+	}
+	const prefix = "refs/remotes/origin/"
+	ref := strings.TrimSpace(out)
+	if !strings.HasPrefix(ref, prefix) {
+
+		return "", false
+	}
+
+	return strings.TrimPrefix(ref, prefix), true
+}
+
+// detectFromLiveRemote queries the origin remote directly with
+// `git ls-remote --symref origin HEAD` and parses the first symref line:
+//
+//	ref: refs/heads/main\tHEAD
+//
+// Network-dependent — failure is silent so offline runs simply fall through
+// to the built-in default. Bounded by git's own timeout / credential helper.
+func detectFromLiveRemote(repoPath string) (string, bool) {
+	out, err := runGit(repoPath,
+		"ls-remote", "--symref", "origin", constants.GitHEAD)
+	if err != nil {
+
+		return "", false
+	}
+
+	return parseLsRemoteSymref(out)
+}
+
+// parseLsRemoteSymref extracts the branch name from the first `ref: ...`
+// line of `git ls-remote --symref` output. Split out for unit-testability —
+// no git invocation, pure string parsing.
+func parseLsRemoteSymref(output string) (string, bool) {
+	const refPrefix = "refs/heads/"
+	for _, line := range strings.Split(output, "\n") {
+		trimmed := strings.TrimSpace(line)
+		if !strings.HasPrefix(trimmed, "ref: ") {
+			continue
+		}
+		// Format: "ref: refs/heads/<name>\tHEAD"
+		body := strings.TrimPrefix(trimmed, "ref: ")
+		fields := strings.Fields(body)
+		if len(fields) == 0 {
+			continue
+		}
+		if !strings.HasPrefix(fields[0], refPrefix) {
+			continue
+		}
+
+		return strings.TrimPrefix(fields[0], refPrefix), true
+	}
+
+	return "", false
+}
+
+// isDetachedHEAD reports whether `git rev-parse --abbrev-ref HEAD` returns
+// the literal "HEAD" sentinel. Used as a final disambiguator after every
+// fallback has been exhausted, so the returned source label accurately
+// distinguishes a true detached state from a fully opaque repo.
+func isDetachedHEAD(repoPath string) bool {
+	out, err := runGit(repoPath,
+		constants.GitRevParse, constants.GitAbbrevRef, constants.GitHEAD)
+	if err != nil {
+
+		return false
+	}
+
+	return strings.TrimSpace(out) == constants.GitHEAD
 }
 
 // Status returns the full live status of a repository.
