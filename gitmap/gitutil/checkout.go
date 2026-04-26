@@ -25,21 +25,9 @@ func CheckoutBranch(repoPath, branch string) (string, error) {
 	return strings.TrimRight(string(out), "\n"), err
 }
 
-// StripRemotePrefix removes the leading "<remote>/" from a ref so it
-// can be passed to `git checkout`. Git's DWIM (do-what-I-mean) handling
-// of `git checkout foo` will create a local tracking branch when a
-// matching remote-tracking ref exists, which is exactly what we want
-// for `gitmap lb --switch` and `gitmap branch default`.
-//
-// Returns the input unchanged when no slash is present.
-func StripRemotePrefix(ref string) string {
-	idx := strings.Index(ref, "/")
-	if idx < 0 {
-		return ref
-	}
+// StripRemotePrefix already lives in latestbranch.go (same package);
+// callers in this file reuse it directly.
 
-	return ref[idx+1:]
-}
 
 // ResolveDefaultBranchName returns the repo's default branch name by
 // asking `git symbolic-ref refs/remotes/origin/HEAD` first, then
