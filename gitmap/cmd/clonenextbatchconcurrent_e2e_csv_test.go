@@ -24,7 +24,11 @@ func TestE2E_BatchConcurrency_ByteIdenticalAcrossPoolSizes(t *testing.T) {
 	repos := makeRepoPaths(50)
 
 	baseline := runAndSerialize(t, repos, 1)
-	for _, workers := range []int{2, 4, 8, 16} {
+	// Pool sizes cover powers of two (1/2/4/8/16) AND odd/prime
+	// values (3/5/7/9) — the latter catch edge cases where jobs
+	// don't divide evenly across workers, exercising the trailing
+	// partial batch and uneven-drain paths in collectBatchResults.
+	for _, workers := range []int{2, 3, 4, 5, 7, 8, 9, 16} {
 		got := runAndSerialize(t, repos, workers)
 		if !bytes.Equal(baseline, got) {
 			t.Fatalf("CSV bytes differ at workers=%d (sequential vs parallel)\n--- want ---\n%s\n--- got ---\n%s",
