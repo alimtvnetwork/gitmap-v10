@@ -33,6 +33,13 @@ const (
 	GitCatFileTypeFlag = "-t"
 	GitCommitType      = "commit"
 	GitTagGlob         = "v*"
+	// GitSymbolicRef + GitRefsRemotesOriginHEAD power
+	// gitutil.ResolveDefaultBranchName, which backs `gitmap branch
+	// default` / `b def`. We ask `git symbolic-ref refs/remotes/origin/HEAD`
+	// to learn the upstream's chosen default (commonly main, sometimes
+	// master, occasionally trunk/develop) instead of guessing.
+	GitSymbolicRef            = "symbolic-ref"
+	GitRefsRemotesOriginHEAD  = "refs/remotes/origin/HEAD"
 )
 
 // Git arguments for latest-branch operations.
