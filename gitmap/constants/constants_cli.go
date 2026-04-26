@@ -214,6 +214,13 @@ const (
 	FlagDescLBNoFetch     = "Skip git fetch (use existing remote refs)"
 	FlagDescLBSort        = "Sort order: date (default, descending) or name (alphabetical)"
 	FlagDescLBFilter      = "Filter branches by glob or substring pattern"
+	// FlagDescLBSwitch / FlagDescLBSwitchShort document `gitmap lb
+	// --switch` / `gitmap lb -s`. Both register the SAME effect: after
+	// printing the latest-branch report, run `git checkout` against the
+	// resolved branch name. Useful as a single-keystroke "jump to whatever
+	// is freshest" workflow when reviewing PR work across many branches.
+	FlagDescLBSwitch      = "Checkout the resolved latest branch after printing the report"
+	FlagDescLBSwitchShort = "Short alias for --switch"
 	FlagDescGroup         = "Filter by group name"
 	FlagDescAll           = "Run against all tracked repos from database"
 	FlagDescListVerbose   = "Show full paths and URLs"
