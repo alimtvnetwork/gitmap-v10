@@ -99,6 +99,10 @@ func executeScan(dir string, cfg model.Config, outFile string, ghDesktop, openFo
 	bench.Phase("scan.alignDBIDs", func() {
 		records = alignRecordsWithDB(records, outputDir)
 	})
+	// Background probe: kicked off here so it runs concurrently with
+	// the project-detection / desktop-sync phases below. Drained
+	// before the "Done" banner unless --no-probe-wait was passed.
+	probeRunner := startBackgroundProbe(records, probeOpts, quiet)
 	fmt.Print(constants.MsgSectionProjects)
 	var detected []detector.DetectionResult
 	bench.Phase("scan.detectProjects", func() {
@@ -124,6 +128,9 @@ func executeScan(dir string, cfg model.Config, outFile string, ghDesktop, openFo
 	if !quiet {
 		fmt.Printf("  📊 Benchmark log: %s\n", filepath.Join(outputDir, scanBenchmarkFile))
 	}
+	bench.Phase("scan.backgroundProbeWait", func() {
+		drainBackgroundProbe(probeRunner, probeOpts, quiet)
+	})
 	fmt.Print(constants.MsgSectionDone)
 
 	// Mark scan task as completed after all steps succeed.
