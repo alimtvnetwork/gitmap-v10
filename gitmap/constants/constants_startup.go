@@ -53,6 +53,19 @@ const (
 	StartupFilePrefix = "gitmap-"
 )
 
+// macOS LaunchAgent convention. The marker uses a hyphen-free key
+// (`XGitmapManaged`) because plist keys are XML element text and
+// keeping them simple avoids any escaping ambiguity in tests / hand
+// edits. The on-disk filename prefix is `gitmap.` (reverse-DNS-ish)
+// so .plist files match the LaunchAgent convention while still
+// being cheap to pre-filter — same two-gate safety as Linux: the
+// filename prefix is a hint, the in-file marker is the proof.
+const (
+	StartupPlistExt    = ".plist"
+	StartupPlistMarker = "XGitmapManaged"
+	StartupPlistPrefix = "gitmap."
+)
+
 // Startup user-visible messages. Plain ASCII arrows / glyphs to stay
 // safe across terminals that don't render Unicode (matches the
 // PowerShell-encoding constraint documented in mem://constraints/
@@ -79,8 +92,12 @@ const (
 	ErrStartupRemoveUsage    = "usage: gitmap startup-remove <name>"
 	ErrStartupAddMissingExec = "startup-add: --exec is required " +
 		"(or run from an installed gitmap binary so we can auto-detect it)"
-	ErrStartupUnsupportedOS  = "startup commands are Linux/Unix-only " +
-		"(use the Windows startup commands on Windows)"
+	ErrStartupUnsupportedOS = "startup commands are not supported on this OS " +
+		"(Linux/Unix XDG autostart and macOS LaunchAgents are supported; " +
+		"on Windows use the Windows startup commands)"
+	ErrStartupAddDarwinTODO = "startup-add is not yet implemented for macOS " +
+		"(use list/remove for existing LaunchAgents; add support is tracked " +
+		"in the OS-agnostic startup roadmap)"
 )
 
 // startup-add CLI flag descriptions. Kept here (not in
