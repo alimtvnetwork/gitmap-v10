@@ -157,6 +157,7 @@ func ScanDirWithOptions(root string, opts ScanOptions) ([]RepoInfo, error) {
 		resolveWorkerCount(opts.Workers),
 		resolveMaxDepth(opts.MaxDepth),
 		opts.Progress,
+		opts.OnDirError,
 	)
 }
 
