@@ -36,12 +36,17 @@ import (
 	"github.com/alimtvnetwork/gitmap-v7/gitmap/startup"
 )
 
-// renderStartupList dispatches to the per-format encoder.
-func renderStartupList(format, dir string, entries []startup.Entry) error {
+// renderStartupList dispatches to the per-format encoder. The
+// `jsonIndent` parameter is only consulted for `--format=json`;
+// other formats ignore it (jsonl is line-oriented and minified by
+// design, csv has no nesting, table is human-prose). This keeps
+// shell scripts that always pass `--json-indent=N` regardless of
+// format from breaking when they switch to a non-json sink.
+func renderStartupList(format string, jsonIndent int, dir string, entries []startup.Entry) error {
 	switch format {
 	case constants.OutputJSON:
 
-		return encodeStartupListJSON(os.Stdout, entries)
+		return encodeStartupListJSON(os.Stdout, entries, jsonIndent)
 	case constants.StartupListFormatJSONL:
 
 		return encodeStartupListJSONL(os.Stdout, entries)
