@@ -11,7 +11,24 @@ import (
 )
 
 // LoadFromFile reads a JSON config file and returns a Config.
-// Returns default config if the file does not exist.
+//
+// Returns the default config when the file does not exist (so users
+// can run gitmap with no config at all). When the file DOES exist,
+// it is schema-validated before defaults are applied:
+//
+//  1. ValidateRawConfig checks every required top-level key is
+//     present in the raw JSON — catches "I forgot defaultMode"
+//     bugs that a typed unmarshal would silently mask with
+//     struct defaults.
+//  2. The bytes are unmarshaled onto a defaulted Config (so any
+//     new optional fields added later don't break old configs).
+//  3. ValidateConfig checks the resulting struct for invalid enum
+//     values — catches typos like `"defaultMode": "htps"` and
+//     explicit empty strings.
+//
+// Either validation step returning an error causes LoadFromFile to
+// return that error so the CLI fails fast at startup instead of
+// limping along with a partially-broken config.
 func LoadFromFile(path string) (model.Config, error) {
 	cfg := model.DefaultConfig()
 	data, err := os.ReadFile(path)
@@ -19,8 +36,21 @@ func LoadFromFile(path string) (model.Config, error) {
 
 		return cfg, handleMissingFile(err)
 	}
+	if err := ValidateRawConfig(data); err != nil {
 
-	return parseConfig(data, cfg)
+		return cfg, err
+	}
+	cfg, err = parseConfig(data, cfg)
+	if err != nil {
+
+		return cfg, err
+	}
+	if err := ValidateConfig(cfg); err != nil {
+
+		return cfg, err
+	}
+
+	return cfg, nil
 }
 
 // handleMissingFile returns nil for missing files, error otherwise.
