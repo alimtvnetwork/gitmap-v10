@@ -208,13 +208,7 @@ func WalkBatchFromDir(root string) ([]string, error) {
 	return absoluteAndSorted(repos), nil
 }
 
-// isGitRepo reports whether path contains a .git entry (file or directory —
-// `.git` files exist for git worktrees).
-func isGitRepo(path string) bool {
-	_, err := os.Stat(filepath.Join(path, ".git"))
-
-	return err == nil
-}
+// (IsGitRepo / isGitRepo live in repodetect.go.)
 
 // absoluteAndSorted resolves each input path to an absolute form and
 // returns the result sorted lexicographically. Paths that fail to resolve
@@ -235,3 +229,5 @@ func absoluteAndSorted(paths []string) []string {
 
 	return out
 }
+
+// (HasGitSubdir lives in repodetect.go.)

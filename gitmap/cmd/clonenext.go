@@ -45,8 +45,10 @@ func runCloneNext(args []string) {
 		}
 	}
 
-	// Batch mode: --csv or --all triggers the multi-repo dispatcher.
-	if shouldRunBatch(cnFlags) {
+	// Batch mode: --csv, --all, or implicit (cwd is not a git repo
+	// but has git subdirs one level down) triggers the multi-repo
+	// dispatcher. See shouldRunBatch for the priority order.
+	if shouldRunBatch(cnFlags, currentWorkingDir()) {
 		runCloneNextBatch(cnFlags.CSVPath, cnFlags.All, cnFlags.MaxConcurrency)
 
 		return
