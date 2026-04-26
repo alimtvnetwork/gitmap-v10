@@ -28,8 +28,11 @@ type batchRowResult struct {
 
 // runCloneNextBatch is the dispatcher invoked by runCloneNext when batch
 // mode is active. It loads the repo list, processes each one, and writes
-// a CSV report.
-func runCloneNextBatch(csvPath string, walkAll bool) {
+// a CSV report. `maxConcurrency` controls the worker-pool size: 1 keeps
+// the legacy sequential behavior with deterministic stdout ordering;
+// values >1 fan repos out across a bounded pool that mirrors the main
+// cloner's pattern (see gitmap/cloner/concurrent.go).
+func runCloneNextBatch(csvPath string, walkAll bool, maxConcurrency int) {
 	repos, err := loadBatchRepos(csvPath, walkAll)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, constants.ErrCloneNextBatchLoad, err)
@@ -38,7 +41,7 @@ func runCloneNextBatch(csvPath string, walkAll bool) {
 
 	fmt.Printf(constants.MsgCloneNextBatchStart, len(repos))
 
-	results := processBatchRepos(repos)
+	results := processBatchRepos(repos, maxConcurrency)
 	reportPath := writeBatchReport(results)
 	printBatchSummary(results, reportPath)
 }
@@ -60,11 +63,73 @@ func loadBatchRepos(csvPath string, walkAll bool) ([]string, error) {
 }
 
 // processBatchRepos runs cn-equivalent steps for each repo and collects
-// per-repo results without aborting on individual failures.
-func processBatchRepos(repos []string) []batchRowResult {
+// per-repo results without aborting on individual failures. Dispatches
+// to the sequential or concurrent runner based on `maxConcurrency`.
+func processBatchRepos(repos []string, maxConcurrency int) []batchRowResult {
+	workers := normalizeBatchWorkers(maxConcurrency, len(repos))
+	if workers > 1 {
+		fmt.Fprintf(os.Stderr, constants.MsgCloneConcurrencyEnabledFmt, workers)
+
+		return processBatchReposConcurrent(repos, workers)
+	}
+
 	out := make([]batchRowResult, 0, len(repos))
 	for _, repo := range repos {
 		out = append(out, processOneBatchRepo(repo))
+	}
+
+	return out
+}
+
+// normalizeBatchWorkers clamps the requested worker count to the work
+// queue size. Mirrors cloner.normalizeWorkers; duplicated rather than
+// imported to keep the cmd package free of an internal cloner dep
+// (this helper is 5 lines — the cost is trivial).
+func normalizeBatchWorkers(requested, jobs int) int {
+	if requested < 1 {
+		return 1
+	}
+	if requested > jobs && jobs > 0 {
+		return jobs
+	}
+
+	return requested
+}
+
+// processBatchReposConcurrent fans out per-repo work across a bounded
+// pool. Each worker pulls one repo from the job channel and writes its
+// outcome to the result channel; we collect in completion order, then
+// re-sort by input index so the CSV report rows still match the
+// caller's repo list ordering.
+func processBatchReposConcurrent(repos []string, workers int) []batchRowResult {
+	type indexedJob struct {
+		idx  int
+		path string
+	}
+	type indexedResult struct {
+		idx int
+		row batchRowResult
+	}
+
+	jobs := make(chan indexedJob, len(repos))
+	results := make(chan indexedResult, len(repos))
+
+	for w := 0; w < workers; w++ {
+		go func() {
+			for j := range jobs {
+				results <- indexedResult{idx: j.idx, row: processOneBatchRepo(j.path)}
+			}
+		}()
+	}
+	for i, r := range repos {
+		jobs <- indexedJob{idx: i, path: r}
+	}
+	close(jobs)
+
+	out := make([]batchRowResult, len(repos))
+	for i := 0; i < len(repos); i++ {
+		r := <-results
+		out[r.idx] = r.row
 	}
 
 	return out
