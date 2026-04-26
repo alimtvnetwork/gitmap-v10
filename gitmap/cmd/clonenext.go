@@ -47,7 +47,7 @@ func runCloneNext(args []string) {
 
 	// Batch mode: --csv or --all triggers the multi-repo dispatcher.
 	if shouldRunBatch(cnFlags) {
-		runCloneNextBatch(cnFlags.CSVPath, cnFlags.All)
+		runCloneNextBatch(cnFlags.CSVPath, cnFlags.All, cnFlags.MaxConcurrency)
 
 		return
 	}
