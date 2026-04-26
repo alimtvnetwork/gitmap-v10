@@ -65,7 +65,8 @@ func parseStartupListFlags(args []string) (string, error) {
 	}
 	switch *format {
 	case constants.StartupListFormatTable, constants.OutputTerminal,
-		constants.OutputJSON, constants.OutputCSV:
+		constants.OutputJSON, constants.StartupListFormatJSONL,
+		constants.OutputCSV:
 
 		return *format, nil
 	default:

@@ -42,6 +42,9 @@ func renderStartupList(format, dir string, entries []startup.Entry) error {
 	case constants.OutputJSON:
 
 		return encodeStartupListJSON(os.Stdout, entries)
+	case constants.StartupListFormatJSONL:
+
+		return encodeStartupListJSONL(os.Stdout, entries)
 	case constants.OutputCSV:
 
 		return encodeStartupListCSV(os.Stdout, entries)
@@ -103,6 +106,24 @@ const (
 // Empty input still encodes as `[]\n` (NOT `null`) so jq pipelines
 // that do `length` work without conditionals.
 func encodeStartupListJSON(w io.Writer, entries []startup.Entry) error {
+	return stablejson.WriteArray(w, buildStartupListJSONItems(entries))
+}
+
+// encodeStartupListJSONL writes one compact JSON object per line in
+// the same key order as encodeStartupListJSON. Empty input writes
+// zero bytes (NOT a stray `\n`) so `wc -l` of the stream equals the
+// entry count exactly. Going through buildStartupListJSONItems keeps
+// the JSON and JSONL field-order contracts byte-locked together —
+// any future add/remove/rename of a column lands in both formats in
+// one diff and the contract test below catches drift.
+func encodeStartupListJSONL(w io.Writer, entries []startup.Entry) error {
+	return stablejson.WriteJSONLines(w, buildStartupListJSONItems(entries))
+}
+
+// buildStartupListJSONItems is the single source of (field name,
+// field order, value) for both --format=json and --format=jsonl.
+// Centralized so a column rename or reorder is one diff, not two.
+func buildStartupListJSONItems(entries []startup.Entry) [][]stablejson.Field {
 	items := make([][]stablejson.Field, 0, len(entries))
 	for _, e := range entries {
 		items = append(items, []stablejson.Field{
@@ -112,7 +133,7 @@ func encodeStartupListJSON(w io.Writer, entries []startup.Entry) error {
 		})
 	}
 
-	return stablejson.WriteArray(w, items)
+	return items
 }
 
 // encodeStartupListCSV writes a header row followed by one row per
