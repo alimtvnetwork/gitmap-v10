@@ -26,6 +26,11 @@ s
 | --workers \<n\> | 0 (auto) | Worker-pool size for the parallel directory walker. `0` picks `min(NumCPU, 16)`; explicit values are clamped into `[1, 16]` to stay under the per-process file-descriptor budget |
 | --relative-root \<dir\> | (scan dir) | Pin the base directory used to compute every output `RelativePath`. Makes CSV/JSON/text/structure/clone-script artifacts byte-stable across cwds. Repos outside the root keep the scanner-computed path and emit a stderr warning |
 | --max-depth \<n\> | 4 | Hard cap on directory levels descended below the scan root. Scan root = depth 0, its children = depth 1, etc. Default 4 keeps walks bounded on huge trees; pass `-1` for unlimited (legacy behavior). Repos found earlier still stop their own subtree |
+| --probe-workers \<n\> | 3 | Worker-pool size for the background version probe. `0` disables it. The auto-trigger ceiling (50 repos) is bypassed when this flag is explicitly set |
+| --probe-concurrency \<n\> | — | Deprecated alias for `--probe-workers`; emits a one-line stderr notice |
+| --probe-depth \<n\> | 1 | `--depth N` passed to the `git clone` shallow-clone fallback inside the background probe. No effect on the `ls-remote` fast path |
+| --no-probe | false | Skip the background probe entirely (offline / air-gapped runs) |
+| --no-probe-wait | false | Return as soon as scan finishes; let probes keep draining until process exit |
 
 ## Prerequisites
 
