@@ -24,6 +24,7 @@ s
 | --no-vscode-sync | false | Skip syncing into VS Code Project Manager projects.json |
 | --no-auto-tags | false | Skip auto-derived tags (git/node/go/...) when syncing |
 | --workers \<n\> | 0 (auto) | Worker-pool size for the parallel directory walker. `0` picks `min(NumCPU, 16)`; explicit values are clamped into `[1, 16]` to stay under the per-process file-descriptor budget |
+| --relative-root \<dir\> | (scan dir) | Pin the base directory used to compute every output `RelativePath`. Makes CSV/JSON/text/structure/clone-script artifacts byte-stable across cwds. Repos outside the root keep the scanner-computed path and emit a stderr warning |
 
 ## Prerequisites
 
