@@ -40,6 +40,17 @@ const (
 	CmdDoctor                = "doctor"
 	CmdLatestBranch          = "latest-branch"
 	CmdLatestBranchAlias     = "lb"
+	// `gitmap branch <subcommand>` namespaces general branch-management
+	// helpers. First subcommand: `default` / `def` — checkout the repo's
+	// default branch (origin/HEAD or constants.DefaultBranch fallback).
+	// Designed for muscle-memory parity with `gitmap lb -s` (latest) so
+	// users can flip between "freshest" and "canonical" with a single
+	// short word. Subcommand strings live in constants_messages.go to
+	// keep all `branch`-specific tokens together.
+	CmdBranch                = "branch"
+	CmdBranchAlias           = "b"
+	CmdBranchSubDefault      = "default" // gitmap:cmd skip
+	CmdBranchSubDefaultAlias = "def"     // gitmap:cmd skip
 	CmdList                  = "list"
 	CmdListAlias             = "ls"
 	CmdGroup                 = "group"
