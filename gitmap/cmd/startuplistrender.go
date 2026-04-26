@@ -108,10 +108,37 @@ const (
 // fields are walked. See gitmap/stablejson/stablejson.go for the
 // full rationale and byte-compat guarantee.
 //
-// Empty input still encodes as `[]\n` (NOT `null`) so jq pipelines
-// that do `length` work without conditionals.
-func encodeStartupListJSON(w io.Writer, entries []startup.Entry) error {
-	return stablejson.WriteArray(w, buildStartupListJSONItems(entries))
+// `jsonIndent` controls whitespace ONLY: 0 emits a single-line
+// minified `[{"k":v}]\n` (matches `jq -c` framing), any positive
+// value N emits a pretty-printed document with N spaces per level.
+// Key order is identical across every indent value — the contract
+// test in startuplistjson_indent_contract_test.go pins this by
+// re-parsing each variant and comparing the key sequence.
+//
+// Empty input still encodes as `[]\n` regardless of indent (NOT
+// `null`, NOT zero bytes) so jq pipelines that do `length` work
+// without conditionals across all indent settings.
+func encodeStartupListJSON(w io.Writer, entries []startup.Entry, jsonIndent int) error {
+	indent := indentSpaces(jsonIndent)
+
+	return stablejson.WriteArrayIndent(w, buildStartupListJSONItems(entries), indent)
+}
+
+// indentSpaces converts the integer --json-indent value into the
+// per-level prefix string stablejson expects. 0 → empty (minified
+// branch); N>0 → N spaces. Centralized so a future "tabs" extension
+// (e.g. --json-indent=tab) lands in exactly one place.
+func indentSpaces(n int) string {
+	if n <= 0 {
+
+		return ""
+	}
+	out := make([]byte, n)
+	for i := range out {
+		out[i] = ' '
+	}
+
+	return string(out)
 }
 
 // encodeStartupListJSONL writes one compact JSON object per line in
