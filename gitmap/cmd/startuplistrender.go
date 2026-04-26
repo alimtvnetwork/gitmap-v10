@@ -16,6 +16,13 @@ package cmd
 // JSON / CSV encoders take an io.Writer (rather than hardcoding
 // os.Stdout) so contract tests can capture the bytes into a buffer
 // for byte-exact comparison against committed golden fixtures.
+//
+// JSON encoding goes through gitmap/stablejson rather than
+// encoding/json directly: stablejson builds each object key-by-key
+// in caller-declared order and CANNOT be reordered by a future Go
+// release or encoding/json/v2. The output is byte-identical to the
+// previous Encoder-based code, so the existing golden fixtures pass
+// unchanged. See gitmap/stablejson/stablejson.go for full rationale.
 
 import (
 	"encoding/csv"
