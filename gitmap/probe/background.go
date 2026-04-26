@@ -186,6 +186,9 @@ func (r *BackgroundRunner) workerLoop() {
 		if r.sink != nil {
 			r.sink(record, result)
 		}
+		if len(result.Error) > 0 && r.onFailure != nil {
+			r.onFailure(record, result)
+		}
 		r.tally(result)
 	}
 }
