@@ -204,10 +204,11 @@ func buildExcludeSet(dirs []string) map[string]bool {
 // keeps the worker function tiny (well under the per-func line limit) and
 // makes the synchronization rules obvious in one place.
 type scanState struct {
-	root    string
-	exclude map[string]bool
+	root     string
+	exclude  map[string]bool
+	maxDepth int // negative = unbounded; otherwise inclusive cap below root
 
-	queue chan string    // pending directories to walk
+	queue chan dirJob   // pending directories + their depth
 	wg    sync.WaitGroup // tracks outstanding queued items, NOT workers
 
 	mu       sync.Mutex
@@ -237,20 +238,21 @@ func (st *scanState) snapshot(final bool) ScanProgress {
 // from an unbounded-capacity FIFO and enqueues child directories back.
 // The queue is closed when wg drops to zero — i.e. every dispatched
 // directory has been fully processed and produced no new work.
-func walkParallel(root string, exclude map[string]bool, workers int, progress func(ScanProgress)) ([]RepoInfo, error) {
+func walkParallel(root string, exclude map[string]bool, workers, maxDepth int, progress func(ScanProgress)) ([]RepoInfo, error) {
 	st := &scanState{
-		root:    root,
-		exclude: exclude,
+		root:     root,
+		exclude:  exclude,
+		maxDepth: maxDepth,
 		// Buffer sized generously so workers rarely block on enqueue.
 		// A bounded buffer is fine — if it fills, workers backpressure
 		// each other, which is acceptable; deadlock is impossible
 		// because every send is paired with a wg.Add and the closer
 		// only fires after wg.Done across all sends.
-		queue: make(chan string, 1024),
+		queue: make(chan dirJob, 1024),
 	}
 
 	st.wg.Add(1)
-	st.queue <- root
+	st.queue <- dirJob{path: root, depth: 0}
 
 	stopProgress := startProgress(st, progress)
 
@@ -259,8 +261,8 @@ func walkParallel(root string, exclude map[string]bool, workers int, progress fu
 		workerWG.Add(1)
 		go func() {
 			defer workerWG.Done()
-			for dir := range st.queue {
-				st.processDir(dir)
+			for job := range st.queue {
+				st.processDir(job)
 				st.wg.Done()
 			}
 		}()
