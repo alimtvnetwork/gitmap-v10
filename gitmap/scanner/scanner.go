@@ -113,6 +113,14 @@ type ScanOptions struct {
 	// subtree as before — the cap only matters for paths that have NOT
 	// hit a `.git` marker yet.
 	MaxDepth int
+	// OnDirError, when non-nil, is invoked once per directory whose
+	// ReadDir fails. Receives the absolute directory path and the
+	// underlying error. Called from worker goroutines — implementations
+	// MUST be goroutine-safe. Independent of the legacy first-error
+	// return value, which is preserved for backward compat: callers
+	// that want PER-DIR attribution use this callback; callers that
+	// just want "did anything go wrong" keep using the err return.
+	OnDirError func(path string, err error)
 }
 
 // ScanDir walks root recursively and returns all Git repo paths found.
