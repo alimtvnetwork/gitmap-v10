@@ -34,7 +34,7 @@ import (
 // AND a documented schema bump (CSV consumers diff on these names).
 var expectedScanCSVHeaders = []string{
 	"repoName", "httpsUrl", "sshUrl", "branch", "branchSource",
-	"relativePath", "absolutePath", "cloneInstruction", "notes",
+	"relativePath", "absolutePath", "cloneInstruction", "notes", "depth",
 }
 
 // expectedLatestBranchCSVHeaders pins the latest-branch CSV layout.
@@ -84,14 +84,14 @@ func TestWriteCSV_ExactBytes(t *testing.T) {
 		SSHUrl: "git@example.com:u/repo-a.git", Branch: "main",
 		BranchSource: "head", RelativePath: "p/repo-a",
 		AbsolutePath: "/p/repo-a", CloneInstruction: "git clone X",
-		Notes: "n",
+		Notes: "n", Depth: 3,
 	}
 	var buf bytes.Buffer
 	if err := WriteCSV(&buf, []model.ScanRecord{rec}); err != nil {
 		t.Fatalf("WriteCSV: %v", err)
 	}
-	want := "repoName,httpsUrl,sshUrl,branch,branchSource,relativePath,absolutePath,cloneInstruction,notes\r\n" +
-		"repo-a,https://example.com/u/repo-a.git,git@example.com:u/repo-a.git,main,head,p/repo-a,/p/repo-a,git clone X,n\r\n"
+	want := "repoName,httpsUrl,sshUrl,branch,branchSource,relativePath,absolutePath,cloneInstruction,notes,depth\r\n" +
+		"repo-a,https://example.com/u/repo-a.git,git@example.com:u/repo-a.git,main,head,p/repo-a,/p/repo-a,git clone X,n,3\r\n"
 	if got := buf.String(); got != want {
 		t.Errorf("WriteCSV bytes mismatch.\n got: %q\nwant: %q", got, want)
 	}
