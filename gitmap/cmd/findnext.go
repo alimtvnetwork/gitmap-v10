@@ -60,7 +60,7 @@ func emitFindNextJSON(rows []model.FindNextRow) {
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "  ")
 	if err := enc.Encode(rows); err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
+		fmt.Fprintf(os.Stderr, constants.ErrFindNextJSONEncodeFmt, err)
 		os.Exit(1)
 	}
 }
