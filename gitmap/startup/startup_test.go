@@ -9,29 +9,20 @@ import (
 	"github.com/alimtvnetwork/gitmap-v7/gitmap/constants"
 )
 
-// withFakeAutostartDir points the OS-appropriate env var at a temp
-// dir so List / Remove operate against an isolated tree, then
-// returns the resolved autostart path so the test can write fixtures
-// into it.
-//
-//   - Linux/Unix: $XDG_CONFIG_HOME → <temp>/autostart
-//   - macOS:      $HOME            → <temp>/Library/LaunchAgents
-//   - Windows:    skipped (startup package returns an error)
+// withFakeAutostartDir points $XDG_CONFIG_HOME at a temp dir so the
+// Linux-shape List / Remove tests below operate against an isolated
+// .desktop tree. Skipped on Windows (unsupported) and macOS (whose
+// LaunchAgent path is exercised by plist_test.go instead — those
+// tests use a different fixture format and dir layout).
 func withFakeAutostartDir(t *testing.T) string {
 	t.Helper()
 	if runtime.GOOS == "windows" {
 		t.Skip("startup package does not support Windows")
 	}
-	root := t.TempDir()
 	if runtime.GOOS == "darwin" {
-		t.Setenv("HOME", root)
-		dir := filepath.Join(root, "Library", "LaunchAgents")
-		if err := os.MkdirAll(dir, 0o755); err != nil {
-			t.Fatalf("mkdir: %v", err)
-		}
-
-		return dir
+		t.Skip(".desktop tests are Linux-only; plist_test.go covers macOS")
 	}
+	root := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", root)
 	dir := filepath.Join(root, "autostart")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
