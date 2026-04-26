@@ -61,6 +61,8 @@ func parseCloneNextFlags(args []string) CloneNextFlags {
 	// later short alias if needed). Default 1 = sequential.
 	maxConcFlag := fs.Int(constants.CloneFlagMaxConcurrency,
 		constants.CloneDefaultMaxConcurrency, constants.FlagDescCloneMaxConcurrency)
+	noProgressFlag := fs.Bool(constants.FlagCloneNextNoProgress, false,
+		constants.FlagDescCloneNextNoProgress)
 	// Reorder so flags placed AFTER the positional version (e.g.
 	// `gitmap cn v+1 -f`) are still recognized. Go's stdlib flag
 	// parser stops at the first non-flag arg, so without this the
@@ -68,16 +70,17 @@ func parseCloneNextFlags(args []string) CloneNextFlags {
 	fs.Parse(reorderFlagsBeforeArgs(args))
 
 	out := CloneNextFlags{
-		Delete:       *delFlag,
-		Keep:         *kpFlag,
-		NoDesktop:    *noDesk,
-		CreateRemote: *createRem,
-		SSHKeyName:   *sshKey,
-		Verbose:      *verboseFlag,
-		CSVPath:      *csvPath,
-		All:          *allFlag,
+		Delete:         *delFlag,
+		Keep:           *kpFlag,
+		NoDesktop:      *noDesk,
+		CreateRemote:   *createRem,
+		SSHKeyName:     *sshKey,
+		Verbose:        *verboseFlag,
+		CSVPath:        *csvPath,
+		All:            *allFlag,
 		Force:          *forceFlag,
 		MaxConcurrency: *maxConcFlag,
+		NoProgress:     *noProgressFlag,
 	}
 	if fs.NArg() > 0 {
 		out.VersionArg = fs.Arg(0)
