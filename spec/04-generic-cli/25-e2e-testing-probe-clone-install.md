@@ -507,3 +507,188 @@ agent can pick them up without re-deriving context:
   retries are added.
 - **chocolatey/winget package install tests** — out of scope here per
   §1, but should follow the same fixture pattern when added.
+
+---
+
+## Appendix A — SHOULD-coverage backlog (deferred scenarios)
+
+This appendix promotes previously hand-waved "nice to have" items into
+specified, paste-ready scenarios. Every entry follows the same five-
+section contract used in §4 (preconditions, CLI, stdout/stderr/exit,
+DB delta, cleanup). Items here are **SHOULD**, not **MUST** — a host
+PR may defer any of them with written justification, but once
+implemented they belong under `tests/e2e_*_test/` next to the MUST
+suites and **MUST NOT** weaken the §7 invariants.
+
+IDs use the next free number per layer (P12+, C11+, I10+) so existing
+references stay stable.
+
+### A.1 Concurrent probe races
+
+#### P12 — Parallel `RunOne` against the same fixture
+
+- **Preconditions:** `repo := fixture.NewBareRepo(t, "v1.0.0", "v1.0.5", "v1.0.20")`.
+  DB row for `repo.URL` exists. Spawn `N := 16` goroutines.
+- **CLI:** each goroutine runs `gitmap-e2e probe ${repo.URL} --json`
+  via `runProbeCLI`; launched simultaneously through a
+  `sync.WaitGroup` + start barrier (`close(start)`).
+- **Stdout/stderr/exit:** every invocation exits `0`; every JSON
+  payload reports `nextVersionTag == "v1.0.20"`,
+  `method == "ls-remote"`, `isAvailable == true`.
+- **DB delta:** exactly `N` new `VersionProbe` rows for that `RepoId`,
+  all with the same `NextVersionTag`. Assert via
+  `db.CountVersionProbes(repoID) == before + N`. No row has a NULL
+  `Method` or partially-written `Error`.
+- **Cleanup:** §4.3 invariant; the bare repo's tree hash is unchanged
+  (`fixture.HashTree(repo.Dir)` matches its pre-test snapshot —
+  proves no goroutine corrupted the shared remote).
+
+#### P13 — Concurrent probes across distinct fixtures (no cross-talk)
+
+- **Preconditions:** create 4 fixtures with disjoint tag sets
+  (`v1.*`, `v2.*`, `v3.*`, `v4.*`). DB has one `Repo` row per fixture.
+- **CLI:** `gitmap-e2e probe --all --json` (single invocation; the
+  internal probe loop is currently sequential per §99 of the
+  v3.8.0 plan, so this test is a regression guard for the planned
+  Phase 2.5 worker pool).
+- **Expected:** JSON array length 4; each entry's `nextVersionTag`
+  matches its fixture's max tag.
+- **DB delta:** 4 new `VersionProbe` rows, one per `RepoId`. No row
+  carries a tag from another fixture's namespace.
+- **Cleanup:** §4.3 invariant; no `gitmap-probe-*` directory survived;
+  no `git` shim invocation referenced a URL outside its fixture.
+
+### A.2 Partial-clone resume / interruption
+
+#### P14 — Shallow-clone interrupted mid-flight, retried successfully
+
+- **Preconditions:** `repo := fixture.NewBareRepo(t, "v1.0.0")`.
+  Wrap `git` on `PATH` with a shim that, on the **first** `clone`
+  invocation, writes a partial `.git/objects/pack/tmp_pack_*` file
+  into the destination and exits with `signal: killed` (exit 137).
+  Subsequent invocations pass through to real `git`.
+- **CLI:** run `gitmap-e2e probe ${repo.URL}` twice in sequence.
+- **Expected (first run):** stdout contains
+  `MsgProbeFailFmt`; exit code `0`; `VersionProbe.Error` matches
+  `constants.ErrProbeCloneFail`. The orphan partial dir under
+  `os.TempDir()` **MUST** still be cleaned up by the production code's
+  `defer os.RemoveAll`.
+- **Expected (second run):** stdout contains `MsgProbeOkFmt` for
+  `v1.0.0`; new `VersionProbe` row with `IsAvailable == 1`.
+- **DB delta:** exactly two new `VersionProbe` rows total — one
+  failure, one success. No row references the partial-pack path.
+- **Cleanup:** §4.3 snapshot delta = 0 across both runs; the git shim
+  log shows exactly two `clone` invocations.
+
+#### C11 — Cloner resumes after a failed first attempt leaves a stub dir
+
+- **Preconditions:** pre-create `<target>/my-repo/` with a single empty
+  `.git/` directory (no `HEAD`, no objects) — simulates a prior
+  killed clone.
+- **CLI:** `gitmap-e2e clone ${repo.URL} --target-dir <target>`
+- **Expected stdout:** contains the cloner's "stale partial directory
+  detected, removing" message (must be promoted to a constant if not
+  already — `constants.MsgClonerStalePartial`).
+- **Exit code:** `0`.
+- **DB delta:** one `Repository` row inserted (or upserted) with the
+  fixture URL.
+- **Cleanup:** `<target>/my-repo/` contains a valid working tree
+  (`git -C <target>/my-repo rev-parse HEAD` exits `0`); no
+  `gitmap-probe-*` or `gitmap-clone-*` temp dir remains.
+
+### A.3 Malformed tag handling
+
+#### P15 — Non-semver tag in remote MUST be ignored, not crash
+
+- **Preconditions:** custom fixture
+  `fixture.NewBareRepoRawTags(t, "v1.0.0", "release-candidate", "1.0", "v1.0.5", "vNEXT")`.
+  Only `v1.0.0` and `v1.0.5` are valid `vMAJOR.MINOR.PATCH` tags.
+- **CLI:** `gitmap-e2e probe ${repo.URL} --json`
+- **Expected JSON:** `nextVersionTag == "v1.0.5"`, `nextVersionNum == 5`.
+  The malformed tags **MUST NOT** appear in stdout/stderr.
+- **Stderr:** empty.
+- **Exit code:** `0`. **MUST NOT** panic.
+- **DB delta:** one `VersionProbe` row, `NextVersionTag == "v1.0.5"`.
+- **Cleanup:** §4.3 invariant.
+
+#### P16 — Tag containing shell metacharacters MUST be inert
+
+- **Preconditions:** fixture seeded with tags `v1.0.0`,
+  `v1.0.1; rm -rf /`, `v1.0.2$(whoami)`. (`git` accepts these as long
+  as the names follow `git check-ref-format`; for any rejected by git
+  the fixture helper falls back to writing `refs/tags/<name>` directly
+  into the bare repo's `packed-refs` file.)
+- **CLI:** `gitmap-e2e probe ${repo.URL}`
+- **Expected:** highest **valid-semver** tag wins (`v1.0.2$(whoami)`
+  is non-semver per §A.3/P15 and ignored). Top result is `v1.0.0`
+  (the only clean tag) **or** `v1.0.1; rm -rf /` if the parser
+  considers a leading `v1.0.1` valid — in either case **no shell
+  expansion occurs**: assert that `/` is unmodified
+  (`os.Stat("/tmp/pwned")` returns `ErrNotExist`) and that no
+  `whoami` subprocess fired (git shim log).
+- **Exit code:** `0`. **MUST NOT** panic.
+- **DB delta:** one `VersionProbe` row; `NextVersionTag` value is
+  written verbatim (no truncation at `;` or `$`).
+- **Cleanup:** §4.3 invariant; PATH-shim log contains zero
+  `sh`/`bash`/`whoami` invocations.
+
+### A.4 Windows long-path probe directories
+
+These scenarios **MUST** be gated by a `runtime.GOOS == "windows"`
+guard and skipped with `t.Skip("windows-only")` elsewhere. They
+exercise the §3 fixtures under paths that exceed `MAX_PATH` (260)
+once the probe's temp-dir suffix is appended.
+
+#### P17 — Probe under a >260-char temp root succeeds
+
+- **Preconditions:** force the probe's temp root via
+  `t.Setenv("TMP", longRoot)` and `t.Setenv("TEMP", longRoot)`,
+  where `longRoot` is constructed as
+  `filepath.Join(t.TempDir(), strings.Repeat("d", 240))` and created
+  with the `\\?\` long-path prefix
+  (`os.MkdirAll(`\\?\` + longRoot, 0o755)`). Confirm
+  `len(longRoot) + len("gitmap-probe-XXXXXXXX") > 260`.
+  Fixture: `repo := fixture.NewBareRepo(t, "v1.0.0")`.
+  **Skip condition:** if `core.longpaths` is not enabled in the test's
+  scoped git config, `t.Skip` with a clear message — the failure
+  belongs to the environment, not the code under test.
+- **CLI:** `gitmap-e2e probe ${repo.URL}`
+- **Stdout:** contains `MsgProbeOkFmt` with `v1.0.0`.
+- **Exit code:** `0`.
+- **DB delta:** one `VersionProbe` row, `IsAvailable == 1`.
+- **Cleanup:** §4.3 invariant — `os.RemoveAll` succeeded against the
+  long path. Test fails if any `gitmap-probe-*` entry remains under
+  `longRoot`.
+
+#### P18 — Shallow-clone fallback under a >260-char temp root
+
+- **Preconditions:** as P17 but the URL points at a non-git directory
+  (the P7 setup) so the shallow-clone branch fires.
+- **CLI:** `gitmap-e2e probe ${repo.URL}`
+- **Expected:** stdout contains `MsgProbeFailFmt`; exit `0`;
+  `VersionProbe.Method == constants.ProbeMethodShallowClone`,
+  `IsAvailable == 0`, `Error` matches `constants.ErrProbeCloneFail`.
+- **Cleanup:** the long-path temp dir created by `tryShallowClone` is
+  removed; §4.3 invariant holds. Test fails with the offending path
+  if cleanup failed (this is the regression we care about — Windows
+  long-path `os.RemoveAll` historically silently leaks).
+
+#### C12 — Cloner target directory exceeds MAX_PATH
+
+- **Preconditions:** windows-only; pre-build a target dir whose path
+  is 250 chars and let the clone produce nested files that push the
+  full path past 260. Requires `git config --global core.longpaths true`
+  in the test's scoped HOME.
+- **CLI:** `gitmap-e2e clone ${repo.URL} --target-dir <longTarget>`
+- **Expected:** exit `0`; working tree present; no
+  `filename too long` in stderr.
+- **DB delta:** one `Repository` row.
+- **Cleanup:** removable via `os.RemoveAll(\\?\<longTarget>)`; no
+  orphan temp directories.
+
+### A.5 Coverage matrix update
+
+When any A-scenario lands, add a row to the §10 acceptance checklist
+under a new "SHOULD coverage" sub-section. The MUST list **MUST NOT**
+be modified — SHOULD items remain optional gates so a host PR can
+ship MUST coverage independently.
