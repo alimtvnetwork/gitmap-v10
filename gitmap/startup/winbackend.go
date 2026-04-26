@@ -86,3 +86,24 @@ func resolveBackendForAdd(b Backend) Backend {
 
 	return BackendUnspecified
 }
+
+// addWindows is the Windows branch of Add. Routes through the
+// chosen backend (Registry or Startup-folder). Lives here (not in
+// add.go) so all Windows dispatch code lives together. Both
+// backends return AddResult with Path set to a backend-appropriate
+// locator: registry value path for the Run-key entry, filesystem
+// path for the .lnk Startup-folder shortcut.
+func addWindows(clean string, opts AddOptions) (AddResult, error) {
+	backend := resolveBackendForAdd(opts.Backend)
+	switch backend {
+	case BackendRegistry:
+
+		return addWindowsRegistry(clean, opts)
+	case BackendStartupFolder:
+
+		return addWindowsStartupFolder(clean, opts)
+	default:
+
+		return AddResult{}, fmt.Errorf(constants.ErrStartupAddBadBackend, backend.String())
+	}
+}
