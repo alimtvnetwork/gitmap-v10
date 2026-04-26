@@ -99,6 +99,7 @@ func buildOneRecord(repo scanner.RepoInfo, opts BuildOptions) model.ScanRecord {
 		Branch: branch, BranchSource: branchSource,
 		RelativePath: repo.RelativePath, AbsolutePath: repo.AbsolutePath,
 		CloneInstruction: instruction, Notes: noteText,
+		Depth: repo.Depth,
 	}
 }
 
