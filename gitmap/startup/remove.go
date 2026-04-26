@@ -28,17 +28,22 @@ import (
 // RemoveResult tags every Remove outcome so callers can render the
 // right user-facing message without inspecting error text. The path
 // is empty for NotOurs / NoOp / BadName so callers don't accidentally
-// print a path the user can't act on.
+// print a path the user can't act on. DryRun reports whether the
+// outcome was simulated (no filesystem mutation) — set when the
+// caller passed RemoveOptions.DryRun=true and the status would
+// otherwise have been RemoveDeleted.
 type RemoveResult struct {
 	Status RemoveStatus
 	Path   string
+	DryRun bool
 }
 
 // RemoveStatus enumerates the four mutually-exclusive outcomes.
 type RemoveStatus int
 
 const (
-	// RemoveDeleted = file existed, was gitmap-managed, was unlinked.
+	// RemoveDeleted = file existed, was gitmap-managed, was unlinked
+	// (or, under DryRun, would have been unlinked).
 	RemoveDeleted RemoveStatus = iota
 	// RemoveNoOp = no file by that name in the autostart dir.
 	RemoveNoOp
@@ -48,16 +53,40 @@ const (
 	RemoveBadName
 )
 
+// RemoveOptions carries optional knobs for Remove. Kept as a struct
+// (not extra positional args) so future flags like Trash bool or
+// BackupTo string can be added without breaking callers.
+type RemoveOptions struct {
+	// DryRun runs the full classification (existence + marker check)
+	// but skips the actual os.Remove call. The returned RemoveResult
+	// has DryRun=true and the Status the live call would have
+	// produced — letting CLI renderers print "would delete X" with
+	// the same accuracy as a real run.
+	DryRun bool
+}
+
 // Remove deletes the named gitmap-managed autostart entry. `name`
 // is the basename WITHOUT the platform extension (the same form
 // `List` returns); a trailing platform extension is tolerated so
 // users who copy/paste from `ls` get the same behavior. The
 // extension is `.desktop` on Linux/Unix and `.plist` on macOS.
+//
+// This is the legacy entry point — equivalent to
+// RemoveWithOptions(name, RemoveOptions{}). New callers that need
+// dry-run semantics should call RemoveWithOptions directly.
 func Remove(name string) (RemoveResult, error) {
+	return RemoveWithOptions(name, RemoveOptions{})
+}
+
+// RemoveWithOptions is the full-featured entry point. The dry-run
+// branch reuses every classification check the live branch runs so
+// `--dry-run` cannot disagree with the real command — only the
+// final os.Remove is suppressed.
+func RemoveWithOptions(name string, opts RemoveOptions) (RemoveResult, error) {
 	clean := normalizeName(name)
 	if !isValidName(clean) {
 
-		return RemoveResult{Status: RemoveBadName}, nil
+		return RemoveResult{Status: RemoveBadName, DryRun: opts.DryRun}, nil
 	}
 	dir, err := AutostartDir()
 	if err != nil {
@@ -66,7 +95,7 @@ func Remove(name string) (RemoveResult, error) {
 	}
 	full := joinPath(dir, clean+platformExt())
 
-	return removeIfManaged(full)
+	return removeIfManaged(full, opts)
 }
 
 // normalizeName strips an optional platform extension and surrounding
