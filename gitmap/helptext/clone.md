@@ -88,6 +88,15 @@ each record's `branchSource` (captured during scan):
 This prevents "Remote branch not found" errors when a scan captured a
 detached HEAD or a literal `HEAD` value that cannot be checked out.
 
+Pass `--default-branch <name>` to override the last two rows: every
+record that would otherwise omit `-b` is rewritten with
+`branchSource=default` and `branch=<name>`, so the cloner emits
+`git clone -b <name> <url> <dest>`. A breadcrumb (`default-branch
+fallback applied: <name>`) is appended to the record's Notes so
+`--audit` and `CloneResult.Notes` make the substitution traceable.
+The flag uses the same constant as `gitmap scan --default-branch`
+to guarantee identical wording across both surfaces.
+
 ## Idempotent clone cache
 
 Repeated `gitmap clone` runs are idempotent. After each successful clone or
