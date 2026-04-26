@@ -100,6 +100,75 @@ func WriteArray(w io.Writer, items [][]Field) error {
 	return err
 }
 
+// WriteJSONLines writes `items` as JSON Lines (one compact object
+// per line, terminated by `\n` — RFC 7464-adjacent, the de-facto
+// `jsonl` format consumed by jq, fluentd, BigQuery, DuckDB, etc.).
+//
+// Each inner []Field is one object; field order within an object
+// follows the slice order verbatim, identical to WriteArray. The
+// difference is purely framing:
+//
+//   - WriteArray:    one pretty-printed `[…]` document, 2-space indent
+//   - WriteJSONLines: one compact `{…}` per line, no indent, no array
+//
+// Empty `items` writes ZERO bytes (NOT `\n`, NOT `[]`) so a consumer
+// that does `wc -l` on the stream sees `0` for an empty list. This
+// matches the JSON Lines convention used by jq's `--compact-output`
+// and is the only sensible empty-case for line-oriented pipelines.
+//
+// Each object is emitted with no inter-key whitespace — `{"k":v,"k2":v2}`
+// — to keep one logical record per physical line. A trailing `\n`
+// terminates every line including the last, so concatenating two
+// WriteJSONLines outputs produces a valid combined stream.
+func WriteJSONLines(w io.Writer, items [][]Field) error {
+	if len(items) == 0 {
+
+		return nil
+	}
+	var buf bytes.Buffer
+	for _, obj := range items {
+		if err := writeCompactObject(&buf, obj); err != nil {
+
+			return err
+		}
+		buf.WriteByte('\n')
+	}
+	_, err := w.Write(buf.Bytes())
+
+	return err
+}
+
+// writeCompactObject writes a single `{"k":v,"k2":v2}` block (no
+// whitespace between tokens) into buf. Key order follows the slice.
+// Each value is JSON-marshalled in isolation so a malformed value
+// fails the WHOLE call rather than emitting half a corrupt line —
+// critical for JSONL because a half-written line would desync every
+// downstream parser that splits on `\n`.
+func writeCompactObject(buf *bytes.Buffer, fields []Field) error {
+	buf.WriteByte('{')
+	for i, f := range fields {
+		if i > 0 {
+			buf.WriteByte(',')
+		}
+		keyBytes, err := json.Marshal(f.Key)
+		if err != nil {
+
+			return fmt.Errorf("stablejson: encode key %q: %w", f.Key, err)
+		}
+		buf.Write(keyBytes)
+		buf.WriteByte(':')
+		valBytes, err := json.Marshal(f.Value)
+		if err != nil {
+
+			return fmt.Errorf("stablejson: encode value for key %q: %w", f.Key, err)
+		}
+		buf.Write(valBytes)
+	}
+	buf.WriteByte('}')
+
+	return nil
+}
+
 // writeObject writes a single `{ ... }` block at array-item
 // indentation (2 spaces outer, 4 spaces inner) into buf. Keys appear
 // in the exact order given. Each value is JSON-marshalled in

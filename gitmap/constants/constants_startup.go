@@ -130,9 +130,15 @@ const (
 // default human-readable rendering ("terminal" works too).
 const (
 	FlagStartupListFormat     = "format"
-	FlagDescStartupListFormat = "Output format: table (default), json, or csv"
+	FlagDescStartupListFormat = "Output format: table (default), json, jsonl, or csv"
 	StartupListFormatTable    = "table"
-	ErrStartupListBadFormat   = "startup-list: unknown --format %q (expected: table, json, csv)"
+	// StartupListFormatJSONL is the jq/fluentd/BigQuery-friendly
+	// line-oriented variant of --format=json: one compact object
+	// per line, no array wrapper, empty list emits zero bytes.
+	// Stable key order within each object is guaranteed via
+	// stablejson.WriteJSONLines (same Field-slice contract as JSON).
+	StartupListFormatJSONL    = "jsonl"
+	ErrStartupListBadFormat   = "startup-list: unknown --format %q (expected: table, json, jsonl, csv)"
 	// CSV header row for `--format csv`. Kept here so the column
 	// order is centralized and tests can reference it.
 	StartupListCSVHeader = "name,path,exec"
