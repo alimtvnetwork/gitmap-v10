@@ -1,7 +1,7 @@
 package cmd
 
 // Reusable helpers for JSON snapshot tests (extracted from
-// startuplistjson_snapshot_test.go to keep that file under the
+// startuplistjson_snapshot_test.go to keep both files under the
 // 200-line code-style budget). Future `--format=json` snapshot
 // tests should land their helpers here too rather than spawning
 // per-feature helper files.
@@ -25,6 +25,7 @@ package cmd
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"testing"
 )
 
@@ -76,12 +77,12 @@ func assertObjectKeysExactAt(t *testing.T, idx int, got, want []string) {
 func readEveryObjectKeys(t *testing.T, raw []byte) [][]string {
 	t.Helper()
 	dec := json.NewDecoder(bytes.NewReader(raw))
-	if err := expectArrayStart(dec); err != nil {
+	if err := expectDelim(dec, '['); err != nil {
 		t.Fatalf("expected top-level array: %v", err)
 	}
 	var out [][]string
 	for dec.More() {
-		if err := expectObjectStart(dec); err != nil {
+		if err := expectDelim(dec, '{'); err != nil {
 			t.Fatalf("expected object at index %d: %v", len(out), err)
 		}
 		out = append(out, collectObjectKeys(t, dec))
@@ -90,145 +91,66 @@ func readEveryObjectKeys(t *testing.T, raw []byte) [][]string {
 	return out
 }
 
-// collectObjectKeys reads key-value pairs from an already-opened
-// JSON object (the `{` token has already been consumed) and returns
-// the keys in wire order. It skips each value with dec.Token() so
-// nested structures are handled correctly without recursive logic.
+// expectDelim reads the next token and confirms it's the requested
+// JSON delimiter (`[`, `]`, `{`, or `}`). One helper instead of
+// per-delimiter wrappers keeps the helpers file under budget while
+// keeping failure messages specific (the caller adds context).
+func expectDelim(dec *json.Decoder, want byte) error {
+	tok, err := dec.Token()
+	if err != nil {
+
+		return err
+	}
+	delim, ok := tok.(json.Delim)
+	if !ok || byte(delim.String()[0]) != want {
+
+		return fmt.Errorf("want delim %q, got %v (%T)", want, tok, tok)
+	}
+
+	return nil
+}
+
+// collectObjectKeys reads key-value pairs from dec until the
+// closing `}` is consumed, returning just the key names in
+// wire order. dec must already have consumed the opening `{`.
 func collectObjectKeys(t *testing.T, dec *json.Decoder) []string {
 	t.Helper()
 	var keys []string
 	for dec.More() {
-		keyTok, err := dec.Token()
+		tok, err := dec.Token()
 		if err != nil {
 			t.Fatalf("reading object key: %v", err)
 		}
-		key, ok := keyTok.(string)
+		key, ok := tok.(string)
 		if !ok {
-			t.Fatalf("expected string key, got %v", keyTok)
+			t.Fatalf("expected string key, got %v (%T)", tok, tok)
 		}
 		keys = append(keys, key)
-		if err := skipValue(dec); err != nil {
+		// Skip the value without decoding its type.
+		var raw json.RawMessage
+		if err := dec.Decode(&raw); err != nil {
 			t.Fatalf("skipping value for key %q: %v", key, err)
 		}
 	}
-	// consume the closing `}`
+	// Consume the closing '}'.
 	if _, err := dec.Token(); err != nil {
-		t.Fatalf("reading closing }: %v", err)
+		t.Fatalf("expected closing '}': %v", err)
 	}
 	return keys
 }
 
-// skipValue advances the decoder past exactly one JSON value,
-// handling scalars (single Token call) and composites (bracket
-// matching). This lets collectObjectKeys skip values without
-// unmarshalling them into Go types.
-func skipValue(dec *json.Decoder) error {
-	tok, err := dec.Token()
-	if err != nil {
-		return err
+// equalStringSlices returns true when a and b have identical length
+// and identical element values at every index.
+func equalStringSlices(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
 	}
-	delim, ok := tok.(json.Delim)
-	if !ok {
-		// scalar — already consumed
-		return nil
-	}
-	var closing json.Delim
-	switch delim {
-	case '{':
-		closing = '}'
-	case '[':
-		closing = ']'
-	default:
-		return nil
-	}
-	for dec.More() {
-		if err := skipValue(dec); err != nil {
-			return err
-		}
-		if delim == '{' {
-			// also skip the value half of the key:value pair
-			if err := skipValue(dec); err != nil {
-				return err
-			}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
 		}
 	}
-	tok, err = dec.Token()
-	if err != nil {
-		return err
-	}
-	if d, ok := tok.(json.Delim); !ok || d != closing {
-		return errBadDelim(string(closing), tok)
-	}
-	return nil
-}
-
-// expectArrayStart reads the next token and confirms it's `[`.
-// Factored out so readEveryObjectKeys stays readable and the error
-// message stays specific ("expected top-level array").
-func expectArrayStart(dec *json.Decoder) error {
-	tok, err := dec.Token()
-	if err != nil {
-
-		return err
-	}
-	if delim, ok := tok.(json.Delim); !ok || delim != '[' {
-
-		return errBadDelim("[", tok)
-	}
-
-	return nil
-}
-
-// expectObjectStart reads the next token and confirms it's `{`.
-// Mirror of expectArrayStart for the per-element check.
-func expectObjectStart(dec *json.Decoder) error {
-	tok, err := dec.Token()
-	if err != nil {
-
-		return err
-	}
-	if delim, ok := tok.(json.Delim); !ok || delim != '{' {
-
-		return errBadDelim("{", tok)
-	}
-
-	return nil
-}
-
-// errBadDelim builds a descriptive error for the expect* helpers.
-// Keeps the call sites narrow (single return) and the message
-// uniform ("want X, got <type> Y").
-func errBadDelim(want string, got any) error {
-	return &snapshotErr{want: want, got: got}
-}
-
-type snapshotErr struct {
-	want string
-	got  any
-}
-
-func (e *snapshotErr) Error() string {
-	return "want delim " + e.want + ", got " + sprintToken(e.got)
-}
-
-// sprintToken renders a json.Token in a form that distinguishes
-// `json.Delim('{')` from the literal string "{". Without this, a
-// schema test failing on an unexpected scalar would print the
-// scalar with no type info and the developer would have to guess.
-func sprintToken(tok any) string {
-	switch v := tok.(type) {
-	case json.Delim:
-
-		return "delim " + string(v)
-	case string:
-
-		return "string " + v
-	case nil:
-
-		return "nil"
-	}
-
-	return "unknown token"
+	return true
 }
 
 // stringSet is the tiny set helper used by the missing/unexpected
@@ -241,20 +163,4 @@ func stringSet(xs []string) map[string]bool {
 	}
 
 	return m
-}
-
-// equalStringSlices returns true iff a and b have the same length
-// and identical elements in the same order. Used by
-// assertObjectKeysExactAt to detect key reordering separately from
-// missing/unexpected keys so the failure message is precise.
-func equalStringSlices(a, b []string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
 }
