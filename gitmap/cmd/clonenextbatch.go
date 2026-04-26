@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/alimtvnetwork/gitmap-v7/gitmap/clonenext"
 	"github.com/alimtvnetwork/gitmap-v7/gitmap/constants"
