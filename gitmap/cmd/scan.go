@@ -78,8 +78,9 @@ func executeScan(dir string, cfg model.Config, outFile string, ghDesktop, openFo
 		os.Exit(1)
 	}
 	var records []model.ScanRecord
+	relRootBase := resolveRelativeRoot(relativeRoot, absDir, quiet)
 	bench.Phase("scan.buildRecords", func() {
-		records = mapper.BuildRecords(repos, cfg.DefaultMode, cfg.Notes)
+		records = mapper.BuildRecordsWithRoot(repos, cfg.DefaultMode, cfg.Notes, relRootBase)
 	})
 	outputDir := resolveOutputDir(cfg.OutputDir, absDir)
 	fmt.Printf(constants.MsgSectionArtifacts, outputDir)
