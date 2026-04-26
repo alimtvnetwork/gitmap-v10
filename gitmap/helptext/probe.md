@@ -5,21 +5,30 @@ Run the hybrid HEAD-then-clone version probe against one or every repo.
 ## Synopsis
 
 ```
-gitmap probe                   # probe every repo in the database
-gitmap probe --all             # explicit form of the above
-gitmap probe <repo-path>       # probe a single repo by absolute path
-gitmap probe --all --json      # emit a JSON array (CI-friendly)
-gitmap probe --all --workers 3 # raise the worker pool (cap = 3, default = 2)
+gitmap probe                            # probe every repo in the database
+gitmap probe --all                      # explicit form of the above
+gitmap probe <repo-path>                # probe a single repo by absolute path
+gitmap probe --all --json               # emit a JSON array (CI-friendly)
+gitmap probe --all --probe-workers 3    # raise the worker pool (cap = 3, default = 2)
+gitmap probe --all --probe-depth 25     # deepen the shallow-clone fallback
 ```
+
+## Flags
+
+| Flag | Default | Notes |
+|---|---|---|
+| `--probe-workers N` | `2` | Foreground worker pool. Capped at **3** because providers throttle bursts. Values < 1 rejected; values > 3 clamped with a stderr notice. |
+| `--workers N` | — | Deprecated alias for `--probe-workers`; emits a one-line stderr notice. |
+| `--probe-depth N` | `1` | `--depth N` passed to the `git clone` shallow-clone fallback. Bump when the latest tag lives further back than the first refs page. Has no effect on the `ls-remote` fast path. |
+| `--json` | off | Emit a JSON array instead of human progress lines. Order is always input order. |
 
 ## Concurrency
 
 Probes run through a small capped worker pool. Two workers by default
 keeps GitHub-style hosts comfortable; the cap is **3** because beyond
 that providers start returning HTTP 429 / `error: 429` from
-`ls-remote` more often than not. `--workers 0` is rejected; values
-above 3 are clamped to 3 with a one-line stderr notice. JSON output
-order is always input order, regardless of completion order.
+`ls-remote` more often than not. JSON output order is always input
+order, regardless of completion order.
 
 ## What it does
 
