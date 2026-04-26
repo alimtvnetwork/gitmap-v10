@@ -364,7 +364,13 @@ func validateShorthandPath(resolved string) string {
 // bounded worker pool in gitmap/cloner/concurrent.go. The on-disk
 // nested folder hierarchy is preserved at any N because each repo
 // still lands at filepath.Join(targetDir, rec.RelativePath).
-func executeClone(source, targetDir string, safePull, ghDesktop bool, maxConcurrency int) {
+//
+// defaultBranch is the optional `--default-branch` fallback. Empty
+// keeps the legacy "remote default HEAD" behavior for rows with an
+// untrustworthy Branch / BranchSource. Non-empty rewrites those rows
+// in cloner.applyDefaultBranchFallback so they go through the
+// trusted `git clone -b <fallback>` path.
+func executeClone(source, targetDir string, safePull, ghDesktop bool, maxConcurrency int, defaultBranch string) {
 	if maxConcurrency < 1 {
 		fmt.Fprintf(os.Stderr, constants.ErrCloneMaxConcurrencyInvalid, maxConcurrency)
 		os.Exit(1)
@@ -389,6 +395,7 @@ func executeClone(source, targetDir string, safePull, ghDesktop bool, maxConcurr
 	summary, err := cloner.CloneFromFileWithOptions(source, targetDir, cloner.CloneOptions{
 		SafePull:       safePull,
 		MaxConcurrency: maxConcurrency,
+		DefaultBranch:  defaultBranch,
 	})
 	if err != nil {
 		failPendingTask(taskDB, taskID, fmt.Sprintf(constants.ErrCloneFailed, source, err))
