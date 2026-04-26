@@ -4,6 +4,13 @@ package model
 import "github.com/alimtvnetwork/gitmap-v7/gitmap/constants"
 
 // ScanRecord holds all information about a discovered Git repository.
+//
+// Depth is the directory level at which the repo was found, counted
+// from the scan root (0 = the scan root itself, 1 = its immediate
+// children, …). Surfaced in CSV / JSON output so users can verify
+// when DefaultMaxDepth (or a custom --max-depth) prevented walking
+// into deeper directories: a row with Depth == cap is a candidate
+// for a deeper rescan.
 type ScanRecord struct {
 	ID               int64  `json:"id"               csv:"id"`
 	Slug             string `json:"slug"             csv:"slug"`
@@ -16,6 +23,7 @@ type ScanRecord struct {
 	AbsolutePath     string `json:"absolutePath"      csv:"absolutePath"`
 	CloneInstruction string `json:"cloneInstruction"  csv:"cloneInstruction"`
 	Notes            string `json:"notes"             csv:"notes"`
+	Depth            int    `json:"depth"             csv:"depth"`
 }
 
 // ReleaseConfig holds release-specific configuration from config.json.
