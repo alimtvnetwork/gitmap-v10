@@ -81,3 +81,99 @@ func TestE2E_BatchConcurrency_ProgressCallbackFires(t *testing.T) {
 		t.Fatalf("results length: got %d, want %d", len(results), len(repos))
 	}
 }
+
+// TestE2E_BatchConcurrency_CollectorReordersByInputIndex makes the
+// reorder-by-input-index contract explicit. The previous ordering
+// test relied on incidental sleep variance; this one *forces*
+// completion order to be the exact reverse of input order via
+// per-index sleeps, then asserts:
+//
+//  1. Completion order recorded by the worker stub is non-monotonic
+//     (proves the randomization actually happened — guards against a
+//     future change that accidentally serializes workers and makes
+//     the input-order check trivially pass).
+//  2. results[i].RepoPath == repos[i] for every i (proves the
+//     collector slots each result back into its input position
+//     regardless of which worker finished first).
+//
+// This is the canonical regression guard for collectBatchResults.
+func TestE2E_BatchConcurrency_CollectorReordersByInputIndex(t *testing.T) {
+	const n = 20
+	repos := makeRepoPaths(n)
+
+	var (
+		mu             sync.Mutex
+		completionOrder []string
+	)
+	original := processOneBatchRepoFn
+	processOneBatchRepoFn = func(path string) batchRowResult {
+		// Sleep proportional to (n - trailing-index) so repos at the
+		// end of the input list finish FIRST. With workers >= n every
+		// job starts immediately and completion order is deterministic
+		// reverse of input order.
+		idx := indexFromRepoPath(path)
+		time.Sleep(time.Duration(n-idx) * time.Millisecond)
+		mu.Lock()
+		completionOrder = append(completionOrder, path)
+		mu.Unlock()
+		return batchRowResult{RepoPath: path, FromVersion: "v1", ToVersion: "v2"}
+	}
+	t.Cleanup(func() { processOneBatchRepoFn = original })
+
+	// workers == n guarantees every job starts immediately, so the
+	// per-index sleep dictates completion order with no scheduling
+	// noise from queue depth.
+	results := processBatchReposConcurrent(repos, n, nil)
+
+	assertCompletionOrderRandomized(t, completionOrder, repos)
+	assertResultsMatchInputOrder(t, results, repos)
+}
+
+// indexFromRepoPath parses the trailing integer from the synthetic
+// "/tmp/repo-N" paths produced by makeRepoPaths.
+func indexFromRepoPath(path string) int {
+	var idx int
+	if _, err := fmt.Sscanf(path, "/tmp/repo-%d", &idx); err != nil {
+		return 0
+	}
+	return idx
+}
+
+// assertCompletionOrderRandomized fails the test when the recorded
+// completion order matches the input order — that would mean workers
+// finished in input order and the collector's reorder logic is never
+// actually exercised, making the input-order assertion meaningless.
+func assertCompletionOrderRandomized(t *testing.T, completionOrder, repos []string) {
+	t.Helper()
+	if len(completionOrder) != len(repos) {
+		t.Fatalf("completion order length %d != input %d",
+			len(completionOrder), len(repos))
+	}
+	matchesInputOrder := true
+	for i, p := range completionOrder {
+		if p != repos[i] {
+			matchesInputOrder = false
+			break
+		}
+	}
+	if matchesInputOrder {
+		t.Fatalf("completion order matched input order — randomization stub failed, " +
+			"reorder-by-index assertion would be trivial")
+	}
+}
+
+// assertResultsMatchInputOrder is the core contract check: even
+// though workers finished in scrambled order, results[i] must be
+// the row produced for repos[i].
+func assertResultsMatchInputOrder(t *testing.T, results []batchRowResult, repos []string) {
+	t.Helper()
+	if len(results) != len(repos) {
+		t.Fatalf("results length %d != input %d", len(results), len(repos))
+	}
+	for i, r := range results {
+		if r.RepoPath != repos[i] {
+			t.Fatalf("collector failed to reorder: results[%d].RepoPath = %q, want %q",
+				i, r.RepoPath, repos[i])
+		}
+	}
+}
