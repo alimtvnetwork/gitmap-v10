@@ -26,7 +26,21 @@ results first, run `gitmap probe --all`.
 | Flag | Effect |
 |---|---|
 | `--scan-folder <id>` | Restrict to repos discovered under one ScanFolder (see `gitmap sf list` for ids) |
-| `--json` | Emit a JSON array instead of the human-readable summary, for CI consumption |
+| `--json` | Emit a JSON array instead of the human-readable summary, for CI consumption (boolean — do **not** pass `=true`) |
+
+`--scan-folder` also accepts the equals form: `--scan-folder=2`.
+
+### Strict validation (v3.122.0+)
+
+Unknown or malformed flags now produce a stderr error and exit code **2** (usage error), distinct from the exit-1 used for I/O or DB failures. Examples:
+
+| Input | Result |
+|---|---|
+| `--jsno` | `unknown flag "--jsno" (did you mean "--json"?)` |
+| `--json=true` | `--json does not take a value (got "true")` |
+| `--scan-folder abc` | `--scan-folder expects an integer, got "abc"` |
+| `--scan-folder` (no value) | `--scan-folder requires an integer scan-folder ID` |
+| `oops` (positional) | `unexpected positional argument "oops"` |
 
 ## Examples
 
