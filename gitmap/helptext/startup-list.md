@@ -72,9 +72,8 @@ the `exec` field is the space-joined `ProgramArguments` array (or
 ```
 
 With `--json-indent=0` the same output collapses to one minified
-line. Key order is identical at every indent — the flag controls
-whitespace ONLY. The empty-list `[]\n` contract holds across all
-indent settings, so `jq length` keeps working.
+line. Key order is identical at every indent (whitespace only).
+The `[]\n` empty-list contract holds across all indent settings.
 
 ### `--format=jsonl`
 
