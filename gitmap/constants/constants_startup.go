@@ -100,3 +100,16 @@ const (
 	FlagDescStartupAddNoDisplay = "Set NoDisplay=true so the entry stays out of app menus"
 	FlagDescStartupAddForce   = "Overwrite an existing gitmap-managed entry (never overwrites third-party files)"
 )
+
+// startup-list CLI flag. Reuses the project-wide OutputTerminal/CSV/
+// JSON constants for values; "table" is accepted as an alias for the
+// default human-readable rendering ("terminal" works too).
+const (
+	FlagStartupListFormat     = "format"
+	FlagDescStartupListFormat = "Output format: table (default), json, or csv"
+	StartupListFormatTable    = "table"
+	ErrStartupListBadFormat   = "startup-list: unknown --format %q (expected: table, json, csv)"
+	// CSV header row for `--format csv`. Kept here so the column
+	// order is centralized and tests can reference it.
+	StartupListCSVHeader = "name,path,exec"
+)
