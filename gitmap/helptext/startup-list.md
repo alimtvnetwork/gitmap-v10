@@ -1,6 +1,6 @@
 # startup-list (sl)
 
-List Linux/Unix XDG autostart entries created and managed by gitmap.
+List user-scoped autostart entries created and managed by gitmap.
 
 ## Synopsis
 
@@ -13,15 +13,18 @@ gitmap sl --format=table
 
 ## Behavior
 
-Scans `$XDG_CONFIG_HOME/autostart/` (falling back to
-`$HOME/.config/autostart/`) for `.desktop` files that satisfy
-**both** conditions:
+Scans the OS-appropriate autostart directory for files that satisfy
+**both** the filename prefix gate AND an in-file marker:
 
-1. Filename starts with `gitmap-`
-2. Body contains `X-Gitmap-Managed=true`
+| OS         | Directory                                              | File prefix | Extension | Marker                          |
+|------------|--------------------------------------------------------|-------------|-----------|---------------------------------|
+| Linux/Unix | `$XDG_CONFIG_HOME/autostart/` or `~/.config/autostart/`| `gitmap-`   | `.desktop`| `X-Gitmap-Managed=true` line    |
+| macOS      | `~/Library/LaunchAgents/`                              | `gitmap.`   | `.plist`  | `<key>XGitmapManaged</key><true/>` |
 
 Third-party autostart entries are silently ignored, even if their
-filename happens to start with `gitmap-`.
+filename happens to start with the gitmap prefix. The marker is the
+real authority — the prefix is just a cheap pre-filter so we don't
+have to open every unrelated file in the directory.
 
 ## Flags
 
@@ -51,7 +54,9 @@ and exits 0 — never an error.
 ### `--format=json`
 
 Array of `{name, path, exec}` objects. Empty results render as `[]`
-(never `null`) so `jq` pipelines work without conditionals.
+(never `null`) so `jq` pipelines work without conditionals. On macOS
+the `exec` field is the space-joined `ProgramArguments` array (or
+`Program` if `ProgramArguments` is absent).
 
 ```json
 [
@@ -75,6 +80,19 @@ gitmap-sync-watcher,/home/user/.config/autostart/gitmap-sync-watcher.desktop,/us
 
 ## Platform notes
 
-Linux/Unix only. On Windows or macOS the command exits with a clear
-"Linux/Unix-only" message — use the platform-specific startup commands
-on those systems instead.
+Linux/Unix and macOS are supported. On Windows the command exits
+with a clear "unsupported OS" message — use the Windows startup
+commands on that platform instead.
+
+### macOS LaunchAgent caveats
+
+- `startup-list` and `startup-remove` operate on the `.plist` file
+  ONLY. They do NOT call `launchctl load/unload` — a removed plist
+  takes effect at the next login or after a manual
+  `launchctl unload <path>`. This is intentional: invoking
+  `launchctl` requires a running user GUI session and would make
+  automated uninstall scripts brittle on CI / SSH sessions.
+- Binary plists are not supported. Gitmap-managed entries are always
+  written in XML form, so a binary plist with our prefix is by
+  definition not ours and gets the same "refused" treatment as a
+  third-party file.
