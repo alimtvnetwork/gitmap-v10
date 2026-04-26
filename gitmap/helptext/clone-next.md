@@ -21,6 +21,9 @@ cn
 | --ssh-key \<name\> | (none) | Use a named SSH key for the clone |
 | --verbose | false | Write detailed debug log |
 | --create-remote | false | Create target GitHub repo if missing (requires GITHUB_TOKEN) |
+| --csv \<path\> | (none) | Batch mode: read repo paths from CSV (one per row) |
+| --all | false | Batch mode: cn every git repo one level under cwd |
+| --max-concurrency N | 1 | Batch mode: run up to N repos in parallel (1 = sequential) |
 
 ## Prerequisites
 
