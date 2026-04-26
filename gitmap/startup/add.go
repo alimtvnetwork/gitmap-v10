@@ -89,15 +89,23 @@ type AddResult struct {
 // Add is the public entry point. Returns (result, nil) for every
 // "soft" outcome; only real I/O failures produce a non-nil error.
 //
-// macOS NOTE: Add intentionally errors on darwin even though
-// AutostartDir() now resolves the LaunchAgents path. macOS plist
-// authoring (with ProgramArguments + RunAtLoad + Label) lives on the
-// roadmap as a separate step so this function can keep its tight
-// .desktop-only contract until then.
+// OS dispatch:
+//
+//   - linux/unix → writes a `.desktop` file with the
+//     X-Gitmap-Managed=true marker into AutostartDir().
+//   - darwin     → writes a LaunchAgent `.plist` with the
+//     XGitmapManaged <true/> marker into ~/Library/LaunchAgents/.
+//   - windows    → AutostartDir() returns the unsupported-OS error
+//     and we propagate it (the cmd runner ALSO short-circuits on
+//     windows; this is defense-in-depth so direct callers of the
+//     startup package can't accidentally land here either).
+//
+// Both OS paths share the same five-status outcome model
+// (Created/Overwritten/Refused/BadName/Exists) and the same
+// "managed-only, never escalate" guard — Force only lifts the
+// "already exists AND is ours" check; a third-party file is NEVER
+// overwritten.
 func Add(opts AddOptions) (AddResult, error) {
-	if runtime.GOOS == "darwin" {
-		return AddResult{}, fmt.Errorf(constants.ErrStartupAddDarwinTODO)
-	}
 	clean := normalizeName(opts.Name)
 	if !isValidName(clean) {
 		return AddResult{Status: AddBadName}, nil
@@ -109,14 +117,30 @@ func Add(opts AddOptions) (AddResult, error) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return AddResult{}, fmt.Errorf("create autostart dir %s: %w", dir, err)
 	}
-	full := joinPath(dir, prefixedFilename(clean))
+	full := joinPath(dir, platformFilename(clean))
 
 	return writeManaged(full, clean, opts)
 }
 
+// platformFilename picks the OS-specific filename shape. macOS uses
+// the reverse-DNS `gitmap.<name>.plist` convention; everything else
+// uses the XDG `gitmap-<name>.desktop` convention. Centralized here
+// so add.go's dispatch stays small and Remove's platformExt() and
+// this function can never disagree on which extension Add wrote.
+func platformFilename(clean string) string {
+	if runtime.GOOS == "darwin" {
+
+		return prefixedFilenamePlist(clean)
+	}
+
+	return prefixedFilename(clean)
+}
+
 // prefixedFilename ensures the on-disk name starts with the gitmap-
 // prefix exactly once. Callers passing "gitmap-foo" or "foo" both
-// land on "gitmap-foo.desktop".
+// land on "gitmap-foo.desktop". Linux/Unix only — the macOS analogue
+// is prefixedFilenamePlist (different prefix shape: `gitmap.` not
+// `gitmap-`, per LaunchAgent reverse-DNS labeling convention).
 func prefixedFilename(clean string) string {
 	if strings.HasPrefix(clean, constants.StartupFilePrefix) {
 		return clean + constants.StartupDesktopExt
@@ -136,7 +160,7 @@ func writeManaged(full, clean string, opts AddOptions) (AddResult, error) {
 	if exists && managed && !opts.Force {
 		return AddResult{Status: AddExists, Path: full}, nil
 	}
-	body := renderDesktop(clean, opts)
+	body := renderForOS(clean, opts)
 	if err := atomicWrite(full, body); err != nil {
 		return AddResult{}, err
 	}
@@ -145,6 +169,19 @@ func writeManaged(full, clean string, opts AddOptions) (AddResult, error) {
 	}
 
 	return AddResult{Status: AddCreated, Path: full}, nil
+}
+
+// renderForOS picks the per-OS body renderer. Same dispatch shape
+// as platformFilename so the format and the on-disk extension can
+// never drift apart (e.g., a future refactor that writes a .plist
+// body into a .desktop file would have to change both functions).
+func renderForOS(clean string, opts AddOptions) []byte {
+	if runtime.GOOS == "darwin" {
+
+		return renderPlist(clean, opts)
+	}
+
+	return renderDesktop(clean, opts)
 }
 
 // classifyTarget returns (exists, managed). A read error is treated
