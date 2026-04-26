@@ -94,11 +94,16 @@ func darwinLaunchAgentsDir() (string, error) {
 	return filepath.Join(home, "Library", "LaunchAgents"), nil
 }
 
-// List returns every gitmap-managed entry in the autostart dir. A
-// MISSING directory is treated as "zero entries", NOT an error —
-// fresh accounts that have never had any autostart file shouldn't
-// see a scary error from `gitmap startup-list`.
+// List returns every gitmap-managed entry. A MISSING directory /
+// registry key is treated as "zero entries", NOT an error — fresh
+// accounts that have never had any autostart entry shouldn't see a
+// scary error from `gitmap startup-list`. On Windows, enumerates
+// BOTH the Registry Run-key and Startup-folder backends.
 func List() ([]Entry, error) {
+	if runtime.GOOS == "windows" {
+
+		return listWindows()
+	}
 	dir, err := AutostartDir()
 	if err != nil {
 
