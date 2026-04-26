@@ -18,7 +18,8 @@ Clone-next flattens by default (v2.75.0+): clones into base name folder, tracks 
 Clone-next `-f` / `--force` (v3.50.0+): chdir-to-parent before remove when cwd IS target folder; refuses versioned-folder fallback.
 Completion generator uses marker-comment opt-in (v3.0.0+): `// gitmap:cmd top-level` on const block, `// gitmap:cmd skip` per spec. CI `generate-check` enforces drift.
 VS Code Project Manager sync: resolve user-data root per OS first, then append `User/globalStorage/alefragnani.project-manager/projects.json` — never hardcode the full path.
-Current version: v3.119.0.
+Current version: v3.152.0.
+Consumer-facing JSON outputs use `gitmap/stablejson` (key-by-key, no struct reflection) so field order cannot drift across Go versions or encoding/json/v2.
 `gitmap cn` accepts folder-arg forms (v3.117.0+): `cn vX <folder>`, `cn v+1 <folder>`, `cn <folder>` (defaults v++). Dispatcher in `clonenextfolderdispatch.go` runs BEFORE alias dispatcher; uses path-hint + os.Stat heuristic. Hero card uses `--accent-success` semantic token (no hardcoded greens).
 `gitmap clone <url>` cds into cloned folder via WriteShellHandoff (v3.118.0+) — single-URL only; multi-URL deliberately skips handoff.
 `gitmap inject` / `inj` (v3.119.0+): register existing folder with Desktop + VS Code, conditional DB upsert (only if `git remote get-url origin` succeeds). cwd default + optional positional via `resolveCloneNextFolder`. Any folder accepted (no `.git/` check). WriteShellHandoff at end.
@@ -50,6 +51,7 @@ Commit-both --interleave (v3.104.0+): author-date merged stream variant via `Run
 - [Release Alias](mem://features/release-alias) — gitmap as / release-alias (ra) / release-alias-pull (rap) with auto-stash labeled by alias-version-unixts, label-match pop for concurrent safety (v3.0.0)
 - [Self Install Uninstall](mem://features/self-install-uninstall) — gitmap self-install / self-uninstall manage the binary itself (separate from third-party install/uninstall). Embedded scripts via go:embed, Windows handoff, marker-block PATH cleanup
 - [Startup Management Unix](mem://features/startup-management-unix) — Linux/Unix `startup-list` (sl) + `startup-remove` (sr) for XDG autostart entries, scoped to `gitmap-` prefix + `X-Gitmap-Managed=true` marker (v3.133.0)
+- [Stable JSON Encoding](mem://features/stable-json-encoding) — `gitmap/stablejson` package: key-by-key encoding, byte-compat with json.Encoder, used by `startup-list --format=json` (v3.152.0)
 - [Replace Command](mem://features/replace-command) — gitmap replace literal "old" "new" / -N / --audit / all bumps `<base>-vN` and `<base>/vN` from git remote URL, interactive confirm before write, atomic temp+rename, binary skip (v3.96.0)
 - [Marker Comments](mem://features/marker-comments) — Decentralized opt-in for completion generator: `// gitmap:cmd top-level` + `// gitmap:cmd skip`, CI drift check enforces sync (v3.0.0)
 - [VS Code Project Manager Sync](mem://features/vscode-project-manager-sync) — gitmap scan auto-syncs and `gitmap code` registers + opens repos in alefragnani.project-manager projects.json (v3.38.0)
