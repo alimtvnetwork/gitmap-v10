@@ -21,9 +21,14 @@ type ScanProbeOptions struct {
 	// default; negative values disable the runner the same as --no-probe.
 	Concurrency int
 	// ConcurrencySet records whether the user explicitly passed
-	// --probe-concurrency. Used to bypass the auto-trigger ceiling
-	// for power users who clearly opted in.
+	// --probe-workers (or the deprecated --probe-concurrency alias).
+	// Used to bypass the auto-trigger ceiling for power users who
+	// clearly opted in.
 	ConcurrencySet bool
+	// Depth is the `--depth N` value forwarded to the shallow-clone
+	// fallback inside the background runner. Defaults to
+	// constants.ProbeDefaultDepth (1) when no flag was passed.
+	Depth int
 }
 
 // parseScanFlags parses flags for the scan command.
@@ -45,17 +50,40 @@ func parseScanFlags(args []string) (dir, configPath, mode, output, outFile, outp
 	noProbeWaitFlag := fs.Bool(constants.ScanProbeFlagNoWait, false, constants.FlagDescScanProbeNoWait)
 	probeConcFlag := fs.Int(constants.ScanProbeFlagConcurrency,
 		constants.ScanProbeDefaultConcurrency, constants.FlagDescScanProbeConcurrency)
+	probeWorkersFlag := fs.Int(constants.ScanProbeFlagProbeWorkers,
+		constants.ScanProbeDefaultConcurrency, constants.FlagDescScanProbeProbeWorkers)
+	probeDepthFlag := fs.Int(constants.ScanProbeFlagProbeDepth,
+		constants.ProbeDefaultDepth, constants.FlagDescScanProbeProbeDepth)
 	fs.Parse(args)
 
 	dir = resolveScanDir(fs)
-	probeOpts = ScanProbeOptions{
-		Disable:        *noProbeFlag,
-		NoWait:         *noProbeWaitFlag,
-		Concurrency:    *probeConcFlag,
-		ConcurrencySet: wasFlagPassed(fs, constants.ScanProbeFlagConcurrency),
-	}
+	probeOpts = resolveScanProbeOptions(fs, noProbeFlag, noProbeWaitFlag,
+		probeConcFlag, probeWorkersFlag, probeDepthFlag)
 
 	return dir, *cfgFlag, *modeFlag, *outputFlag, *outFileFlag, *outputPathFlag, *relRootFlag, *ghDesktopFlag, *openFlag, *quietFlag, *noVSCodeSyncFlag, *noAutoTagsFlag, *reportErrFlag, *workersFlag, *maxDepthFlag, probeOpts
+}
+
+// resolveScanProbeOptions reconciles the deprecated --probe-concurrency
+// against the unified --probe-workers. The new flag wins when both are
+// set; when only the deprecated one is set we honor it and emit a
+// one-line stderr deprecation notice. Depth comes through unchanged.
+func resolveScanProbeOptions(fs *flag.FlagSet, noProbe, noWait *bool,
+	probeConc, probeWorkers, probeDepth *int) ScanProbeOptions {
+	concSet := wasFlagPassed(fs, constants.ScanProbeFlagConcurrency)
+	workersSet := wasFlagPassed(fs, constants.ScanProbeFlagProbeWorkers)
+	conc := *probeWorkers
+	if !workersSet && concSet {
+		fmt.Fprint(os.Stderr, constants.MsgScanProbeConcurrencyAlias)
+		conc = *probeConc
+	}
+
+	return ScanProbeOptions{
+		Disable:        *noProbe,
+		NoWait:         *noWait,
+		Concurrency:    conc,
+		ConcurrencySet: workersSet || concSet,
+		Depth:          *probeDepth,
+	}
 }
 
 // wasFlagPassed reports whether the named flag was explicitly set on
