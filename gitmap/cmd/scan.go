@@ -43,7 +43,7 @@ func runScan(args []string) {
 // stage. This is the file users should attach when reporting "scan is
 // slow" — it pinpoints which phase (walk, DB upsert, project detection,
 // release import, desktop sync, …) actually consumed the time.
-func executeScan(dir string, cfg model.Config, outFile string, ghDesktop, openFolder, quiet, noVSCodeSync, noAutoTags bool, workers int, cache model.ScanCache, probeOpts ScanProbeOptions, relativeRoot string) {
+func executeScan(dir string, cfg model.Config, outFile string, ghDesktop, openFolder, quiet, noVSCodeSync, noAutoTags bool, workers, maxDepth int, cache model.ScanCache, probeOpts ScanProbeOptions, relativeRoot string) {
 	absDir := resolveScanTarget(dir)
 
 	bench := newScanBenchmark(absDir)
