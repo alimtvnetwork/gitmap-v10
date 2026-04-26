@@ -59,13 +59,20 @@ func processBatchReposConcurrent(repos []string, workers int, onResult func(batc
 	return collectBatchResults(repos, results, onResult)
 }
 
+// processOneBatchRepoFn is the worker entrypoint, exposed as a
+// package-level var so E2E tests can swap in a deterministic stub
+// without spawning real git processes. Default points at the real
+// implementation in clonenextbatch.go; production code never
+// reassigns it. Tests restore the original in t.Cleanup.
+var processOneBatchRepoFn = processOneBatchRepo
+
 // startBatchWorkers spins up the worker goroutines. Each one drains
 // the job channel until it closes.
 func startBatchWorkers(workers int, jobs <-chan indexedBatchJob, results chan<- indexedBatchResult) {
 	for w := 0; w < workers; w++ {
 		go func() {
 			for j := range jobs {
-				results <- indexedBatchResult{idx: j.idx, row: processOneBatchRepo(j.path)}
+				results <- indexedBatchResult{idx: j.idx, row: processOneBatchRepoFn(j.path)}
 			}
 		}()
 	}
