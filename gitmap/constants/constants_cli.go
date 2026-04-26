@@ -155,6 +155,15 @@ const (
 	FlagScanWorkers       = "workers"
 	FlagDescScanWorkers   = "Worker pool size for scan (0 = auto, capped at 16)"
 	DefaultScanWorkers    = 0
+	// FlagScanRelativeRoot lets the user pin the base path used to compute
+	// each repo's RelativePath in the output (CSV/JSON/text/structure/
+	// clone scripts). Without it, RelativePath is derived from the scan
+	// dir, which means running `gitmap scan .` from different cwds
+	// produces different paths for the same repos. With --relative-root,
+	// every output row is computed against the supplied (absolute or
+	// relative) directory so artifacts stay byte-stable across cwds.
+	FlagScanRelativeRoot     = "relative-root"
+	FlagDescScanRelativeRoot = "Pin the base directory used for output RelativePath (absolute or relative; must contain every scanned repo)"
 	FlagDescSetupConfig   = "Path to git-setup.json config file"
 	FlagDescDryRun        = "Preview changes without applying them"
 	FlagDescAssets        = "Directory or file to attach to the release"
