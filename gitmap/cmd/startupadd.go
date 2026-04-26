@@ -1,10 +1,11 @@
 package cmd
 
-// CLI runner for `gitmap startup-add`. Linux/Unix-only — on Windows
-// the dispatcher would land here too if we wired it cross-platform,
-// so we re-check runtime.GOOS up front and exit with the standard
-// "unsupported OS" message rather than letting the startup package's
-// directory resolver do it (gives a single consistent error path).
+// CLI runner for `gitmap startup-add`. Supports Linux/Unix (XDG
+// .desktop) and macOS (LaunchAgent .plist); Windows is rejected up
+// front with the standard "unsupported OS" message rather than
+// letting the startup package's directory resolver do it (gives a
+// single consistent error path and matches startup-list /
+// startup-remove on the same input).
 //
 // Output contract (matches startup-list / startup-remove):
 //   - Exactly one summary line per outcome.
