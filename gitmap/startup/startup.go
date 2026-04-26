@@ -1,18 +1,30 @@
-// Package startup manages Linux/Unix XDG autostart entries created by
-// gitmap. Scope is intentionally narrow:
+// Package startup manages user-scoped autostart entries created by
+// gitmap on the host OS:
 //
-//   - List enumerates ONLY .desktop files in the user's autostart
-//     directory that contain the X-Gitmap-Managed=true marker key.
-//     Third-party autostart entries are silently ignored.
-//   - Remove deletes a single named entry, but ONLY after re-confirming
-//     it carries the marker. A request to remove a third-party file
-//     becomes a refused no-op, never a deletion.
+//   - Linux/Unix: XDG `.desktop` files in `$XDG_CONFIG_HOME/autostart/`
+//     (or `$HOME/.config/autostart/`) carrying the `X-Gitmap-Managed=true`
+//     key.
+//   - macOS: LaunchAgent `.plist` files in `~/Library/LaunchAgents/`
+//     carrying a top-level `<key>XGitmapManaged</key><true/>` marker.
 //
-// macOS LaunchAgents (~/Library/LaunchAgents/*.plist) are NOT covered
-// here — they use a different format and lifecycle (launchctl
-// load/unload) that warrants its own implementation. The directory
-// resolver returns an error on darwin so the CLI prints the
-// "Linux/Unix-only" message instead of silently doing nothing.
+// On both OSes, List enumerates ONLY entries that satisfy BOTH the
+// filename prefix gate AND the in-file marker; Remove deletes one
+// named entry only after re-confirming it carries the marker. A
+// request to remove a third-party entry becomes a refused no-op,
+// never a deletion.
+//
+// Windows is intentionally NOT covered by this package — Windows uses
+// Registry `Run` keys / Startup folder shortcuts handled by separate
+// code. The directory resolver returns an error on Windows so the
+// CLI prints the "unsupported OS" message instead of touching a
+// non-existent directory.
+//
+// macOS LaunchAgent lifecycle (launchctl load/unload) is NOT
+// triggered here — list/remove operate on the .plist file ONLY. A
+// removed plist takes effect at the next login or after a manual
+// `launchctl unload`. This is intentional: invoking launchctl
+// requires a running user GUI session and would make automated
+// uninstall scripts brittle on CI / SSH sessions.
 package startup
 
 import (
@@ -26,27 +38,35 @@ import (
 )
 
 // Entry is one gitmap-managed autostart record. Path is the absolute
-// .desktop file path; Name is the basename WITHOUT the .desktop
+// file path; Name is the basename WITHOUT the platform-specific
 // extension (the form users pass to `startup-remove`); Exec is the
-// `Exec=` line value, surfaced so `startup-list` shows what would
-// actually run at login.
+// command line surfaced so `startup-list` shows what would actually
+// run at login. On macOS, Exec is the space-joined ProgramArguments
+// (or the Program string if ProgramArguments is absent).
 type Entry struct {
 	Name string
 	Path string
 	Exec string
 }
 
-// AutostartDir returns the absolute path to the user's XDG autostart
-// directory. Honors $XDG_CONFIG_HOME when set, otherwise falls back
-// to $HOME/.config/autostart per the freedesktop.org base-dir spec.
+// AutostartDir returns the absolute path to the user's autostart
+// directory for the current OS.
 //
-// Returns an error on Windows / macOS so callers can print the
-// platform-specific "unsupported OS" message rather than touching a
-// non-existent directory.
+//   - Linux/Unix: honors $XDG_CONFIG_HOME, falls back to
+//     $HOME/.config/autostart per freedesktop.org base-dir spec.
+//   - macOS: $HOME/Library/LaunchAgents (per Apple's LaunchAgents
+//     documentation; the user-domain location requires no sudo).
+//
+// Returns an error on Windows so callers print the platform-specific
+// "unsupported OS" message instead of touching a non-existent dir.
 func AutostartDir() (string, error) {
-	if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
+	if runtime.GOOS == "windows" {
 
 		return "", fmt.Errorf(constants.ErrStartupUnsupportedOS)
+	}
+	if runtime.GOOS == "darwin" {
+
+		return darwinLaunchAgentsDir()
 	}
 	if xdg := strings.TrimSpace(os.Getenv("XDG_CONFIG_HOME")); len(xdg) > 0 {
 
@@ -61,10 +81,23 @@ func AutostartDir() (string, error) {
 	return filepath.Join(home, ".config", "autostart"), nil
 }
 
+// darwinLaunchAgentsDir resolves $HOME/Library/LaunchAgents. Kept
+// separate so the macOS path-shape choice is in one place and tests
+// can override $HOME to point at a temp dir.
+func darwinLaunchAgentsDir() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+
+		return "", err
+	}
+
+	return filepath.Join(home, "Library", "LaunchAgents"), nil
+}
+
 // List returns every gitmap-managed entry in the autostart dir. A
-// MISSING directory is treated as "zero entries", NOT as an error —
-// fresh user accounts that have never had any autostart file
-// shouldn't see a scary error from `gitmap startup-list`.
+// MISSING directory is treated as "zero entries", NOT an error —
+// fresh accounts that have never had any autostart file shouldn't
+// see a scary error from `gitmap startup-list`.
 func List() ([]Entry, error) {
 	dir, err := AutostartDir()
 	if err != nil {
