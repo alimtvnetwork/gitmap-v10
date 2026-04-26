@@ -180,6 +180,14 @@ func runCloneNext(args []string) {
 		}
 	}
 
+	// Dry-run gate: print the planned clone command and exit BEFORE
+	// any side effect (clone, removal, DB write, GH Desktop, VS Code,
+	// shell handoff). Placed after target/folder resolution so the
+	// previewed url+dest match exactly what a real run would invoke.
+	if cnFlags.DryRun {
+		printCloneNextDryRun(targetURL, targetPath)
+	}
+
 	if cnFlags.Force {
 		fmt.Printf(constants.MsgCNStageClone, targetName)
 	}
