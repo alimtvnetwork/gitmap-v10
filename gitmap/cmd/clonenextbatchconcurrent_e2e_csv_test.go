@@ -10,10 +10,13 @@ package cmd
 
 import (
 	"bytes"
+	"encoding/csv"
 	"fmt"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/alimtvnetwork/gitmap-v7/gitmap/constants"
 )
 
 // TestE2E_BatchConcurrency_ByteIdenticalAcrossPoolSizes is the
@@ -93,4 +96,91 @@ func TestE2E_BatchConcurrency_FullWriteBatchReport(t *testing.T) {
 			t.Fatalf("row %d should contain %q, got %q", i, want, lines[i+1])
 		}
 	}
+}
+
+// TestE2E_BatchConcurrency_CSVStatusCountsMatchInMemory closes the
+// loop on the report-writing pipeline: the in-memory tallyBatch
+// counts (the values printed in the 1-line summary) MUST equal the
+// counts a downstream consumer would compute by re-parsing the CSV
+// from disk. A drift between these two views — e.g. a writer that
+// silently drops a row, mis-quotes the status field, or changes
+// column order — would corrupt every downstream dashboard while
+// leaving the in-process summary looking healthy.
+func TestE2E_BatchConcurrency_CSVStatusCountsMatchInMemory(t *testing.T) {
+	installStubProcessor(t)
+	t.Chdir(t.TempDir())
+
+	repos := makeRepoPaths(50)
+	results := processBatchReposConcurrent(repos, 4, nil)
+
+	wantOK, wantFailed, wantSkipped := tallyBatch(results)
+
+	reportPath := writeBatchReport(results)
+	if reportPath == "" {
+		t.Fatal("writeBatchReport returned empty path")
+	}
+	gotOK, gotFailed, gotSkipped := tallyCSVStatuses(t, reportPath)
+
+	if gotOK != wantOK || gotFailed != wantFailed || gotSkipped != wantSkipped {
+		t.Fatalf("CSV status counts diverged from in-memory tally:\n"+
+			"  in-memory: ok=%d failed=%d skipped=%d\n"+
+			"  csv-parse: ok=%d failed=%d skipped=%d",
+			wantOK, wantFailed, wantSkipped, gotOK, gotFailed, gotSkipped)
+	}
+}
+
+// tallyCSVStatuses re-parses the produced report with encoding/csv
+// (so quoting, escaping, and column order are all exercised) and
+// returns the bucket counts derived purely from the on-disk bytes.
+// Reads the status column by header name to stay resilient to
+// future column reorderings within the same header set.
+func tallyCSVStatuses(t *testing.T, path string) (ok, failed, skipped int) {
+	t.Helper()
+	f, err := os.Open(path)
+	if err != nil {
+		t.Fatalf("open report: %v", err)
+	}
+	defer f.Close()
+
+	rows, err := csv.NewReader(f).ReadAll()
+	if err != nil {
+		t.Fatalf("parse csv: %v", err)
+	}
+	if len(rows) < 1 {
+		t.Fatalf("csv has no header row")
+	}
+	statusCol := indexOfHeader(rows[0], "status")
+	if statusCol < 0 {
+		t.Fatalf("csv header missing 'status' column: %v", rows[0])
+	}
+	for _, row := range rows[1:] {
+		ok, failed, skipped = bumpStatusBucket(row[statusCol], ok, failed, skipped)
+	}
+	return ok, failed, skipped
+}
+
+// indexOfHeader returns the column index of name in header, or -1.
+func indexOfHeader(header []string, name string) int {
+	for i, h := range header {
+		if h == name {
+			return i
+		}
+	}
+	return -1
+}
+
+// bumpStatusBucket mirrors tallyBatch's switch but operates on the
+// raw status string read from the CSV (no enum coupling beyond the
+// shared constants). Unknown statuses are deliberately ignored so a
+// future bucket addition surfaces as a count mismatch in the caller.
+func bumpStatusBucket(status string, ok, failed, skipped int) (int, int, int) {
+	switch status {
+	case constants.BatchStatusOK:
+		ok++
+	case constants.BatchStatusFailed:
+		failed++
+	case constants.BatchStatusSkipped:
+		skipped++
+	}
+	return ok, failed, skipped
 }
