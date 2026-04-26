@@ -25,7 +25,6 @@ package cmd
 
 import (
 	"bytes"
-	"encoding/json"
 	"testing"
 
 	"github.com/alimtvnetwork/gitmap-v7/gitmap/startup"
@@ -111,7 +110,10 @@ func mustEncodeStartupList(t *testing.T, entries []startup.Entry) []byte {
 		t.Fatalf("encode: %v", err)
 	}
 
+	return append([]byte(nil), buf.Bytes()...)
+}
 
 // Schema-check helpers (assertEveryObjectKeysExact, etc.) live in
 // jsonsnapshot_helpers_test.go so this file stays focused on the
+// startup-list-specific test cases and under the 200-line budget.
 // startup-list-specific test cases and under the 200-line budget.
