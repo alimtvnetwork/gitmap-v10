@@ -120,7 +120,9 @@ func removeIfManaged(full string) (RemoveResult, error) {
 // race between `startup-list` printing and the user typing
 // `startup-remove` cannot trick us into deleting a file that has
 // since been replaced by a third-party autostart entry with the same
-// name.
+// name. Dispatches to the per-OS parser since the marker grammar
+// differs (`X-Gitmap-Managed=true` line vs `<key>XGitmapManaged</key>
+// <true/>` plist element pair).
 func isManagedFile(path string) bool {
 	f, err := os.Open(path)
 	if err != nil {
@@ -129,7 +131,24 @@ func isManagedFile(path string) bool {
 	}
 	defer f.Close()
 
+	if runtime.GOOS == "darwin" {
+		managed, _ := parsePlistFields(f)
+
+		return managed
+	}
 	managed, _ := parseDesktopFields(newScanner(f))
 
 	return managed
+}
+
+// platformExt returns the autostart filename extension for the
+// running OS. Centralized so Remove and normalizeName agree without
+// either importing the runtime constant directly.
+func platformExt() string {
+	if runtime.GOOS == "darwin" {
+
+		return constants.StartupPlistExt
+	}
+
+	return constants.StartupDesktopExt
 }
