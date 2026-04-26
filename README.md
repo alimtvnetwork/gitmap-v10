@@ -618,9 +618,9 @@ gitmap scan ~/edge --output csv
 
 ```csv
 repoName,httpsUrl,sshUrl,branch,branchSource,relativePath,absolutePath,cloneInstruction,notes,depth
-real-repo,,,main,head,real-repo,/home/u/edge/real-repo,git clone --branch main . real-repo,,1
-inner,,,main,head,nested-under-real/inner,/home/u/edge/nested-under-real/inner,git clone --branch main . inner,,2
-worktree-link,,,feature-x,head,worktree-link,/home/u/edge/worktree-link,git clone --branch feature-x . worktree-link,,1
+real-repo,https://github.com/u/real-repo.git,git@github.com:u/real-repo.git,main,head,real-repo,/home/u/edge/real-repo,git clone -b main https://github.com/u/real-repo.git real-repo,,1
+inner,https://github.com/u/inner.git,git@github.com:u/inner.git,main,head,nested-under-real/inner,/home/u/edge/nested-under-real/inner,git clone -b main https://github.com/u/inner.git nested-under-real/inner,,2
+worktree-link,https://github.com/u/main-repo.git,git@github.com:u/main-repo.git,feature-x,head,worktree-link,/home/u/edge/worktree-link,git clone -b feature-x https://github.com/u/main-repo.git worktree-link,,1
 ```
 
 Why each skipped row was rejected — match the row to the rules in
