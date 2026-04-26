@@ -18,6 +18,7 @@ lb
 | --format json\|csv\|terminal | terminal | Output format |
 | --no-fetch | false | Skip git fetch before query |
 | --sort date\|name | date | Sort order |
+| --switch, -s | false | Checkout the resolved latest branch after printing the report |
 
 ## Prerequisites
 
