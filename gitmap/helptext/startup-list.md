@@ -117,12 +117,10 @@ commands on that platform instead.
 ### macOS LaunchAgent caveats
 
 - `startup-list` and `startup-remove` operate on the `.plist` file
-  ONLY. They do NOT call `launchctl load/unload` — a removed plist
+  ONLY — they do NOT call `launchctl load/unload`. A removed plist
   takes effect at the next login or after a manual
-  `launchctl unload <path>`. This is intentional: invoking
-  `launchctl` requires a running user GUI session and would make
-  automated uninstall scripts brittle on CI / SSH sessions.
-- Binary plists are not supported. Gitmap-managed entries are always
-  written in XML form, so a binary plist with our prefix is by
-  definition not ours and gets the same "refused" treatment as a
-  third-party file.
+  `launchctl unload <path>`. Intentional: `launchctl` requires a
+  GUI session, making automated uninstall scripts brittle on CI.
+- Binary plists are not supported. Gitmap-managed entries are
+  always XML, so a binary plist with our prefix is treated as
+  third-party and refused.
