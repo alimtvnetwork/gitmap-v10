@@ -51,12 +51,11 @@ type BackgroundRunner struct {
 	stats   runnerStats
 }
 
-// runnerStats tracks per-bucket counters under its own mutex so
-// Stats() can be read mid-flight without racing with workers.
+// runnerStats tracks per-bucket counters under its own mutex.
 type runnerStats struct {
-	mu                            sync.Mutex
-	queued                        int
-	available, unchanged, failed  int
+	mu                           sync.Mutex
+	queued                       int
+	available, unchanged, failed int
 }
 
 // NewBackgroundRunner spins up `workers` goroutines feeding from a
