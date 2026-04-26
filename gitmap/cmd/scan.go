@@ -21,7 +21,7 @@ import (
 // runScan handles the "scan" subcommand.
 func runScan(args []string) {
 	checkHelp("scan", args)
-	dir, cfgPath, mode, output, outFile, outputPath, relativeRoot, ghDesktop, openFolder, quiet, noVSCodeSync, noAutoTags, reportErrors, workers, maxDepth, probeOpts := parseScanFlags(args)
+	dir, cfgPath, mode, output, outFile, outputPath, relativeRoot, defaultBranch, ghDesktop, openFolder, quiet, noVSCodeSync, noAutoTags, reportErrors, workers, maxDepth, probeOpts := parseScanFlags(args)
 	cfg, err := config.LoadFromFile(cfgPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, constants.ErrConfigLoad, cfgPath, err)
@@ -33,7 +33,7 @@ func runScan(args []string) {
 		OutFile: outFile, OutputPath: outputPath,
 		GithubDesktop: ghDesktop, OpenFolder: openFolder, Quiet: quiet,
 	}
-	executeScan(dir, cfg, outFile, ghDesktop, openFolder, quiet, noVSCodeSync, noAutoTags, reportErrors, workers, maxDepth, cache, probeOpts, relativeRoot)
+	executeScan(dir, cfg, outFile, ghDesktop, openFolder, quiet, noVSCodeSync, noAutoTags, reportErrors, workers, maxDepth, cache, probeOpts, relativeRoot, defaultBranch)
 }
 
 // executeScan performs the directory scan and outputs results.
@@ -43,7 +43,7 @@ func runScan(args []string) {
 // stage. This is the file users should attach when reporting "scan is
 // slow" — it pinpoints which phase (walk, DB upsert, project detection,
 // release import, desktop sync, …) actually consumed the time.
-func executeScan(dir string, cfg model.Config, outFile string, ghDesktop, openFolder, quiet, noVSCodeSync, noAutoTags, reportErrors bool, workers, maxDepth int, cache model.ScanCache, probeOpts ScanProbeOptions, relativeRoot string) {
+func executeScan(dir string, cfg model.Config, outFile string, ghDesktop, openFolder, quiet, noVSCodeSync, noAutoTags, reportErrors bool, workers, maxDepth int, cache model.ScanCache, probeOpts ScanProbeOptions, relativeRoot, defaultBranch string) {
 	absDir := resolveScanTarget(dir)
 
 	bench := newScanBenchmark(absDir)
@@ -83,7 +83,12 @@ func executeScan(dir string, cfg model.Config, outFile string, ghDesktop, openFo
 	var records []model.ScanRecord
 	relRootBase := resolveRelativeRoot(relativeRoot, absDir, quiet)
 	bench.Phase("scan.buildRecords", func() {
-		records = mapper.BuildRecordsWithRoot(repos, cfg.DefaultMode, cfg.Notes, relRootBase)
+		records = mapper.BuildRecordsWithOptions(repos, mapper.BuildOptions{
+			Mode:          cfg.DefaultMode,
+			DefaultNote:   cfg.Notes,
+			RelRoot:       relRootBase,
+			DefaultBranch: defaultBranch,
+		})
 	})
 	outputDir := resolveOutputDir(cfg.OutputDir, absDir)
 	fmt.Printf(constants.MsgSectionArtifacts, outputDir)
