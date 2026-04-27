@@ -29,8 +29,10 @@ import (
 // renders them in the chosen format. The default `table` format
 // matches the legacy human-readable output; `json` and `csv` exist
 // for piping into other tools (jq, spreadsheet imports, etc).
+// --backend and --name filter the result set in-memory before the
+// renderer runs so format-specific code paths stay untouched.
 func runStartupList(args []string) {
-	format, jsonIndent, err := parseStartupListFlags(args)
+	opts, err := parseStartupListFlags(args)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(2)
@@ -40,20 +42,34 @@ func runStartupList(args []string) {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
+	entries = filterStartupList(entries, opts.backend, opts.name)
 	dir, _ := startup.AutostartDir()
-	if err := renderStartupList(format, jsonIndent, dir, entries); err != nil {
+	if err := renderStartupList(opts.format, opts.jsonIndent, dir, entries); err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
 }
 
-// parseStartupListFlags extracts --format and --json-indent and
-// validates each independently. Unknown values fail fast with exit
-// 2 so scripts catch typos immediately rather than getting silent
-// fall-through to a default rendering. --json-indent is parsed and
-// validated even when the format ignores it, so a typo like
-// `--json-indent=99` is caught regardless of the chosen format.
-func parseStartupListFlags(args []string) (string, int, error) {
+// startupListOpts bundles the parsed flag values so the dispatcher
+// stays a one-liner and adding a future filter (e.g., --since) is
+// one struct field + one parser line, never a signature change.
+type startupListOpts struct {
+	format     string
+	jsonIndent int
+	backend    string
+	name       string
+}
+
+// parseStartupListFlags extracts --format, --json-indent, --backend,
+// and --name and validates each independently. Unknown values fail
+// fast with exit 2 so scripts catch typos immediately rather than
+// getting silent fall-through to a default rendering. --json-indent
+// is parsed and validated even when the format ignores it, so a
+// typo like `--json-indent=99` is caught regardless of the chosen
+// format. --backend rejects unknown values with the same shape as
+// startup-add so the user sees one consistent message across both
+// commands.
+func parseStartupListFlags(args []string) (startupListOpts, error) {
 	fs := flag.NewFlagSet("startup-list", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	format := fs.String(
@@ -66,24 +82,54 @@ func parseStartupListFlags(args []string) (string, int, error) {
 		constants.StartupListJSONIndentDefault,
 		constants.FlagDescStartupListJSONIndent,
 	)
+	backend := fs.String(
+		constants.FlagStartupListBackend, "",
+		constants.FlagDescStartupListBackend,
+	)
+	name := fs.String(
+		constants.FlagStartupListName, "",
+		constants.FlagDescStartupListName,
+	)
 	if err := fs.Parse(args); err != nil {
 
-		return "", 0, err
+		return startupListOpts{}, err
 	}
 	if *jsonIndent < 0 || *jsonIndent > constants.StartupListJSONIndentMax {
 
-		return "", 0, fmt.Errorf(constants.ErrStartupListBadJSONIndent, *jsonIndent)
+		return startupListOpts{}, fmt.Errorf(constants.ErrStartupListBadJSONIndent, *jsonIndent)
+	}
+	if err := validateStartupListBackend(*backend); err != nil {
+
+		return startupListOpts{}, err
 	}
 	switch *format {
 	case constants.StartupListFormatTable, constants.OutputTerminal,
 		constants.OutputJSON, constants.StartupListFormatJSONL,
 		constants.OutputCSV:
 
-		return *format, *jsonIndent, nil
+		return startupListOpts{
+			format: *format, jsonIndent: *jsonIndent,
+			backend: *backend, name: *name,
+		}, nil
 	default:
 
-		return "", 0, fmt.Errorf(constants.ErrStartupListBadFormat, *format)
+		return startupListOpts{}, fmt.Errorf(constants.ErrStartupListBadFormat, *format)
 	}
+}
+
+// validateStartupListBackend rejects unknown --backend values with
+// the same error message shape as startup-add. Empty (== no filter)
+// is always valid.
+func validateStartupListBackend(b string) error {
+	switch b {
+	case "",
+		constants.StartupBackendRegistry,
+		constants.StartupBackendStartupFolder:
+
+		return nil
+	}
+
+	return fmt.Errorf(constants.ErrStartupListBadBackend, b)
 }
 
 // runStartupRemove deletes a single managed entry. After --dry-run
