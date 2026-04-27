@@ -943,7 +943,7 @@ jobs:
   test-summary:
     name: Test Summary
     runs-on: ubuntu-latest
-    needs: [sha-check, lint, lint-baseline-diff, vulncheck, generate-check, cmd-naming-check, constants-naming-check, constants-collision-check, test, full-suite-guard]
+    needs: [sha-check, lint, lint-baseline-diff, vulncheck, generate-check, cmd-naming-check, constants-naming-check, constants-collision-check, golden-allow-leak-check, test, full-suite-guard]
     if: always()
     steps:
       - name: Already validated
