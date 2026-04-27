@@ -91,16 +91,22 @@ const CommandPalette = () => {
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-card text-muted-foreground text-xs font-sans hover:bg-muted/50 hover:text-foreground transition-colors"
-      >
-        <Search className="h-3 w-3" />
-        <span className="hidden sm:inline">Search...</span>
-        <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground">
-          ⌘K
-        </kbd>
-      </button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onClick={() => setOpen(true)}
+            aria-label="Open command palette (search commands, flags, pages)"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-card text-muted-foreground text-xs font-sans hover:bg-muted/50 hover:text-foreground transition-colors"
+          >
+            <Search className="h-3 w-3" />
+            <span className="hidden sm:inline">Search...</span>
+            <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground">
+              ⌘K
+            </kbd>
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">Search commands, flags & pages (⌘K)</TooltipContent>
+      </Tooltip>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput placeholder="Search commands, flags, pages..." />
