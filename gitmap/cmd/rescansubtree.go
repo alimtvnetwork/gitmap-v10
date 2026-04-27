@@ -1,6 +1,16 @@
 package cmd
 
-// CLI entry point for `gitmap rescan-subtree <absolutePath>`.
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strconv"
+
+	"github.com/alimtvnetwork/gitmap-v7/gitmap/constants"
+)
+
+// runRescanSubtree is the CLI entry point for
+// `gitmap rescan-subtree <absolutePath>`.
 //
 // Workflow this command supports:
 //
@@ -27,19 +37,6 @@ package cmd
 //	    existing directory. Distinct from the scan failure exit code so
 //	    shell wrappers can tell "you invoked me wrong" apart from "the
 //	    walk itself failed".
-
-import (
-	"fmt"
-	"os"
-	"path/filepath"
-	"strconv"
-
-	"github.com/alimtvnetwork/gitmap-v7/gitmap/constants"
-)
-
-// runRescanSubtree validates <absolutePath> and forwards the rest of
-// argv to runScan with a deeper default --max-depth applied when the
-// caller did not specify one.
 func runRescanSubtree(args []string) {
 	checkHelp("rescan-subtree", args)
 
@@ -217,14 +214,19 @@ func startsWith(s, prefix string) bool {
 // flag form we don't bother decoding.
 func extractMaxDepthForLog(scanArgs []string) string {
 	want := constants.FlagScanMaxDepth
+	prefixDouble := "--" + want + "="
+	prefixSingle := "-" + want + "="
 	for i, a := range scanArgs {
+		// Space form: `--max-depth N` / `-max-depth N`. The bare token
+		// must end the inspection — falling through to the inline-form
+		// check would mis-classify a malformed `--max-depth` (no value)
+		// as a non-match and let the loop wander into unrelated flags.
 		if a == "--"+want || a == "-"+want {
 			if i+1 < len(scanArgs) {
 				return scanArgs[i+1]
 			}
+			return "auto"
 		}
-		prefixDouble := "--" + want + "="
-		prefixSingle := "-" + want + "="
 		if startsWith(a, prefixDouble) {
 			return a[len(prefixDouble):]
 		}

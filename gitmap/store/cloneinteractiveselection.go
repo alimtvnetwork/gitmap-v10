@@ -36,12 +36,5 @@ func (db *DB) SaveClonePickSelection(plan clonepick.Plan) (int64, error) {
 	return res.LastInsertId()
 }
 
-// boolToInt encodes Go bools as SQLite's 0/1 integers. Local helper
-// to keep the column-list call site readable.
-func boolToInt(b bool) int {
-	if b {
-		return 1
-	}
-
-	return 0
-}
+// boolToInt is shared with release.go (same package). Defined once
+// there to avoid `redeclared in this block` (go vet / go build).
