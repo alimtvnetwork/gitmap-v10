@@ -445,6 +445,41 @@ jobs:
         shell: bash
         run: python3 .github/scripts/check-constants-collisions.py
 
+  golden-allow-leak-check:
+    # Defends the GITMAP_ALLOW_GOLDEN_UPDATE gate: this env var is the
+    # second of two defense-in-depth keys guarding fixture regeneration,
+    # and project policy is that **CI and shipped scripts must never
+    # set it** — only humans set it locally when they deliberately
+    # regenerate goldens. A leak in a workflow `env:` block, a Make
+    # target, a `.sh`/`.ps1` setup script, or a stray `os.Setenv(...)`
+    # outside the goldenguard package would silently unlock fixture
+    # rewrites on every CI run.
+    #
+    # The check is per-file-type (shell / PowerShell / YAML / Makefile
+    # / Dockerfile / Go) so it matches assignment SYNTAX rather than
+    # the bare token. That avoids ~100% false positives from the many
+    # legitimate mentions in test error messages, comments, helptext
+    # markdown, and the regoldens command's child-process env slice.
+    # Only gitmap/goldenguard/ is whitelisted (it owns the var).
+    #
+    # See spec/05-coding-guidelines/21-golden-fixture-regeneration.md
+    # §6 (CI Posture) for the policy this enforces.
+    name: GITMAP_ALLOW_GOLDEN_UPDATE Leak Check
+    runs-on: ubuntu-latest
+    needs: sha-check
+    steps:
+      - name: Already validated
+        if: needs.sha-check.outputs.already-built == 'true'
+        run: echo "SHA ${{ github.sha }} already passed golden-allow leak check"
+
+      - uses: actions/checkout@v6
+        if: needs.sha-check.outputs.already-built != 'true'
+
+      - name: Run golden-allow leak guard
+        if: needs.sha-check.outputs.already-built != 'true'
+        shell: bash
+        run: bash .github/scripts/check-no-golden-allow-leak.sh
+
   generate-check:
     # Guarantees that every Cmd* constant added to a scanned constants_*.go
     # is reflected in completion/allcommands_generated.go. If a contributor
