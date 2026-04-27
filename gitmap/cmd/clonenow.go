@@ -28,12 +28,13 @@ import (
 // cloneNowFlags holds parsed CLI inputs. Grouped in a struct so
 // future additions don't churn every helper signature.
 type cloneNowFlags struct {
-	file    string
-	execute bool
-	quiet   bool
-	mode    string
-	format  string
-	cwd     string
+	file     string
+	execute  bool
+	quiet    bool
+	mode     string
+	format   string
+	cwd      string
+	onExists string
 }
 
 // runCloneNow is the dispatcher entry. checkHelp handles `--help`
@@ -42,7 +43,7 @@ type cloneNowFlags struct {
 func runCloneNow(args []string) {
 	checkHelp("clone-now", args)
 	cfg := parseCloneNowFlags(args)
-	plan, err := clonenow.ParseFile(cfg.file, cfg.format, cfg.mode)
+	plan, err := clonenow.ParseFile(cfg.file, cfg.format, cfg.mode, cfg.onExists)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -72,6 +73,8 @@ func parseCloneNowFlags(args []string) cloneNowFlags {
 		constants.FlagDescCloneNowFormat)
 	fs.StringVar(&cfg.cwd, constants.FlagCloneNowCwd, "",
 		constants.FlagDescCloneNowCwd)
+	fs.StringVar(&cfg.onExists, constants.FlagCloneNowOnExists,
+		constants.CloneNowOnExistsSkip, constants.FlagDescCloneNowOnExists)
 	reordered := reorderFlagsBeforeArgs(args)
 	fs.Parse(reordered)
 	if fs.NArg() < 1 {
@@ -94,9 +97,17 @@ func validateCloneNowFlags(cfg cloneNowFlags) {
 	}
 	switch cfg.format {
 	case "", constants.CloneNowFormatJSON, constants.CloneNowFormatCSV, constants.CloneNowFormatText:
+	default:
+		fmt.Fprintf(os.Stderr, constants.ErrCloneNowBadFormat+"\n", cfg.format)
+		os.Exit(2)
+	}
+	switch cfg.onExists {
+	case constants.CloneNowOnExistsSkip,
+		constants.CloneNowOnExistsUpdate,
+		constants.CloneNowOnExistsForce:
 		return
 	}
-	fmt.Fprintf(os.Stderr, constants.ErrCloneNowBadFormat+"\n", cfg.format)
+	fmt.Fprintf(os.Stderr, constants.ErrCloneNowBadOnExists+"\n", cfg.onExists)
 	os.Exit(2)
 }
 
