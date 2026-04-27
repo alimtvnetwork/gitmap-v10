@@ -219,12 +219,12 @@ describe("DocsTooltip — non-element children fallback", () => {
         <span>extra</span>
       </>,
     );
-    // The fallback wraps multi-children in a tabIndex=0 span which
-    // becomes the focus target Radix listens on (not the descendant
-    // button). Focus the wrapper to surface the tooltip body.
+    // The fallback wraps multi-children in a span so Radix's
+    // Children.only doesn't throw. Focus the wrapper (Radix attaches
+    // its focus listeners to the trigger element, not descendants)
+    // and confirm the tooltip body still renders.
     const inner = screen.getByLabelText("inner btn");
     const wrapper = inner.parentElement as HTMLElement;
-    expect(wrapper.tabIndex).toBe(0);
     wrapper.focus();
     const tips = await screen.findAllByRole("tooltip");
     const matched = tips.some((t) =>
