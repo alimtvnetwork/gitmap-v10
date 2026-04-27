@@ -48,6 +48,7 @@ func previewDryRunBatch(csvPath string, walkAll bool) {
 	fmt.Print(constants.MsgCloneNextDryRunHeader)
 	count := emitDryRunRows(repos)
 	fmt.Printf(constants.MsgCloneNextDryRunFooter, count)
+	maybeExitOnCmdFaithfulMismatch()
 	os.Exit(0)
 }
 
