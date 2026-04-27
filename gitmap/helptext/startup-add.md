@@ -84,12 +84,40 @@ Pass an absolute path. Relative paths are accepted as-is and
 interpreted by the OS at login time. Omit the flag (or pass `""`)
 to inherit whatever directory the login session provides.
 
+## Windows backends
+
+| `--backend`         | Hive | Scope             | Admin? | Path |
+|---------------------|------|-------------------|--------|------|
+| `registry` (default)| HKCU | Current user      | no     | `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\gitmap-<name>` |
+| `registry-hklm`     | HKLM | Every user (machine-wide) | **yes** | `HKLM\Software\Microsoft\Windows\CurrentVersion\Run\gitmap-<name>` |
+| `startup-folder`    | —    | Current user      | no     | `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\gitmap-<name>.lnk` |
+
+The `registry-hklm` backend writes the autostart value under
+`HKEY_LOCAL_MACHINE` so it fires for **every interactive user** on
+the machine — useful for shared workstations, kiosks, and lab
+images. Tracking metadata is mirrored at
+`HKLM\Software\Gitmap\StartupRegistry\<name>` so `startup-list
+--backend=registry-hklm` can attribute each entry to gitmap
+without touching `HKCU`.
+
+Writes (add / remove) require administrator privileges. The
+process token is checked **before** any registry mutation; if you
+are not elevated the command exits with a friendly:
+
+    startup-add: --backend=registry-hklm requires administrator privileges
+    (re-run from an elevated shell, e.g. `Run as administrator` from the
+    Start menu, or use the per-user `--backend=registry` default)
+
+`startup-list --backend=registry-hklm` and `startup-remove
+--backend=registry-hklm --dry-run` are read-only and work for any
+user (no elevation needed).
+
 ## Prerequisites
 
 - Linux or other Unix with `~/.config/autostart` (XDG-compliant).
 - macOS uses LaunchAgents — not handled here.
-- On Windows, the command exits with the standard "unsupported OS"
-  message.
+- Windows: any backend works for `--output=json`/terminal alike;
+  `registry-hklm` additionally requires UAC elevation for writes.
 
 ## Safety
 
