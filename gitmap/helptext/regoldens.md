@@ -101,12 +101,19 @@ gitmap rg --pattern TestCloneFromReportJSON_Golden \
   --package ./gitmap/clonefrom/ --diff=full
 ```
 
+Run a determinism pre-check; fail fast before any fixture is rewritten:
+
+```
+gitmap rg --pattern TestCloneFromReportJSON_Golden \
+  --package ./gitmap/clonefrom/ --determinism
+```
+
 ## Exit codes
 
 | Code | Meaning |
 |---|---|
-| 0 | Both passes succeeded (or `--dry-run`/`--skip-verify` completed). |
-| 1 | Pass 1 (regenerate) or pass 2 (verify) failed — see stderr. |
+| 0 | Pre-check (if requested), pass 1, and pass 2 all succeeded (or `--dry-run`/`--skip-verify` completed). |
+| 1 | Pre-check, pass 1, or pass 2 failed — see stderr. The pre-check failure message names the non-deterministic writer; pass 1 was NOT run and no fixtures were touched. |
 | 2 | Bad CLI usage (missing `--pattern`, or invalid `--diff` value). |
 
 ## After regenerating
