@@ -79,6 +79,8 @@ func bindRegoldensFlags(fs *flag.FlagSet, cfg *regoldensFlags) {
 		constants.FlagDescRegoldensSkipVerify)
 	fs.BoolVar(&cfg.isDryRun, constants.FlagRegoldensDryRun, false,
 		constants.FlagDescRegoldensDryRun)
+	fs.BoolVar(&cfg.showDiff, constants.FlagRegoldensDiff, false,
+		constants.FlagDescRegoldensDiff)
 }
 
 // emitRegoldensDryRun prints both invocations without executing.
