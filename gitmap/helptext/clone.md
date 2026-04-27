@@ -22,6 +22,7 @@ c
 | --max-concurrency \<N\> | 1 | Run up to N clones in parallel (1 = sequential). Hierarchy is preserved at any N. |
 | --default-branch \<name\> | (none) | Fallback branch name when HEAD/remote-tracking detection finds nothing. Rewrites `branchSource=detached \| unknown \| empty` rows so they go through the trusted `git clone -b <name>` path instead of relying on the remote's default HEAD. Empty preserves legacy behavior. |
 | --verbose | false | Write detailed debug log |
+| --output \<mode\> | (off) | `terminal` streams a standardized branch/from/to/command block to **stdout** immediately before each URL's `git clone`. Git progress and the per-repo summary stay on **stderr**. Pipe stdout to capture just the previews. |
 
 ## Hierarchy preservation
 

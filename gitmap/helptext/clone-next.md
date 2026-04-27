@@ -24,6 +24,7 @@ cn
 | --csv \<path\> | (none) | Batch mode: read repo paths from CSV (one per row) |
 | --all | false | Batch mode: cn every git repo one level under cwd |
 | --max-concurrency N | 1 | Batch mode: run up to N repos in parallel (1 = sequential) |
+| --output \<mode\> | (off) | `terminal` prints the standardized branch/from/to/command block on **stdout** before the clone runs (one block per repo in batch mode). Git progress and version-transition lines stay on **stderr**. |
 
 ## Prerequisites
 
