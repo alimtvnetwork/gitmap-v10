@@ -75,7 +75,10 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <MotionConfig reducedMotion="user">
-    <TooltipProvider>
+    <TooltipProvider
+      delayDuration={DOCS_TOOLTIP_DELAY_MS}
+      skipDelayDuration={DOCS_TOOLTIP_SKIP_DELAY_MS}
+    >
       <Toaster />
       <Sonner />
       <BrowserRouter>
