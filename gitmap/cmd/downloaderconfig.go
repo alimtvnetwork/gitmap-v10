@@ -5,7 +5,7 @@
 //
 //  1. Path supplied  → load JSON from disk, validate, save to Setting DB.
 //  2. No path        → interactive prompt, pre-populated from current
-//                      DB values (or downloaderconfig.Defaults() if none).
+//     DB values (or downloaderconfig.Defaults() if none).
 //
 // All actual download / install logic ships in Slice 2 (aria2c installer
 // + engine) and Slice 3 (download / download-unzip commands). This command

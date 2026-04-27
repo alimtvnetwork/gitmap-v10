@@ -8,7 +8,7 @@ type DatabaseExport struct {
 	Repos      []ScanRecord           `json:"repos"`
 	Groups     []GroupExport          `json:"groups"`
 	Releases   []ReleaseRecord        `json:"releases"`
-	History    []CommandHistoryRecord  `json:"history"`
+	History    []CommandHistoryRecord `json:"history"`
 	Bookmarks  []BookmarkRecord       `json:"bookmarks"`
 }
 

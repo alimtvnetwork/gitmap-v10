@@ -12,13 +12,13 @@ import (
 )
 
 const (
-	powerShellBinLegacy         = "powershell"
-	powerShellBinCore           = "pwsh"
-	powerShellDirCore           = "PowerShell"
-	powerShellDirLegacy         = "WindowsPowerShell"
-	powerShellProfileAllHosts   = "profile.ps1"
-	powerShellProfileCurrent    = "Microsoft.PowerShell_profile.ps1"
-	powerShellProfileProbeCmd   = "$PROFILE.CurrentUserAllHosts; $PROFILE.CurrentUserCurrentHost"
+	powerShellBinLegacy       = "powershell"
+	powerShellBinCore         = "pwsh"
+	powerShellDirCore         = "PowerShell"
+	powerShellDirLegacy       = "WindowsPowerShell"
+	powerShellProfileAllHosts = "profile.ps1"
+	powerShellProfileCurrent  = "Microsoft.PowerShell_profile.ps1"
+	powerShellProfileProbeCmd = "$PROFILE.CurrentUserAllHosts; $PROFILE.CurrentUserCurrentHost"
 )
 
 // Install writes the completion script and adds a source line to the profile.

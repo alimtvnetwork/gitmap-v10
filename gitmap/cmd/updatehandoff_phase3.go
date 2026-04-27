@@ -77,9 +77,9 @@ func scheduleDeployedCleanupHandoff() {
 // gitmap binary plus the resolution source label used in logs.
 //
 // Resolution order matters:
-//   1. Config-declared deployed binary (powershell.json deployPath)
-//   2. Sibling gitmap(.exe) next to the handoff copy
-//   3. PATH lookup as a last resort only
+//  1. Config-declared deployed binary (powershell.json deployPath)
+//  2. Sibling gitmap(.exe) next to the handoff copy
+//  3. PATH lookup as a last resort only
 //
 // PATH is intentionally last because duplicate/stale gitmap.exe installs can
 // linger on Windows and point cleanup at the wrong binary after an update.

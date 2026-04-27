@@ -139,4 +139,3 @@ func printCloneStepMulti(w io.Writer, step string, cmds ...string) {
 	}
 	fmt.Fprintln(w)
 }
-

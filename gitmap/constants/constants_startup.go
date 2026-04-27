@@ -168,9 +168,9 @@ const (
 // fallback. Linux/macOS callers ignore --backend — there's only one
 // autostart backend per OS.
 const (
-	FlagStartupRemoveDryRun     = "dry-run"
-	FlagDescStartupRemoveDryRun = "Show what would be deleted (or refused/no-op) without touching the filesystem"
-	FlagStartupRemoveBackend    = "backend"
+	FlagStartupRemoveDryRun      = "dry-run"
+	FlagDescStartupRemoveDryRun  = "Show what would be deleted (or refused/no-op) without touching the filesystem"
+	FlagStartupRemoveBackend     = "backend"
 	FlagDescStartupRemoveBackend = "Windows backend to remove from: registry or startup-folder " +
 		"(default: try both — registry first, then startup-folder)"
 )

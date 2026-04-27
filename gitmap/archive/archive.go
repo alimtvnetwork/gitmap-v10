@@ -35,18 +35,18 @@ import (
 type Format string
 
 const (
-	FormatZip    Format = "Zip"
-	FormatTar    Format = "Tar"
-	FormatTarGz  Format = "TarGz"
-	FormatTarBz2 Format = "TarBz2"
-	FormatTarXz  Format = "TarXz"
-	FormatTarZst Format = "TarZst"
-	FormatGz     Format = "Gz"
-	FormatBz2    Format = "Bz2"
-	FormatXz     Format = "Xz"
-	FormatZst    Format = "Zst"
-	Format7z     Format = "SevenZip"
-	FormatRar    Format = "Rar"
+	FormatZip     Format = "Zip"
+	FormatTar     Format = "Tar"
+	FormatTarGz   Format = "TarGz"
+	FormatTarBz2  Format = "TarBz2"
+	FormatTarXz   Format = "TarXz"
+	FormatTarZst  Format = "TarZst"
+	FormatGz      Format = "Gz"
+	FormatBz2     Format = "Bz2"
+	FormatXz      Format = "Xz"
+	FormatZst     Format = "Zst"
+	Format7z      Format = "SevenZip"
+	FormatRar     Format = "Rar"
 	FormatUnknown Format = ""
 )
 

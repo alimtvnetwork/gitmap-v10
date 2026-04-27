@@ -127,4 +127,3 @@ func applyCoreSettings(core map[string]string, dryRun bool, r *SetupResult) {
 	}
 	applySection(constants.SetupSectionCore, settings, dryRun, r)
 }
-

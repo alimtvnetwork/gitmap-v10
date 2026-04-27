@@ -60,15 +60,15 @@ const (
 // that have a prior release manifest, computes a minor bump per repo, and
 // prompts ONCE before releasing them all.
 const (
-	MsgReleaseScanHeader   = "\n  Auto-bump %d repo(s) with prior releases:\n"
-	MsgReleaseScanRow      = "    • %s   %s → %s\n"
-	MsgReleaseScanPrompt   = "\n  Proceed with all releases? [y/N]: "
-	MsgReleaseScanYes      = "\n  → -y supplied; proceeding without prompt.\n"
-	MsgReleaseScanAborted  = "  ✗ Multi-repo release aborted by user.\n"
-	MsgReleaseScanRunning  = "\n  ── Releasing %s → %s ──\n"
-	MsgReleaseScanFail     = "  ✗ Release failed for %s: %v\n"
-	MsgReleaseScanPartial  = "\n  ⚠ %d of %d release(s) failed.\n"
-	MsgReleaseScanDone     = "\n  ✓ All %d release(s) complete.\n"
+	MsgReleaseScanHeader  = "\n  Auto-bump %d repo(s) with prior releases:\n"
+	MsgReleaseScanRow     = "    • %s   %s → %s\n"
+	MsgReleaseScanPrompt  = "\n  Proceed with all releases? [y/N]: "
+	MsgReleaseScanYes     = "\n  → -y supplied; proceeding without prompt.\n"
+	MsgReleaseScanAborted = "  ✗ Multi-repo release aborted by user.\n"
+	MsgReleaseScanRunning = "\n  ── Releasing %s → %s ──\n"
+	MsgReleaseScanFail    = "  ✗ Release failed for %s: %v\n"
+	MsgReleaseScanPartial = "\n  ⚠ %d of %d release(s) failed.\n"
+	MsgReleaseScanDone    = "\n  ✓ All %d release(s) complete.\n"
 )
 
 // Release orphaned metadata messages.

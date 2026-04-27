@@ -60,17 +60,17 @@ const (
 
 // Options bundles every CLI flag for the move/merge family.
 type Options struct {
-	Yes              bool
-	Prefer           PreferPolicy
-	NoPush           bool
-	NoCommit         bool
-	ForceFolder      bool
-	PullFolder       bool
-	InitNewRight     bool
-	DryRun           bool
-	IncludeVCS       bool
-	IncludeNodeMods  bool
-	CommandName      string // "mv" | "merge-both" | "merge-left" | "merge-right"
-	LogPrefix        string // "[mv]" etc.
-	CommitMsgFmt     string // template; "%s" filled from other side's display
+	Yes             bool
+	Prefer          PreferPolicy
+	NoPush          bool
+	NoCommit        bool
+	ForceFolder     bool
+	PullFolder      bool
+	InitNewRight    bool
+	DryRun          bool
+	IncludeVCS      bool
+	IncludeNodeMods bool
+	CommandName     string // "mv" | "merge-both" | "merge-left" | "merge-right"
+	LogPrefix       string // "[mv]" etc.
+	CommitMsgFmt    string // template; "%s" filled from other side's display
 }

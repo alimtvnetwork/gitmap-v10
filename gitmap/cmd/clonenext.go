@@ -21,8 +21,9 @@ import (
 //
 // Form 1 — `gitmap cn vX.Y.Z`         : operates on the current repo.
 // Form 2 — `gitmap cn <repo> vX.Y.Z`  : cross-dir — chdir into <repo>, run
-//                                        clone-next, chdir back. See
-//                                        `clonenextcrossdir.go`.
+//
+//	clone-next, chdir back. See
+//	`clonenextcrossdir.go`.
 func runCloneNext(args []string) {
 	// v3.117.0: folder-arg dispatch runs FIRST so path-shaped tokens
 	// win over the release-alias resolver. Order matters — see

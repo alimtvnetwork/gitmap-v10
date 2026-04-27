@@ -2,10 +2,10 @@
 //
 // These complement the pattern-based pass in updatecleanup_remove.go by
 // targeting two artifact classes that don't fit the simple-glob model:
-//   1. The obsolete v2.90.0 drive-root forwarding shim
-//      (e.g. E:\gitmap.exe sitting at the literal drive root, NOT
-//      inside a gitmap\ subfolder).
-//   2. *.gitmap-tmp-* swap directories left by interrupted clones.
+//  1. The obsolete v2.90.0 drive-root forwarding shim
+//     (e.g. E:\gitmap.exe sitting at the literal drive root, NOT
+//     inside a gitmap\ subfolder).
+//  2. *.gitmap-tmp-* swap directories left by interrupted clones.
 //
 // Both passes follow the spec/04-generic-cli/22-data-folder-deploy-and-cleanup.md
 // contract (DFD-6, DFD-7).
@@ -80,9 +80,9 @@ func isRemovableDriveRootShim(shimPath, selfPath string) bool {
 	if info.Size() > driveRootShimMaxBytes {
 		fmt.Fprintf(os.Stderr, "  !! [cleanup] skipping drive-root shim %s (size %d > 5MB)\n", shimPath, info.Size())
 		logHandoffEvent("cleanup", "drive_root_skip", map[string]string{
-			"path":  shimPath,
+			"path":   shimPath,
 			"reason": "size_guard",
-			"bytes": fmt.Sprintf("%d", info.Size()),
+			"bytes":  fmt.Sprintf("%d", info.Size()),
 		})
 		emitDebugWindowsJSON("drive_root_skip", map[string]any{
 			"path":   shimPath,

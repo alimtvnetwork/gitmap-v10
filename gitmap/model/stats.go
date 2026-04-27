@@ -16,11 +16,11 @@ type CommandStats struct {
 
 // OverallStats holds the summary across all commands.
 type OverallStats struct {
-	TotalCommands  int            `json:"totalCommands"`
-	UniqueCommands int            `json:"uniqueCommands"`
-	TotalSuccess   int            `json:"totalSuccess"`
-	TotalFail      int            `json:"totalFail"`
-	OverallFailRate float64       `json:"overallFailRate"`
-	AvgDuration    int64          `json:"avgDurationMs"`
-	Commands       []CommandStats `json:"commands"`
+	TotalCommands   int            `json:"totalCommands"`
+	UniqueCommands  int            `json:"uniqueCommands"`
+	TotalSuccess    int            `json:"totalSuccess"`
+	TotalFail       int            `json:"totalFail"`
+	OverallFailRate float64        `json:"overallFailRate"`
+	AvgDuration     int64          `json:"avgDurationMs"`
+	Commands        []CommandStats `json:"commands"`
 }

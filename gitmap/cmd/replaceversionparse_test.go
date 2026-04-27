@@ -12,8 +12,8 @@ func TestSlugFromRemote(t *testing.T) {
 		"git@github.com:alimtvnetwork/gitmap-v7.git":     "gitmap-v7",
 		"git@github.com:alimtvnetwork/gitmap-v7":         "gitmap-v7",
 		"ssh://git@host.example/foo/bar/gitmap-v12.git":  "gitmap-v12",
-		"gitmap-v3":                                      "gitmap-v3",
-		"gitmap-v3.git":                                  "gitmap-v3",
+		"gitmap-v3":     "gitmap-v3",
+		"gitmap-v3.git": "gitmap-v3",
 	}
 
 	for in, want := range cases {
@@ -34,13 +34,13 @@ func TestRemoteSlugRegex(t *testing.T) {
 		num     string
 	}
 	cases := map[string]want{
-		"gitmap-v7":            {true, "gitmap", "7"},
-		"my-tool-v123":         {true, "my-tool", "123"},
-		"some-app-prefix-v0":   {true, "some-app-prefix", "0"},
-		"gitmap":               {false, "", ""},
-		"gitmap-v":             {false, "", ""},
-		"gitmap-vX":            {false, "", ""},
-		"gitmap-v7-extra":      {false, "", ""},
+		"gitmap-v7":          {true, "gitmap", "7"},
+		"my-tool-v123":       {true, "my-tool", "123"},
+		"some-app-prefix-v0": {true, "some-app-prefix", "0"},
+		"gitmap":             {false, "", ""},
+		"gitmap-v":           {false, "", ""},
+		"gitmap-vX":          {false, "", ""},
+		"gitmap-v7-extra":    {false, "", ""},
 	}
 	for in, w := range cases {
 		m := remoteSlugRe.FindStringSubmatch(in)

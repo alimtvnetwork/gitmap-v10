@@ -12,15 +12,15 @@ import (
 
 // RepoStatus holds the live state of a Git repository.
 type RepoStatus struct {
-	Branch       string
-	Dirty        bool
-	Untracked    int
-	Modified     int
-	Staged       int
-	Ahead        int
-	Behind       int
-	StashCount   int
-	Unreachable  bool
+	Branch      string
+	Dirty       bool
+	Untracked   int
+	Modified    int
+	Staged      int
+	Ahead       int
+	Behind      int
+	StashCount  int
+	Unreachable bool
 }
 
 // RemoteURL returns the origin remote URL for a repo at the given path.
@@ -36,11 +36,11 @@ func RemoteURL(repoPath string) (string, error) {
 
 // Branch source labels describe how a repo's branch was determined.
 const (
-	BranchSourceHEAD            = "HEAD"
-	BranchSourceDetached        = "detached"
-	BranchSourceRemoteTracking  = "remote-tracking"
-	BranchSourceDefault         = "default"
-	BranchSourceUnknown         = "unknown"
+	BranchSourceHEAD           = "HEAD"
+	BranchSourceDetached       = "detached"
+	BranchSourceRemoteTracking = "remote-tracking"
+	BranchSourceDefault        = "default"
+	BranchSourceUnknown        = "unknown"
 )
 
 // CurrentBranch returns the current branch name for a repo.

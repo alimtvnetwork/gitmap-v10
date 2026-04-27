@@ -81,9 +81,9 @@ func buildLinkInfo(target string) ([]byte, error) {
 func buildVolumeID() []byte {
 	le := binary.LittleEndian
 	vol := make([]byte, volumeIDHeaderSize)
-	le.PutUint32(vol[0:4], volumeIDHeaderSize)     // VolumeIDSize
-	le.PutUint32(vol[4:8], driveTypeFixed)         // DriveType
-	le.PutUint32(vol[8:12], driveSerialDefault)    // DriveSerialNumber
+	le.PutUint32(vol[0:4], volumeIDHeaderSize)  // VolumeIDSize
+	le.PutUint32(vol[4:8], driveTypeFixed)      // DriveType
+	le.PutUint32(vol[8:12], driveSerialDefault) // DriveSerialNumber
 	le.PutUint32(vol[12:16], volumeLabelOffsetMissing)
 
 	return vol

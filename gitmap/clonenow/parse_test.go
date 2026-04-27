@@ -165,10 +165,10 @@ func TestDedupRows_LaterWins(t *testing.T) {
 
 func TestDeriveDest(t *testing.T) {
 	cases := map[string]string{
-		"https://example.com/owner/repo.git":  "repo",
-		"git@example.com:owner/repo.git":      "repo",
-		"ssh://git@example.com/owner/repo":    "repo",
-		"https://example.com/owner/repo/":     "repo",
+		"https://example.com/owner/repo.git": "repo",
+		"git@example.com:owner/repo.git":     "repo",
+		"ssh://git@example.com/owner/repo":   "repo",
+		"https://example.com/owner/repo/":    "repo",
 	}
 	for in, want := range cases {
 		if got := DeriveDest(in); got != want {

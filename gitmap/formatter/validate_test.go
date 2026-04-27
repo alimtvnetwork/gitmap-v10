@@ -74,7 +74,7 @@ func TestValidateRecords_TableDriven(t *testing.T) {
 			wantField:    "Slug",
 		},
 		{
-			name: "multiple_issues_one_record",
+			name:    "multiple_issues_one_record",
 			records: []model.ScanRecord{{
 				// Missing RepoName, RelativePath, AND any URL → 3 issues.
 			}},

@@ -53,4 +53,3 @@ func DefaultDBPath() string {
 
 	return filepath.Join(dir, dbFile)
 }
-

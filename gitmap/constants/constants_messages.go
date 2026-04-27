@@ -50,12 +50,12 @@ const OSDarwin = "darwin"
 // OS file-explorer commands.
 const (
 	CmdExplorer     = "explorer" // gitmap:cmd skip
-	CmdOpen         = "open" // gitmap:cmd skip
+	CmdOpen         = "open"     // gitmap:cmd skip
 	CmdXdgOpen      = "xdg-open" // gitmap:cmd skip
-	CmdWindowsShell = "cmd" // gitmap:cmd skip
-	CmdArgSlashC    = "/c" // gitmap:cmd skip
-	CmdArgStart     = "start" // gitmap:cmd skip
-	CmdArgEmpty     = "" // gitmap:cmd skip
+	CmdWindowsShell = "cmd"      // gitmap:cmd skip
+	CmdArgSlashC    = "/c"       // gitmap:cmd skip
+	CmdArgStart     = "start"    // gitmap:cmd skip
+	CmdArgEmpty     = ""         // gitmap:cmd skip
 )
 
 // Desktop sync error messages.
@@ -136,9 +136,9 @@ const (
 	MsgSectionDone      = "\n🎉 Scan complete.\n"
 	MsgSectionRule      = "────────────────────────────────────────────"
 	MsgScanFolderTagged = "  🏷️  Tagged %d repo(s) with scan folder #%d\n"
-	MsgUpdateStarting     = "\n  Updating gitmap from source repo...\n"
-	MsgUpdateRepoPath     = "  → Repo path: %s\n"
-	MsgUpdateVersion      = "\n  ✓ Updated to gitmap v%s\n"
+	MsgUpdateStarting   = "\n  Updating gitmap from source repo...\n"
+	MsgUpdateRepoPath   = "  → Repo path: %s\n"
+	MsgUpdateVersion    = "\n  ✓ Updated to gitmap v%s\n"
 )
 
 // List and group messages.
@@ -204,16 +204,16 @@ const (
 	// does not contain a discovered repo, which would yield a "../"
 	// path in the output and break clone-script reproducibility.
 	ErrScanRelativeRootNotAncestor = "Error: --relative-root %s is not an ancestor of repo %s (would produce %q)\n"
-	MsgScanResolvedDir   = "  ↳ Resolved %q → %s\n"
+	MsgScanResolvedDir             = "  ↳ Resolved %q → %s\n"
 	// MsgScanRelativeRoot announces the pinned RelativePath base when it
 	// differs from the scan dir, so the user sees that output paths
 	// will be computed against this directory rather than [dir].
 	MsgScanRelativeRoot = "  ↳ RelativePath root pinned to %s\n"
-	ErrCloneFailed       = "Error: clone failed for source file %s: %v (operation: read)\n"
-	ErrOutputFailed      = "Error: output generation failed: %v\n"
-	ErrCreateDir         = "Error: cannot create directory at %s: %v (operation: mkdir)\n"
-	ErrCreateFile        = "Error: cannot create file at %s: %v (operation: write)\n"
-	ErrNoRepoPath        = `
+	ErrCloneFailed      = "Error: clone failed for source file %s: %v (operation: read)\n"
+	ErrOutputFailed     = "Error: output generation failed: %v\n"
+	ErrCreateDir        = "Error: cannot create directory at %s: %v (operation: mkdir)\n"
+	ErrCreateFile       = "Error: cannot create file at %s: %v (operation: write)\n"
+	ErrNoRepoPath       = `
   ✗ Source repository path not found.
 
   This binary was installed without a linked source repo, so 'update'

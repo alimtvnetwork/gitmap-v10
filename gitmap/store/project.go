@@ -63,7 +63,10 @@ func (db *DB) DeleteStaleProjects(repoID int64, keepIDs []int64) (int64, error) 
 }
 
 // scanProjectRows scans SQL rows into DetectedProject slices.
-func scanProjectRows(rows interface{ Next() bool; Scan(...interface{}) error }) ([]model.DetectedProject, error) {
+func scanProjectRows(rows interface {
+	Next() bool
+	Scan(...interface{}) error
+}) ([]model.DetectedProject, error) {
 	var projects []model.DetectedProject
 	for rows.Next() {
 		var p model.DetectedProject

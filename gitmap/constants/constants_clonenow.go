@@ -119,20 +119,20 @@ const (
 	// so the per-row summary tells the user exactly which branch
 	// of the on-exists policy fired. The mismatch + fail messages
 	// take printf args -- documented per-line.
-	MsgCloneNowAlreadyMatches  = "already matches (url + branch)"
-	MsgCloneNowNotARepo        = "dest exists but is not a git repo"
+	MsgCloneNowAlreadyMatches = "already matches (url + branch)"
+	MsgCloneNowNotARepo       = "dest exists but is not a git repo"
 	// %s = current remote, %s = expected remote.
-	MsgCloneNowURLMismatch     = "skipped: remote url differs (have=%s, want=%s)"
+	MsgCloneNowURLMismatch = "skipped: remote url differs (have=%s, want=%s)"
 	// %s = current branch, %s = expected branch.
-	MsgCloneNowBranchMismatch  = "skipped: branch differs (have=%s, want=%s)"
-	MsgCloneNowUpdated         = "updated (fetch + checkout)"
-	MsgCloneNowForceRecloned   = "force-recloned (previous dir removed)"
+	MsgCloneNowBranchMismatch = "skipped: branch differs (have=%s, want=%s)"
+	MsgCloneNowUpdated        = "updated (fetch + checkout)"
+	MsgCloneNowForceRecloned  = "force-recloned (previous dir removed)"
 	// %s = path, %v = err.
 	MsgCloneNowForceRemoveFail = "force: remove %s: %v"
 	// %s = trimmed git stderr.
-	MsgCloneNowFetchFail       = "update: git fetch failed: %s"
+	MsgCloneNowFetchFail = "update: git fetch failed: %s"
 	// %s = branch, %s = trimmed git stderr.
-	MsgCloneNowCheckoutFail    = "update: git checkout %s failed: %s"
+	MsgCloneNowCheckoutFail = "update: git checkout %s failed: %s"
 )
 
 // Errors. All use printf-style verbs documented inline.

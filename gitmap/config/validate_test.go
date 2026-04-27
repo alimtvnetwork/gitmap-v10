@@ -83,7 +83,7 @@ func TestValidateConfig_RejectsEmptyEnumValue(t *testing.T) {
 // fix is obvious from reading the error alone.
 func TestValidateConfig_RejectsTypoEnumValue(t *testing.T) {
 	cfg := model.Config{
-		DefaultMode:   "htps", // typo
+		DefaultMode:   "htps",    // typo
 		DefaultOutput: "trminal", // typo
 		OutputDir:     "./out",
 	}

@@ -87,9 +87,9 @@ const (
 // the cmd package.
 const (
 	ChangelogPrettyRule        = "──────────────────────────────────────────────────────────────────────"
-	ChangelogPrettyHeaderFmt   = "  %s%s%s%s  %s%s%s\n"   // dim, version, reset, dim-bullet, white, title, reset
-	ChangelogPrettyHeaderBare  = "  %s%s%s\n"              // version only when no title parsed
-	ChangelogPrettyBulletFmt   = "  %s%s%s %s\n"           // indent, color marker, reset, text
+	ChangelogPrettyHeaderFmt   = "  %s%s%s%s  %s%s%s\n" // dim, version, reset, dim-bullet, white, title, reset
+	ChangelogPrettyHeaderBare  = "  %s%s%s\n"           // version only when no title parsed
+	ChangelogPrettyBulletFmt   = "  %s%s%s %s\n"        // indent, color marker, reset, text
 	ChangelogPrettyBoldOpen    = "\033[1m"
 	ChangelogPrettyBoldClose   = "\033[22m"
 	ChangelogPrettyCodeOpen    = "\033[36m"

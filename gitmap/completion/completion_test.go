@@ -14,6 +14,7 @@ import (
 // during the migration to match the real Cmd*Alias constants:
 //   - "ep" -> "ex"  (CmdExportAlias = "ex")
 //   - "gor" -> "gr" (CmdGoReposAlias = "gr")
+//
 // These were never registered in the dispatcher, so removing them from the
 // legacy contract is a bug-fix, not a regression.
 var legacyAllCommands = []string{

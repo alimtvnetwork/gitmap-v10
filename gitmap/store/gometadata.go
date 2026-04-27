@@ -63,7 +63,10 @@ func (db *DB) DeleteStaleGoRunnables(goMetadataID int64, keepIDs []int64) error 
 }
 
 // scanGoRunnableRows scans rows into GoRunnableFile slices.
-func scanGoRunnableRows(rows interface{ Next() bool; Scan(...interface{}) error }) ([]model.GoRunnableFile, error) {
+func scanGoRunnableRows(rows interface {
+	Next() bool
+	Scan(...interface{}) error
+}) ([]model.GoRunnableFile, error) {
 	var runnables []model.GoRunnableFile
 	for rows.Next() {
 		var r model.GoRunnableFile

@@ -209,17 +209,17 @@ const (
 
 // SQL: drop project detection tables (v15 names + legacy retained for Reset).
 const (
-	SQLDropGoRunnableFile     = "DROP TABLE IF EXISTS GoRunnableFile"
-	SQLDropGoRunnableFiles    = "DROP TABLE IF EXISTS GoRunnableFiles" // legacy
-	SQLDropGoProjectMetadata  = "DROP TABLE IF EXISTS GoProjectMetadata"
-	SQLDropCsharpKeyFile      = "DROP TABLE IF EXISTS CsharpKeyFile"
-	SQLDropCsharpKeyFiles     = "DROP TABLE IF EXISTS CSharpKeyFiles"      // legacy (pre-Csharp + plural)
-	SQLDropCsharpProjectFile  = "DROP TABLE IF EXISTS CsharpProjectFile"
-	SQLDropCsharpProjectFiles = "DROP TABLE IF EXISTS CSharpProjectFiles"  // legacy
-	SQLDropCsharpProjectMeta  = "DROP TABLE IF EXISTS CsharpProjectMetadata"
+	SQLDropGoRunnableFile          = "DROP TABLE IF EXISTS GoRunnableFile"
+	SQLDropGoRunnableFiles         = "DROP TABLE IF EXISTS GoRunnableFiles" // legacy
+	SQLDropGoProjectMetadata       = "DROP TABLE IF EXISTS GoProjectMetadata"
+	SQLDropCsharpKeyFile           = "DROP TABLE IF EXISTS CsharpKeyFile"
+	SQLDropCsharpKeyFiles          = "DROP TABLE IF EXISTS CSharpKeyFiles" // legacy (pre-Csharp + plural)
+	SQLDropCsharpProjectFile       = "DROP TABLE IF EXISTS CsharpProjectFile"
+	SQLDropCsharpProjectFiles      = "DROP TABLE IF EXISTS CSharpProjectFiles" // legacy
+	SQLDropCsharpProjectMeta       = "DROP TABLE IF EXISTS CsharpProjectMetadata"
 	SQLDropCsharpProjectMetaLegacy = "DROP TABLE IF EXISTS CSharpProjectMetadata" // legacy
-	SQLDropDetectedProject    = "DROP TABLE IF EXISTS DetectedProject"
-	SQLDropDetectedProjects   = "DROP TABLE IF EXISTS DetectedProjects" // legacy
-	SQLDropProjectType        = "DROP TABLE IF EXISTS ProjectType"
-	SQLDropProjectTypes       = "DROP TABLE IF EXISTS ProjectTypes"     // legacy
+	SQLDropDetectedProject         = "DROP TABLE IF EXISTS DetectedProject"
+	SQLDropDetectedProjects        = "DROP TABLE IF EXISTS DetectedProjects" // legacy
+	SQLDropProjectType             = "DROP TABLE IF EXISTS ProjectType"
+	SQLDropProjectTypes            = "DROP TABLE IF EXISTS ProjectTypes" // legacy
 )

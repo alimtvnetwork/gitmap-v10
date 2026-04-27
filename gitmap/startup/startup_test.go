@@ -60,7 +60,7 @@ func TestList_OnlyReturnsManaged(t *testing.T) {
 	writeDesktop(t, dir, "gitmap-foo.desktop", true, "/usr/bin/foo")
 	writeDesktop(t, dir, "gitmap-bar.desktop", true, "/usr/bin/bar")
 	writeDesktop(t, dir, "gitmap-spoof.desktop", false, "/evil") // prefix only, no marker
-	writeDesktop(t, dir, "thirdparty.desktop", true, "/x")        // marker but wrong prefix
+	writeDesktop(t, dir, "thirdparty.desktop", true, "/x")       // marker but wrong prefix
 
 	got, err := List()
 	if err != nil {
@@ -98,10 +98,10 @@ func TestList_MissingDirReturnsEmpty(t *testing.T) {
 
 // TestRemove_StatusMatrix exercises every RemoveStatus branch with
 // dedicated fixtures so each row of the contract is covered:
-//   1. RemoveDeleted    — managed file present, gets unlinked.
-//   2. RemoveNoOp       — name doesn't exist, clean exit.
-//   3. RemoveRefused    — file exists but lacks the marker.
-//   4. RemoveBadName    — input contains a path separator.
+//  1. RemoveDeleted    — managed file present, gets unlinked.
+//  2. RemoveNoOp       — name doesn't exist, clean exit.
+//  3. RemoveRefused    — file exists but lacks the marker.
+//  4. RemoveBadName    — input contains a path separator.
 func TestRemove_StatusMatrix(t *testing.T) {
 	dir := withFakeAutostartDir(t)
 	managedPath := writeDesktop(t, dir, "gitmap-keep.desktop", true, "/x")

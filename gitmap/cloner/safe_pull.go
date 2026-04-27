@@ -109,4 +109,3 @@ func runGitPull(repoDir string) (string, error) {
 
 	return string(out), err
 }
-

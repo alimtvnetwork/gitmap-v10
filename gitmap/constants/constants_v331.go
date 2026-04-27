@@ -42,11 +42,11 @@ const (
 
 // Cross-dir release (`r <repo> <ver>`) messages + errors.
 const (
-	MsgRRStartingFmt    = "  → Releasing %s at %s (version %s)...\n"
-	MsgRRFetchingFmt    = "  📡 Fetching remote refs in %s...\n"
-	MsgRRRebasingFmt    = "  🔁 Pull --rebase in %s...\n"
-	MsgRRReturnedFmt    = "  ↩ Returned to %s\n"
-	ErrRRFetchFailedFmt = "  ✗ git fetch failed in %s: %v"
+	MsgRRStartingFmt     = "  → Releasing %s at %s (version %s)...\n"
+	MsgRRFetchingFmt     = "  📡 Fetching remote refs in %s...\n"
+	MsgRRRebasingFmt     = "  🔁 Pull --rebase in %s...\n"
+	MsgRRReturnedFmt     = "  ↩ Returned to %s\n"
+	ErrRRFetchFailedFmt  = "  ✗ git fetch failed in %s: %v"
 	ErrRRRebaseFailedFmt = "  ✗ git pull --rebase failed in %s: %v\n  Resolve the conflict, then re-run the release."
 )
 
@@ -87,13 +87,13 @@ const (
 // upserts into the SQLite database. See gitmap/cmd/inject.go and
 // gitmap/helptext/inject.md.
 const (
-	MsgInjectStart      = "→ injecting %s (%s)\n"
-	MsgInjectDone       = "✓ injected %s\n"
-	MsgInjectNoRemote   = "  ↳ no remote origin configured for %s — skipping database upsert\n"
-	MsgInjectDBOK       = "  ↳ database: upserted %s (%s)\n"
-	ErrInjectResolve    = "  ✗ inject: %v\n"
-	WarnInjectDBOpen    = "  ⚠ inject: could not open database: %v\n"
-	WarnInjectDBUpsert  = "  ⚠ inject: could not save repo to database: %v\n"
+	MsgInjectStart     = "→ injecting %s (%s)\n"
+	MsgInjectDone      = "✓ injected %s\n"
+	MsgInjectNoRemote  = "  ↳ no remote origin configured for %s — skipping database upsert\n"
+	MsgInjectDBOK      = "  ↳ database: upserted %s (%s)\n"
+	ErrInjectResolve   = "  ✗ inject: %v\n"
+	WarnInjectDBOpen   = "  ⚠ inject: could not open database: %v\n"
+	WarnInjectDBUpsert = "  ⚠ inject: could not save repo to database: %v\n"
 )
 
 // SSH existing-key-on-disk fix messages.

@@ -62,7 +62,7 @@ func assertSchemaKeysArray(t *testing.T, raw []byte, name string) {
 //
 //   - {...}        — single-object output (e.g. latest-branch)
 //   - [{...}, ...] — array output (checks only the first object;
-//                    use assertSchemaKeysArray to check every row)
+//     use assertSchemaKeysArray to check every row)
 //
 // Routes through the same accept/update flow as the array variant.
 func assertSchemaKeysFirstObject(t *testing.T, raw []byte, name string) {

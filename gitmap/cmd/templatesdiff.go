@@ -17,12 +17,12 @@ const (
 	cmdTemplatesDiff      = constants.CmdTemplatesDiff
 	cmdTemplatesDiffAlias = constants.CmdTemplatesDiffAlias
 
-	flagDiffLang = "lang"
+	flagDiffLang     = "lang"
 	flagDescDiffLang = "Language to diff (e.g. go, node). Required."
-	flagDiffKind = "kind"
+	flagDiffKind     = "kind"
 	flagDescDiffKind = "Kind to diff (ignore | attributes). Default: both."
-	flagDiffCwd = "cwd"
-	flagDescDiffCwd = "Working directory to diff against (default: current dir)."
+	flagDiffCwd      = "cwd"
+	flagDescDiffCwd  = "Working directory to diff against (default: current dir)."
 
 	errDiffLangRequired = "templates diff: --lang <name> is required\n"
 	errDiffBadKind      = "templates diff: unknown --kind %q (want ignore | attributes)\n"

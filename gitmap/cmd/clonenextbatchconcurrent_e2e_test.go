@@ -102,7 +102,7 @@ func TestE2E_BatchConcurrency_CollectorReordersByInputIndex(t *testing.T) {
 	repos := makeRepoPaths(n)
 
 	var (
-		mu             sync.Mutex
+		mu              sync.Mutex
 		completionOrder []string
 	)
 	original := processOneBatchRepoFn

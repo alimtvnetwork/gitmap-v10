@@ -3,49 +3,49 @@ package constants
 // gitmap:cmd top-level
 // CLI commands.
 const (
-	CmdScan                  = "scan"
-	CmdScanAlias             = "s"
-	CmdClone                 = "clone"
-	CmdCloneAlias            = "c"
-	CmdUpdate                = "update"
-	CmdUpdateRunner          = "update-runner" // gitmap:cmd skip
-	CmdUpdateCleanup         = "update-cleanup" // gitmap:cmd skip
-	CmdInstalledDir          = "installed-dir" // gitmap:cmd skip
-	CmdInstalledDirAlias     = "id"
-	CmdVersion               = "version"
-	CmdVersionAlias          = "v"
-	CmdHelp                  = "help"
-	CmdDesktopSync           = "desktop-sync"
-	CmdDesktopSyncAlias      = "ds"
-	CmdGitHubDesktop         = "github-desktop"
-	CmdGitHubDesktopAlias    = "gd"
-	CmdPull                  = "pull"
-	CmdPullAlias             = "p"
-	CmdRescan                = "rescan"
-	CmdRescanAlias           = "rsc"
+	CmdScan               = "scan"
+	CmdScanAlias          = "s"
+	CmdClone              = "clone"
+	CmdCloneAlias         = "c"
+	CmdUpdate             = "update"
+	CmdUpdateRunner       = "update-runner"  // gitmap:cmd skip
+	CmdUpdateCleanup      = "update-cleanup" // gitmap:cmd skip
+	CmdInstalledDir       = "installed-dir"  // gitmap:cmd skip
+	CmdInstalledDirAlias  = "id"
+	CmdVersion            = "version"
+	CmdVersionAlias       = "v"
+	CmdHelp               = "help"
+	CmdDesktopSync        = "desktop-sync"
+	CmdDesktopSyncAlias   = "ds"
+	CmdGitHubDesktop      = "github-desktop"
+	CmdGitHubDesktopAlias = "gd"
+	CmdPull               = "pull"
+	CmdPullAlias          = "p"
+	CmdRescan             = "rescan"
+	CmdRescanAlias        = "rsc"
 	// CmdRescanSubtree narrowly re-runs `gitmap scan` against the
 	// absolutePath of an at-cap row from a previous scan output. Default
 	// MaxDepth is bumped to RescanSubtreeDefaultMaxDepth so users get a
 	// deeper view in one step; override with --max-depth.
-	CmdRescanSubtree         = "rescan-subtree"
-	CmdRescanSubtreeAlias    = "rss"
-	CmdSetup                 = "setup"
-	CmdStatus                = "status"
-	CmdStatusAlias           = "st"
-	CmdExec                  = "exec"
-	CmdExecAlias             = "x"
-	CmdRelease               = "release"
-	CmdReleaseShort          = "r"
-	CmdReleaseBranch         = "release-branch"
-	CmdReleaseBranchAlias    = "rb"
-	CmdReleasePending        = "release-pending"
-	CmdReleasePendingAlias   = "rp"
-	CmdChangelog             = "changelog"
-	CmdChangelogAlias        = "cl"
-	CmdChangelogMD           = "changelog.md" // gitmap:cmd skip
-	CmdDoctor                = "doctor"
-	CmdLatestBranch          = "latest-branch"
-	CmdLatestBranchAlias     = "lb"
+	CmdRescanSubtree       = "rescan-subtree"
+	CmdRescanSubtreeAlias  = "rss"
+	CmdSetup               = "setup"
+	CmdStatus              = "status"
+	CmdStatusAlias         = "st"
+	CmdExec                = "exec"
+	CmdExecAlias           = "x"
+	CmdRelease             = "release"
+	CmdReleaseShort        = "r"
+	CmdReleaseBranch       = "release-branch"
+	CmdReleaseBranchAlias  = "rb"
+	CmdReleasePending      = "release-pending"
+	CmdReleasePendingAlias = "rp"
+	CmdChangelog           = "changelog"
+	CmdChangelogAlias      = "cl"
+	CmdChangelogMD         = "changelog.md" // gitmap:cmd skip
+	CmdDoctor              = "doctor"
+	CmdLatestBranch        = "latest-branch"
+	CmdLatestBranchAlias   = "lb"
 	// `gitmap branch <subcommand>` namespaces general branch-management
 	// helpers. First subcommand: `default` / `def` — checkout the repo's
 	// default branch (origin/HEAD or constants.DefaultBranch fallback).
@@ -62,10 +62,10 @@ const (
 	CmdGroup                 = "group"
 	CmdGroupAlias            = "g"
 	CmdGroupCreate           = "create" // gitmap:cmd skip
-	CmdGroupAdd              = "add" // gitmap:cmd skip
+	CmdGroupAdd              = "add"    // gitmap:cmd skip
 	CmdGroupRemove           = "remove" // gitmap:cmd skip
-	CmdGroupList             = "list" // gitmap:cmd skip
-	CmdGroupShow             = "show" // gitmap:cmd skip
+	CmdGroupList             = "list"   // gitmap:cmd skip
+	CmdGroupShow             = "show"   // gitmap:cmd skip
 	CmdGroupDelete           = "delete" // gitmap:cmd skip
 	CmdDBReset               = "db-reset"
 	CmdReset                 = "reset"
@@ -89,9 +89,9 @@ const (
 	CmdReleaseSelfAlias2     = "rs"
 	CmdHelpDashboard         = "help-dashboard"
 	CmdHelpDashboardAlias    = "hd"
-	CmdPending               = "pending" // gitmap:cmd skip
+	CmdPending               = "pending"    // gitmap:cmd skip
 	CmdDoPending             = "do-pending" // gitmap:cmd skip
-	CmdDoPendingAlias        = "dp" // gitmap:cmd skip
+	CmdDoPendingAlias        = "dp"         // gitmap:cmd skip
 	CmdLLMDocs               = "llm-docs"
 	CmdLLMDocsAlias          = "ld"
 	CmdSetSourceRepo         = "set-source-repo" // gitmap:cmd skip
@@ -158,20 +158,20 @@ const (
 
 // Flag descriptions.
 const (
-	FlagDescConfig        = "Path to config file"
-	FlagDescMode          = "Clone URL style: https or ssh"
-	FlagDescOutput        = "Output format: terminal, csv, json"
-	FlagDescOutFile       = "Exact output file path"
-	FlagDescOutputPath    = "Output directory for CSV/JSON"
-	FlagDescTargetDir     = "Base directory for cloned repos"
-	FlagDescSafePull      = "If repo exists, run safe git pull with retries and unlock diagnostics"
-	FlagDescGHDesktop     = "Add discovered repos to GitHub Desktop"
-	FlagDescOpen          = "Open output folder after scan completes"
-	FlagDescQuiet         = "Suppress terminal clone help section"
-	FlagDescVerbose       = "Write detailed stdout/stderr debug log to a timestamped file"
-	FlagScanWorkers       = "workers"
-	FlagDescScanWorkers   = "Worker pool size for scan (0 = auto, capped at 16)"
-	DefaultScanWorkers    = 0
+	FlagDescConfig      = "Path to config file"
+	FlagDescMode        = "Clone URL style: https or ssh"
+	FlagDescOutput      = "Output format: terminal, csv, json"
+	FlagDescOutFile     = "Exact output file path"
+	FlagDescOutputPath  = "Output directory for CSV/JSON"
+	FlagDescTargetDir   = "Base directory for cloned repos"
+	FlagDescSafePull    = "If repo exists, run safe git pull with retries and unlock diagnostics"
+	FlagDescGHDesktop   = "Add discovered repos to GitHub Desktop"
+	FlagDescOpen        = "Open output folder after scan completes"
+	FlagDescQuiet       = "Suppress terminal clone help section"
+	FlagDescVerbose     = "Write detailed stdout/stderr debug log to a timestamped file"
+	FlagScanWorkers     = "workers"
+	FlagDescScanWorkers = "Worker pool size for scan (0 = auto, capped at 16)"
+	DefaultScanWorkers  = 0
 	// FlagScanRelativeRoot lets the user pin the base path used to compute
 	// each repo's RelativePath in the output (CSV/JSON/text/structure/
 	// clone scripts). Without it, RelativePath is derived from the scan
@@ -218,25 +218,25 @@ const (
 	// this one `--errors-report` keeps both UX surfaces intact.
 	FlagScanReportErrors     = "errors-report"
 	FlagDescScanReportErrors = "Write per-repo failures to .gitmap/reports/errors-<unixts>.json (only emitted when failures occur)"
-	FlagDescSetupConfig   = "Path to git-setup.json config file"
-	FlagDescDryRun        = "Preview changes without applying them"
-	FlagDescAssets        = "Directory or file to attach to the release"
-	FlagDescCommit        = "Create release from a specific commit"
-	FlagDescRelBranch     = "Create release from latest commit of a branch"
-	FlagDescBump          = "Auto-increment version: major, minor, or patch"
-	FlagDescDraft         = "Create an unpublished draft release"
-	FlagDescLatest        = "Show only the latest changelog entry"
-	FlagDescLimit         = "Number of changelog versions to show"
-	FlagDescOpenChangelog = "Open CHANGELOG.md with the default system app"
-	FlagDescLBRemote      = "Remote to filter branches against (default: origin)"
-	FlagDescLBAllRemotes  = "Include branches from all remotes"
-	FlagDescLBContains    = "Fall back to --contains if --points-at returns empty"
-	FlagDescLBTop         = "Show top N most recently updated branches"
-	FlagDescLBJSON        = "Output structured JSON instead of plain text (shorthand for --format json)"
-	FlagDescLBFormat      = "Output format: terminal, json, csv (default: terminal)"
-	FlagDescLBNoFetch     = "Skip git fetch (use existing remote refs)"
-	FlagDescLBSort        = "Sort order: date (default, descending) or name (alphabetical)"
-	FlagDescLBFilter      = "Filter branches by glob or substring pattern"
+	FlagDescSetupConfig      = "Path to git-setup.json config file"
+	FlagDescDryRun           = "Preview changes without applying them"
+	FlagDescAssets           = "Directory or file to attach to the release"
+	FlagDescCommit           = "Create release from a specific commit"
+	FlagDescRelBranch        = "Create release from latest commit of a branch"
+	FlagDescBump             = "Auto-increment version: major, minor, or patch"
+	FlagDescDraft            = "Create an unpublished draft release"
+	FlagDescLatest           = "Show only the latest changelog entry"
+	FlagDescLimit            = "Number of changelog versions to show"
+	FlagDescOpenChangelog    = "Open CHANGELOG.md with the default system app"
+	FlagDescLBRemote         = "Remote to filter branches against (default: origin)"
+	FlagDescLBAllRemotes     = "Include branches from all remotes"
+	FlagDescLBContains       = "Fall back to --contains if --points-at returns empty"
+	FlagDescLBTop            = "Show top N most recently updated branches"
+	FlagDescLBJSON           = "Output structured JSON instead of plain text (shorthand for --format json)"
+	FlagDescLBFormat         = "Output format: terminal, json, csv (default: terminal)"
+	FlagDescLBNoFetch        = "Skip git fetch (use existing remote refs)"
+	FlagDescLBSort           = "Sort order: date (default, descending) or name (alphabetical)"
+	FlagDescLBFilter         = "Filter branches by glob or substring pattern"
 	// FlagDescLBSwitch / FlagDescLBSwitchShort document `gitmap lb
 	// --switch` / `gitmap lb -s`. Both register the SAME effect: after
 	// printing the latest-branch report, run `git checkout` against the

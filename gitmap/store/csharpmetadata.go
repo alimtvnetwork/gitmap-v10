@@ -96,7 +96,10 @@ func (db *DB) DeleteStaleCsharpKeyFiles(metadataID int64, keepIDs []int64) error
 }
 
 // scanCsharpFileRows scans rows into CsharpProjectFile slices.
-func scanCsharpFileRows(rows interface{ Next() bool; Scan(...interface{}) error }) ([]model.CsharpProjectFile, error) {
+func scanCsharpFileRows(rows interface {
+	Next() bool
+	Scan(...interface{}) error
+}) ([]model.CsharpProjectFile, error) {
 	var files []model.CsharpProjectFile
 	for rows.Next() {
 		var f model.CsharpProjectFile
@@ -113,7 +116,10 @@ func scanCsharpFileRows(rows interface{ Next() bool; Scan(...interface{}) error 
 }
 
 // scanCsharpKeyFileRows scans rows into CsharpKeyFile slices.
-func scanCsharpKeyFileRows(rows interface{ Next() bool; Scan(...interface{}) error }) ([]model.CsharpKeyFile, error) {
+func scanCsharpKeyFileRows(rows interface {
+	Next() bool
+	Scan(...interface{}) error
+}) ([]model.CsharpKeyFile, error) {
 	var files []model.CsharpKeyFile
 	for rows.Next() {
 		var f model.CsharpKeyFile

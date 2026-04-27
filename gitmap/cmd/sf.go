@@ -192,4 +192,3 @@ func openSfDB() *store.DB {
 
 	return db
 }
-

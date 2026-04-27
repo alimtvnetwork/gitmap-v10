@@ -12,11 +12,11 @@ const (
 
 // Clean-code installer messages.
 const (
-	MsgCleanCodeRunning  = "  Installing coding guidelines from %s\n"
-	MsgCleanCodeDone     = "  OK Coding guidelines installed.\n"
-	MsgCleanCodeNoPwsh   = "  ✗ PowerShell not found on PATH. Install PowerShell 7+ or run the one-liner manually:\n      irm %s | iex\n"
-	ErrCleanCodeFailed   = "  ✗ Coding guidelines install failed: %v\n"
-	MsgCleanCodeNonWin   = "  Note: this installer is PowerShell-based; on non-Windows it requires PowerShell 7+ (pwsh).\n"
+	MsgCleanCodeRunning = "  Installing coding guidelines from %s\n"
+	MsgCleanCodeDone    = "  OK Coding guidelines installed.\n"
+	MsgCleanCodeNoPwsh  = "  ✗ PowerShell not found on PATH. Install PowerShell 7+ or run the one-liner manually:\n      irm %s | iex\n"
+	ErrCleanCodeFailed  = "  ✗ Coding guidelines install failed: %v\n"
+	MsgCleanCodeNonWin  = "  Note: this installer is PowerShell-based; on non-Windows it requires PowerShell 7+ (pwsh).\n"
 )
 
 // gitmap:cmd top-level

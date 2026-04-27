@@ -205,4 +205,3 @@ func updateLatestIfStable(v Version) error {
 
 	return nil
 }
-

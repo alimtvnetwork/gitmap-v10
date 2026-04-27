@@ -1,9 +1,9 @@
 // Package cmd — clonenextfolderdispatch.go implements the v3.117.0
 // folder-arg forms of `gitmap cn`:
 //
-//   gitmap cn vX <folder>     — explicit version, explicit folder
-//   gitmap cn v+1 <folder>    — version-bump shortcut
-//   gitmap cn <folder>        — folder only (defaults to v++)
+//	gitmap cn vX <folder>     — explicit version, explicit folder
+//	gitmap cn v+1 <folder>    — version-bump shortcut
+//	gitmap cn <folder>        — folder only (defaults to v++)
 //
 // All three chdir into the resolved folder, run the existing in-place
 // `runCloneNext` pipeline, then chdir back via the shared

@@ -10,14 +10,14 @@ const (
 // gitmap:cmd top-level
 // Env subcommands.
 const (
-	CmdEnvSet        = "set" // gitmap:cmd skip
-	CmdEnvGet        = "get" // gitmap:cmd skip
+	CmdEnvSet        = "set"    // gitmap:cmd skip
+	CmdEnvGet        = "get"    // gitmap:cmd skip
 	CmdEnvDelete     = "delete" // gitmap:cmd skip
-	CmdEnvList       = "list" // gitmap:cmd skip
-	CmdEnvPathAdd    = "path" // gitmap:cmd skip
-	CmdEnvPathSub    = "add" // gitmap:cmd skip
+	CmdEnvList       = "list"   // gitmap:cmd skip
+	CmdEnvPathAdd    = "path"   // gitmap:cmd skip
+	CmdEnvPathSub    = "add"    // gitmap:cmd skip
 	CmdEnvPathRemove = "remove" // gitmap:cmd skip
-	CmdEnvPathList   = "list" // gitmap:cmd skip
+	CmdEnvPathList   = "list"   // gitmap:cmd skip
 )
 
 // Env help text.

@@ -39,14 +39,14 @@ func (db *DB) StartArchiveHistory(cmd string, inputs []string, mode string) (int
 	res, err := db.conn.Exec(constants.SQLInsertArchiveHistory,
 		cmd,
 		string(raw),
-		"",                     // OutputPath filled at finish
-		"",                     // ArchiveFormat filled at finish
-		mode,                   // CompressionMode known up-front
-		0,                      // UsedTemporaryDirectory updated at finish
-		"",                     // Status — empty means "in flight"
-		"",                     // ErrorMessage
+		"",   // OutputPath filled at finish
+		"",   // ArchiveFormat filled at finish
+		mode, // CompressionMode known up-front
+		0,    // UsedTemporaryDirectory updated at finish
+		"",   // Status — empty means "in flight"
+		"",   // ErrorMessage
 		time.Now().UTC().Format(time.RFC3339),
-		"",                     // CompletedAt
+		"", // CompletedAt
 	)
 	if err != nil {
 		return 0, err

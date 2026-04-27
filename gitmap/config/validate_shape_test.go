@@ -18,7 +18,6 @@ import (
 	"github.com/alimtvnetwork/gitmap-v7/gitmap/model"
 )
 
-
 // TestValidateRawShape_RejectsWrongTypePerKey covers the canonical
 // failure mode the shape check exists for: the user wrote a number
 // where a string was expected. Asserting the error names BOTH the

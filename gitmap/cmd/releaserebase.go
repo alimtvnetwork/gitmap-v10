@@ -20,9 +20,9 @@ import (
 // versionPattern matches the three version-shaped tokens any cross-dir
 // dispatcher in this package needs to recognize:
 //
-//   1. Full SemVer with optional pre-release: "1.2.3", "v1.2.3", "v1.2.3-rc1"
-//   2. clone-next bump shortcut:              "v++"
-//   3. clone-next explicit-bump shortcut:     "v+N" (N >= 1)
+//  1. Full SemVer with optional pre-release: "1.2.3", "v1.2.3", "v1.2.3-rc1"
+//  2. clone-next bump shortcut:              "v++"
+//  3. clone-next explicit-bump shortcut:     "v+N" (N >= 1)
 //
 // The bump shortcuts (#2 and #3) are clone-next-specific but live here
 // because `looksLikeVersion` is shared with the release dispatcher

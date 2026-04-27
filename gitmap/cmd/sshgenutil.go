@@ -71,7 +71,6 @@ func defaultSSHKeyPath(name string) string {
 // stricter version there only expands "~", "~/...", "~\..." — which is
 // what every caller in this package needs. Do not redeclare it here.
 
-
 // ensureSSHDir creates a directory with 0700 permissions if it doesn't exist.
 func ensureSSHDir(dir string) error {
 	return os.MkdirAll(dir, 0o700)

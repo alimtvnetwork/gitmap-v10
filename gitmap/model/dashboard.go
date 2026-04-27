@@ -3,12 +3,12 @@ package model
 
 // DashboardData is the top-level structure written to dashboard.json.
 type DashboardData struct {
-	Meta      DashboardMeta          `json:"meta"`
-	Branches  []BranchInfo           `json:"branches"`
-	Tags      []TagInfo              `json:"tags"`
-	Authors   []AuthorInfo           `json:"authors"`
-	Commits   []CommitInfo           `json:"commits"`
-	Frequency FrequencyData          `json:"frequency"`
+	Meta      DashboardMeta `json:"meta"`
+	Branches  []BranchInfo  `json:"branches"`
+	Tags      []TagInfo     `json:"tags"`
+	Authors   []AuthorInfo  `json:"authors"`
+	Commits   []CommitInfo  `json:"commits"`
+	Frequency FrequencyData `json:"frequency"`
 }
 
 // DashboardMeta holds repository-level metadata and generation context.

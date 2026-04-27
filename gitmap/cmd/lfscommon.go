@@ -203,7 +203,6 @@ func loadTrackedPatterns() map[string]bool {
 
 // (gitTopLevel is provided by as.go; we reuse it here.)
 
-
 // printLFSCommonBanner prints the header for the run.
 func printLFSCommonBanner(dryRun bool) {
 	fmt.Println()

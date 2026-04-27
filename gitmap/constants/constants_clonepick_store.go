@@ -9,21 +9,21 @@ package constants
 //
 // Why no FK to Repo(RepoId):
 //
-//   The repo being picked may not exist in any prior `gitmap scan`
-//   output. A user can `clone-pick owner/repo docs` against a fresh
-//   clone they've never indexed locally; gating that behind a
-//   "must scan first" requirement would gut the command's usefulness.
-//   We instead identify the repo by its canonical id (host/owner/repo)
-//   stored as text and indexed.
+//	The repo being picked may not exist in any prior `gitmap scan`
+//	output. A user can `clone-pick owner/repo docs` against a fresh
+//	clone they've never indexed locally; gating that behind a
+//	"must scan first" requirement would gut the command's usefulness.
+//	We instead identify the repo by its canonical id (host/owner/repo)
+//	stored as text and indexed.
 //
 // Why no UNIQUE on Name:
 //
-//   '' is the default Name (auto-saves without --name). SQLite UNIQUE
-//   would reject the second nameless save. Uniqueness for non-empty
-//   names is enforced in the store layer (a SELECT-then-INSERT race
-//   is acceptable here -- worst case the second user sees an error
-//   when their `--replay <name>` lookup returns >1 row, which is the
-//   MsgClonePickReplayAmbiguous path and prints the candidate IDs).
+//	'' is the default Name (auto-saves without --name). SQLite UNIQUE
+//	would reject the second nameless save. Uniqueness for non-empty
+//	names is enforced in the store layer (a SELECT-then-INSERT race
+//	is acceptable here -- worst case the second user sees an error
+//	when their `--replay <name>` lookup returns >1 row, which is the
+//	MsgClonePickReplayAmbiguous path and prints the candidate IDs).
 const SQLCreateCloneInteractiveSelection = `CREATE TABLE IF NOT EXISTS CloneInteractiveSelection (
 	SelectionId       INTEGER PRIMARY KEY AUTOINCREMENT,
 	Name              TEXT NOT NULL DEFAULT '',

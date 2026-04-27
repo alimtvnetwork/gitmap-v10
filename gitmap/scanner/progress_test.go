@@ -27,9 +27,9 @@ func TestScanProgressFinalSnapshotMatchesTotals(t *testing.T) {
 	}
 
 	var (
-		mu          sync.Mutex
-		snapshots   []ScanProgress
-		finalCount  int
+		mu         sync.Mutex
+		snapshots  []ScanProgress
+		finalCount int
 	)
 
 	got, err := ScanDirWithOptions(root, ScanOptions{

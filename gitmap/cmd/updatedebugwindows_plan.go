@@ -4,15 +4,15 @@
 //
 // Two functions are exported within the package:
 //
-//   dumpDebugWindowsCommandPlan — renders the Phase 3 spawn command
-//   line as a copy-pastable shell invocation (proper quoting), and
-//   prints an explicit note that no `git` subprocess is launched.
+//	dumpDebugWindowsCommandPlan — renders the Phase 3 spawn command
+//	line as a copy-pastable shell invocation (proper quoting), and
+//	prints an explicit note that no `git` subprocess is launched.
 //
-//   dumpDebugWindowsCleanupPlan — enumerates the filepath.Glob
-//   patterns the deployed binary will scan and the actual file
-//   matches that will be passed to os.Remove / os.RemoveAll. Called
-//   from runUpdateCleanup BEFORE any deletion happens so the output
-//   reflects intent, not outcome.
+//	dumpDebugWindowsCleanupPlan — enumerates the filepath.Glob
+//	patterns the deployed binary will scan and the actual file
+//	matches that will be passed to os.Remove / os.RemoveAll. Called
+//	from runUpdateCleanup BEFORE any deletion happens so the output
+//	reflects intent, not outcome.
 //
 // These complement the structured-event log written by
 // updatehandofflog.go (which is post-hoc) with a pre-flight view.
@@ -74,10 +74,10 @@ func quoteShellToken(t string) string {
 // so the user sees the *plan*, not the outcome.
 //
 // Operations enumerated:
-//   1. Temp-artifact globs (gitmap-update-* in TEMP and deploy dirs)
-//   2. Backup-artifact globs (*.old next to deployed binary)
-//   3. Clone-swap dir globs (*.gitmap-tmp-*)
-//   4. Drive-root shim candidate (Windows only)
+//  1. Temp-artifact globs (gitmap-update-* in TEMP and deploy dirs)
+//  2. Backup-artifact globs (*.old next to deployed binary)
+//  3. Clone-swap dir globs (*.gitmap-tmp-*)
+//  4. Drive-root shim candidate (Windows only)
 func dumpDebugWindowsCleanupPlan(ctx updateCleanupContext) {
 	if !isDebugWindowsRequested() {
 		return

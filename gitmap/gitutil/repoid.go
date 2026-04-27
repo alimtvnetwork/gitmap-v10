@@ -10,9 +10,9 @@
 //
 // Examples:
 //
-// 	https://github.com/acme/widget.git    -> github.com/acme/widget
-// 	git@github.com:acme/widget.git        -> github.com/acme/widget
-// 	ssh://git@github.com/acme/widget      -> github.com/acme/widget
+//	https://github.com/acme/widget.git    -> github.com/acme/widget
+//	git@github.com:acme/widget.git        -> github.com/acme/widget
+//	ssh://git@github.com/acme/widget      -> github.com/acme/widget
 //
 // Unfamiliar URL shapes are returned lowercased + trimmed but
 // otherwise untouched, so callers can still equality-compare without

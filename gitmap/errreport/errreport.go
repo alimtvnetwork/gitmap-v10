@@ -51,9 +51,9 @@ const (
 type Entry struct {
 	RepoPath        string `json:"repo_path"`
 	RemoteURL       string `json:"remote_url,omitempty"`
-	Step            string `json:"step,omitempty"`            // free-text producer-defined: "ls-remote", "clone", "readdir", …
-	Error           string `json:"error"`                     // human-readable error text
-	TimestampUnixMS int64  `json:"timestamp_unix_ms"`         // capture time, ms-precision
+	Step            string `json:"step,omitempty"`    // free-text producer-defined: "ls-remote", "clone", "readdir", …
+	Error           string `json:"error"`             // human-readable error text
+	TimestampUnixMS int64  `json:"timestamp_unix_ms"` // capture time, ms-precision
 }
 
 // Meta is the report header. Written even when both phase arrays are

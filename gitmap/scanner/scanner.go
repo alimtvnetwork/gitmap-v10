@@ -224,7 +224,7 @@ type scanState struct {
 	exclude  map[string]bool
 	maxDepth int // negative = unbounded; otherwise inclusive cap below root
 
-	queue chan dirJob   // pending directories + their depth
+	queue chan dirJob    // pending directories + their depth
 	wg    sync.WaitGroup // tracks outstanding queued items, NOT workers
 
 	mu       sync.Mutex

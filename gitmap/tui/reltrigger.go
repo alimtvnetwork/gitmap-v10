@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/alimtvnetwork/gitmap-v7/gitmap/constants"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 // relTriggerModel handles release initiation from the TUI.

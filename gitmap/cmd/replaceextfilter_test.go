@@ -95,10 +95,10 @@ func TestResolveExtCase(t *testing.T) {
 // --ext / --ext-case combos that production code paths exercise.
 func TestParseReplaceFlagsExtAndCase(t *testing.T) {
 	cases := []struct {
-		name        string
-		args        []string
-		wantExts    []string
-		wantInsens  bool
+		name       string
+		args       []string
+		wantExts   []string
+		wantInsens bool
 	}{
 		{"default insensitive", []string{"--ext", ".Go,.MD", "old", "new"},
 			[]string{".go", ".md"}, true},

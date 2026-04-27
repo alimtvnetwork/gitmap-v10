@@ -11,10 +11,10 @@ const (
 // Profile subcommands.
 const (
 	CmdProfileCreate = "create" // gitmap:cmd skip
-	CmdProfileList   = "list" // gitmap:cmd skip
+	CmdProfileList   = "list"   // gitmap:cmd skip
 	CmdProfileSwitch = "switch" // gitmap:cmd skip
 	CmdProfileDelete = "delete" // gitmap:cmd skip
-	CmdProfileShow   = "show" // gitmap:cmd skip
+	CmdProfileShow   = "show"   // gitmap:cmd skip
 )
 
 // Profile help text.

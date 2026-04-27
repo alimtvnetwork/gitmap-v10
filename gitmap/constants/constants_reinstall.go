@@ -6,10 +6,10 @@
 // is a separate top-level verb that manages the gitmap binary itself,
 // auto-detecting the install method:
 //
-//   * If a source repo is linked (constants.RepoPath != ""), shell out to
+//   - If a source repo is linked (constants.RepoPath != ""), shell out to
 //     run.ps1 -reinstall (Windows) or run.sh --reinstall (Unix). This
 //     preserves the user's existing build → deploy → setup pipeline.
-//   * Otherwise, run self-uninstall + self-install back-to-back.
+//   - Otherwise, run self-uninstall + self-install back-to-back.
 //
 // The auto-detect is documented in helptext/reinstall.md and overridable
 // with --mode {auto|repo|self}.

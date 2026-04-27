@@ -23,13 +23,13 @@ import (
 
 // RenderSummary writes a human-readable summary to w. Format:
 //
-//   gitmap clone-from: 5 ok, 1 skipped, 2 failed (8 total)
-//   report: .gitmap/clone-from-report-1735000000.csv
+//	gitmap clone-from: 5 ok, 1 skipped, 2 failed (8 total)
+//	report: .gitmap/clone-from-report-1735000000.csv
 //
-//     ok       https://github.com/a/b.git    (1.2s)
-//     skipped  https://github.com/c/d.git    dest exists
-//     failed   https://github.com/e/f.git    fatal: repository not found
-//     ...
+//	  ok       https://github.com/a/b.git    (1.2s)
+//	  skipped  https://github.com/c/d.git    dest exists
+//	  failed   https://github.com/e/f.git    fatal: repository not found
+//	  ...
 func RenderSummary(w io.Writer, results []Result, reportPath string) error {
 	ok, skipped, failed := tallyResults(results)
 	header := fmt.Sprintf(constants.MsgCloneFromSummaryHeader,

@@ -3,11 +3,12 @@
 // entry from an earlier crash.
 //
 // Modes (see helptext/pending-clear.md for the full contract):
-//   orphans  — TargetPath is missing on disk
-//   illegal  — TargetPath looks like a URL or contains illegal Windows
-//              path characters (`:` after drive letter, `?`, `*`, etc.)
-//   all      — every pending task
-//   <id>     — a single task by numeric ID
+//
+//	orphans  — TargetPath is missing on disk
+//	illegal  — TargetPath looks like a URL or contains illegal Windows
+//	           path characters (`:` after drive letter, `?`, `*`, etc.)
+//	all      — every pending task
+//	<id>     — a single task by numeric ID
 //
 // Default mode is `orphans` because it's the safest auto-cleanup.
 // Confirmation is required unless --yes is passed; --dry-run previews

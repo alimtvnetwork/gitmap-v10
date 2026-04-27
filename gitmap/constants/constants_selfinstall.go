@@ -30,22 +30,22 @@ const (
 
 // Self-install messages.
 const (
-	MsgSelfInstallHeader     = "\n  gitmap self-install\n\n"
-	MsgSelfInstallPrompt     = "  Install directory [%s]: "
-	MsgSelfInstallUsing      = "  Using install directory: %s\n"
-	MsgSelfInstallEmbedded   = "  Running embedded installer (%s)...\n"
-	MsgSelfInstallRemote     = "  Embedded installer unavailable; downloading from %s\n"
-	MsgSelfInstallDone       = "  ✓ Install completed.\n"
-	MsgSelfInstallReminder   = "  Open a new terminal (or reload your profile) to pick up PATH changes.\n"
+	MsgSelfInstallHeader   = "\n  gitmap self-install\n\n"
+	MsgSelfInstallPrompt   = "  Install directory [%s]: "
+	MsgSelfInstallUsing    = "  Using install directory: %s\n"
+	MsgSelfInstallEmbedded = "  Running embedded installer (%s)...\n"
+	MsgSelfInstallRemote   = "  Embedded installer unavailable; downloading from %s\n"
+	MsgSelfInstallDone     = "  ✓ Install completed.\n"
+	MsgSelfInstallReminder = "  Open a new terminal (or reload your profile) to pick up PATH changes.\n"
 )
 
 // Self-install errors.
 const (
-	ErrSelfInstallScriptWrite  = "Error: write installer to temp: %v\n"
-	ErrSelfInstallScriptRun    = "Error: run installer: %v\n"
-	ErrSelfInstallDownload     = "Error: download installer from %s: %v\n"
-	ErrSelfInstallNoShell      = "Error: no supported shell found (need PowerShell on Windows or bash on Unix)\n"
-	ErrSelfInstallReadStdin    = "Error: read install dir from stdin: %v\n"
+	ErrSelfInstallScriptWrite = "Error: write installer to temp: %v\n"
+	ErrSelfInstallScriptRun   = "Error: run installer: %v\n"
+	ErrSelfInstallDownload    = "Error: download installer from %s: %v\n"
+	ErrSelfInstallNoShell     = "Error: no supported shell found (need PowerShell on Windows or bash on Unix)\n"
+	ErrSelfInstallReadStdin   = "Error: read install dir from stdin: %v\n"
 )
 
 // Self-uninstall messages.
@@ -68,11 +68,11 @@ const (
 
 // Self-uninstall errors.
 const (
-	ErrSelfUninstallNoConfirm   = "Error: refusing to run without --confirm or interactive 'yes'.\n"
-	ErrSelfUninstallRemove      = "Error: remove %s: %v\n"
-	ErrSelfUninstallSnippetRead = "Error: read profile %s: %v\n"
+	ErrSelfUninstallNoConfirm    = "Error: refusing to run without --confirm or interactive 'yes'.\n"
+	ErrSelfUninstallRemove       = "Error: remove %s: %v\n"
+	ErrSelfUninstallSnippetRead  = "Error: read profile %s: %v\n"
 	ErrSelfUninstallSnippetWrite = "Error: rewrite profile %s: %v\n"
-	ErrSelfUninstallHandoffCopy = "Error: create handoff copy: %v\n"
+	ErrSelfUninstallHandoffCopy  = "Error: create handoff copy: %v\n"
 )
 
 // Hidden runner subcommand for the self-uninstall handoff (lets the temp
@@ -87,17 +87,17 @@ const CmdSelfUninstallRunner = "self-uninstall-runner" // gitmap:cmd skip
 // hidden aliases so existing scripts and CI continue to work — the Go
 // parser collapses all three onto opts.ShellMode (formerly opts.Profile).
 const (
-	FlagSelfDir          = "--dir"
-	FlagSelfYes          = "--yes"
-	FlagSelfConfirm      = "--confirm"
-	FlagSelfKeepData     = "--keep-data"
-	FlagSelfKeepSnippet  = "--keep-snippet"
-	FlagSelfFromVersion  = "--version"
-	FlagSelfShellMode    = "--shell-mode" // canonical (v3.48.0+)
-	FlagSelfProfile      = "--profile"    // hidden alias (v3.46.0+)
-	FlagSelfDualShell    = "--dual-shell" // hidden alias (v3.43.0+)
-	FlagSelfShowPath     = "--show-path"
-	FlagSelfForceLock    = "--force-lock"
+	FlagSelfDir         = "--dir"
+	FlagSelfYes         = "--yes"
+	FlagSelfConfirm     = "--confirm"
+	FlagSelfKeepData    = "--keep-data"
+	FlagSelfKeepSnippet = "--keep-snippet"
+	FlagSelfFromVersion = "--version"
+	FlagSelfShellMode   = "--shell-mode" // canonical (v3.48.0+)
+	FlagSelfProfile     = "--profile"    // hidden alias (v3.46.0+)
+	FlagSelfDualShell   = "--dual-shell" // hidden alias (v3.43.0+)
+	FlagSelfShowPath    = "--show-path"
+	FlagSelfForceLock   = "--force-lock"
 )
 
 // ShellMode values accepted by --shell-mode. `auto` is the default
@@ -112,8 +112,9 @@ const (
 // which writes everything detected.
 //
 // Aliases retained for back-compat:
-//   ProfileMode* names mirror ShellMode* names — both are still exported
-//   so old code referencing ProfileModeBoth keeps compiling.
+//
+//	ProfileMode* names mirror ShellMode* names — both are still exported
+//	so old code referencing ProfileModeBoth keeps compiling.
 const (
 	ShellModeAuto = "auto"
 	ShellModeBoth = "both"
@@ -171,10 +172,10 @@ const (
 	FlagDescSelfFromVersion = "Pin a specific gitmap version to install (e.g. v3.0.0)"
 	FlagDescSelfShellMode   = "Which shell profile(s) to write PATH into: auto|both|zsh|bash|pwsh|fish " +
 		"or any '+'-joined combo such as zsh+pwsh (default: auto)"
-	FlagDescSelfProfile     = "Deprecated alias for --shell-mode (hidden; still works)"
-	FlagDescSelfDualShell   = "Deprecated alias for --shell-mode both (hidden; still works)"
-	FlagDescSelfShowPath    = "Print detected shell, chosen PATH target, and every profile file written"
-	FlagDescSelfForceLock   = "Bypass the duplicate-install guard (recover from a stale lock left by a crashed installer)"
+	FlagDescSelfProfile   = "Deprecated alias for --shell-mode (hidden; still works)"
+	FlagDescSelfDualShell = "Deprecated alias for --shell-mode both (hidden; still works)"
+	FlagDescSelfShowPath  = "Print detected shell, chosen PATH target, and every profile file written"
+	FlagDescSelfForceLock = "Bypass the duplicate-install guard (recover from a stale lock left by a crashed installer)"
 )
 
 // Self-install duplicate-install guard.

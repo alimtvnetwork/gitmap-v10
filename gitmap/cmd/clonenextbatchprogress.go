@@ -23,10 +23,10 @@ import (
 // batchProgressReporter tracks completed/failed/skipped counters and
 // prints a one-line update each time a repo finishes.
 type batchProgressReporter struct {
-	total      int
-	done       int
+	total               int
+	done                int
 	ok, failed, skipped int
-	silent     bool
+	silent              bool
 }
 
 // newBatchProgressReporter returns a reporter sized for `total` jobs.

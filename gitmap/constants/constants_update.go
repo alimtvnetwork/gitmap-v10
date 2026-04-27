@@ -33,13 +33,13 @@ const DebugWindowsJSONFileFmt = "gitmap-debug-windows-%s.jsonl"
 
 // Report-errors values and env-var bridge to run.ps1 / run.sh.
 const (
-	ReportErrorsJSON       = "json"
-	EnvReportErrorsFormat  = "GITMAP_REPORT_ERRORS"
-	EnvReportErrorsFile    = "GITMAP_REPORT_ERRORS_FILE"
+	ReportErrorsJSON        = "json"
+	EnvReportErrorsFormat   = "GITMAP_REPORT_ERRORS"
+	EnvReportErrorsFile     = "GITMAP_REPORT_ERRORS_FILE"
 	EnvUpdateCleanupDelayMS = "GITMAP_UPDATE_CLEANUP_DELAY_MS"
 	UpdateHandoffLogNameFmt = "gitmap-update-handoff-%s.log"
-	ReportErrorsFilePrefix = "gitmap-update-report-"
-	ReportErrorsFileSuffix = ".jsonl"
+	ReportErrorsFilePrefix  = "gitmap-update-report-"
+	ReportErrorsFileSuffix  = ".jsonl"
 )
 
 // Report-errors UI messages.
@@ -52,45 +52,45 @@ const (
 
 // Debug-repo-detect bridge.
 const (
-	EnvDebugRepoDetect    = "GITMAP_DEBUG_REPO_DETECT"
-	MsgDebugRepoDetectOn  = "  → Repo-detect debug enabled (will print marker checks)\n"
+	EnvDebugRepoDetect   = "GITMAP_DEBUG_REPO_DETECT"
+	MsgDebugRepoDetectOn = "  → Repo-detect debug enabled (will print marker checks)\n"
 )
 
 // Updater fallback.
 const (
-	UpdaterBin                = "gitmap-updater"
-	MsgUpdaterFallback        = "  → No source repo found. Delegating to %s...\n\n"
-	UpdateCleanupSourceConfig = "config"
+	UpdaterBin                 = "gitmap-updater"
+	MsgUpdaterFallback         = "  → No source repo found. Delegating to %s...\n\n"
+	UpdateCleanupSourceConfig  = "config"
 	UpdateCleanupSourceSibling = "sibling"
-	UpdateCleanupSourcePath   = "PATH"
+	UpdateCleanupSourcePath    = "PATH"
 	UpdateCleanupSourceUnknown = "unknown"
 )
 
 // Update UI messages.
 const (
-	MsgUpdateActive        = "  → Active: %s\n  → Handoff: %s\n"
-	MsgUpdateCleanStart    = "\n  Cleaning up update artifacts..."
-	MsgUpdateCleanBinary   = "  → Cleanup binary: %s\n"
-	MsgUpdateCleanDelay    = "  → Waiting %dms for deploy handles to settle...\n"
-	MsgUpdateCleanDone     = "  ✓ Removed %d file(s)\n\n"
-	MsgUpdateCleanNone     = "  ✓ Nothing to clean up"
-	MsgUpdateTempRemoved   = "  → Removed temp copy: %s\n"
-	MsgUpdateOldRemoved    = "  → Removed backup: %s\n"
-	MsgUpdatePhase3Handoff = "\n  → Handing off cleanup to deployed binary: %s update-cleanup\n"
-	MsgUpdatePhase3Resolve = "  → Cleanup target resolved via: %s\n"
-	MsgUpdatePhase3Target  = "  → Cleanup target path: %s\n"
-	MsgUpdatePhase3Started = "  → Cleanup process started (pid=%d)\n"
-	MsgUpdatePhase3LogFile = "  → Handoff log file: %s\n"
-	UpdateRunnerLogStart   = "update-runner starting, repo=%s"
-	UpdateScriptLogExec    = "executing update script: %s"
-	UpdateScriptLogExit    = "update script exited: err=%v"
-	UpdatePhase3LogResolve = "update-cleanup target resolved via %s: %s"
-	UpdatePhase3LogStarted = "update-cleanup started pid=%d target=%s"
-	UpdatePhase3LogStartFail = "update-cleanup launch failed target=%s err=%v"
+	MsgUpdateActive              = "  → Active: %s\n  → Handoff: %s\n"
+	MsgUpdateCleanStart          = "\n  Cleaning up update artifacts..."
+	MsgUpdateCleanBinary         = "  → Cleanup binary: %s\n"
+	MsgUpdateCleanDelay          = "  → Waiting %dms for deploy handles to settle...\n"
+	MsgUpdateCleanDone           = "  ✓ Removed %d file(s)\n\n"
+	MsgUpdateCleanNone           = "  ✓ Nothing to clean up"
+	MsgUpdateTempRemoved         = "  → Removed temp copy: %s\n"
+	MsgUpdateOldRemoved          = "  → Removed backup: %s\n"
+	MsgUpdatePhase3Handoff       = "\n  → Handing off cleanup to deployed binary: %s update-cleanup\n"
+	MsgUpdatePhase3Resolve       = "  → Cleanup target resolved via: %s\n"
+	MsgUpdatePhase3Target        = "  → Cleanup target path: %s\n"
+	MsgUpdatePhase3Started       = "  → Cleanup process started (pid=%d)\n"
+	MsgUpdatePhase3LogFile       = "  → Handoff log file: %s\n"
+	UpdateRunnerLogStart         = "update-runner starting, repo=%s"
+	UpdateScriptLogExec          = "executing update script: %s"
+	UpdateScriptLogExit          = "update script exited: err=%v"
+	UpdatePhase3LogResolve       = "update-cleanup target resolved via %s: %s"
+	UpdatePhase3LogStarted       = "update-cleanup started pid=%d target=%s"
+	UpdatePhase3LogStartFail     = "update-cleanup launch failed target=%s err=%v"
 	UpdatePhase3LogTargetMissing = "update-cleanup handoff skipped: deployed target could not be resolved"
-	UpdatePhase3LogInline = "update-cleanup running inline from deployed binary: %s"
-	UpdateCleanupLogStart = "update-cleanup starting: self=%s"
-	UpdateCleanupLogDone = "update-cleanup finished: removed=%d"
+	UpdatePhase3LogInline        = "update-cleanup running inline from deployed binary: %s"
+	UpdateCleanupLogStart        = "update-cleanup starting: self=%s"
+	UpdateCleanupLogDone         = "update-cleanup finished: removed=%d"
 	UpdateCleanupLogDelayInvalid = "update-cleanup ignored invalid delay value: %q"
 )
 
@@ -99,57 +99,56 @@ const (
 // process. The dump is intentionally verbose and prefixed with
 // `[debug-windows]` so it's grep-friendly in CI logs and bug reports.
 const (
-	MsgDebugWinHeader     = "\n[debug-windows] ===== update-cleanup handoff diagnostics =====\n"
-	MsgDebugWinPhase      = "[debug-windows] phase            : %s\n"
-	MsgDebugWinGOOS       = "[debug-windows] GOOS             : %s\n"
-	MsgDebugWinSelf       = "[debug-windows] self executable  : %s\n"
-	MsgDebugWinPID        = "[debug-windows] self pid         : %d\n"
-	MsgDebugWinPPID       = "[debug-windows] parent pid       : %d\n"
-	MsgDebugWinLogFile    = "[debug-windows] handoff log file : %s\n"
-	MsgDebugWinSource     = "[debug-windows] resolution source: %s\n"
-	MsgDebugWinTarget     = "[debug-windows] resolved target  : %s\n"
+	MsgDebugWinHeader       = "\n[debug-windows] ===== update-cleanup handoff diagnostics =====\n"
+	MsgDebugWinPhase        = "[debug-windows] phase            : %s\n"
+	MsgDebugWinGOOS         = "[debug-windows] GOOS             : %s\n"
+	MsgDebugWinSelf         = "[debug-windows] self executable  : %s\n"
+	MsgDebugWinPID          = "[debug-windows] self pid         : %d\n"
+	MsgDebugWinPPID         = "[debug-windows] parent pid       : %d\n"
+	MsgDebugWinLogFile      = "[debug-windows] handoff log file : %s\n"
+	MsgDebugWinSource       = "[debug-windows] resolution source: %s\n"
+	MsgDebugWinTarget       = "[debug-windows] resolved target  : %s\n"
 	MsgDebugWinTargetExists = "[debug-windows] target exists    : %t\n"
-	MsgDebugWinChildArgv  = "[debug-windows] child argv       : %v\n"
-	MsgDebugWinChildEnv   = "[debug-windows] %-16s : %s\n"
-	MsgDebugWinChildPID   = "[debug-windows] spawned child pid: %d\n"
-	MsgDebugWinNote       = "[debug-windows] %s\n"
-	MsgDebugWinFooter     = "[debug-windows] ============================================\n\n"
+	MsgDebugWinChildArgv    = "[debug-windows] child argv       : %v\n"
+	MsgDebugWinChildEnv     = "[debug-windows] %-16s : %s\n"
+	MsgDebugWinChildPID     = "[debug-windows] spawned child pid: %d\n"
+	MsgDebugWinNote         = "[debug-windows] %s\n"
+	MsgDebugWinFooter       = "[debug-windows] ============================================\n\n"
 
 	// Command-line rendering: exact invocation that Phase 3 will run,
 	// formatted so the user can copy-paste it into a shell to reproduce.
-	MsgDebugWinCmdLine    = "[debug-windows] spawn command    : %s\n"
-	MsgDebugWinCmdNote    = "[debug-windows] (no `git` subprocess is launched by update-cleanup; only the line above plus os.Remove/os.RemoveAll on the paths below)\n"
+	MsgDebugWinCmdLine = "[debug-windows] spawn command    : %s\n"
+	MsgDebugWinCmdNote = "[debug-windows] (no `git` subprocess is launched by update-cleanup; only the line above plus os.Remove/os.RemoveAll on the paths below)\n"
 
 	// Cleanup plan: the actual filesystem operations the deployed binary
 	// will perform, enumerated BEFORE any deletion happens.
-	MsgDebugWinCleanHdr   = "[debug-windows] ----- planned cleanup operations -----\n"
-	MsgDebugWinCleanGlob  = "[debug-windows] glob             : %s\n"
-	MsgDebugWinCleanMatch = "[debug-windows]   → os.Remove    : %s\n"
-	MsgDebugWinCleanEmpty = "[debug-windows]   (no matches)\n"
-	MsgDebugWinCleanSwap  = "[debug-windows]   → os.RemoveAll : %s\n"
-	MsgDebugWinCleanShim  = "[debug-windows] drive-root shim  : %s (%s)\n"
+	MsgDebugWinCleanHdr      = "[debug-windows] ----- planned cleanup operations -----\n"
+	MsgDebugWinCleanGlob     = "[debug-windows] glob             : %s\n"
+	MsgDebugWinCleanMatch    = "[debug-windows]   → os.Remove    : %s\n"
+	MsgDebugWinCleanEmpty    = "[debug-windows]   (no matches)\n"
+	MsgDebugWinCleanSwap     = "[debug-windows]   → os.RemoveAll : %s\n"
+	MsgDebugWinCleanShim     = "[debug-windows] drive-root shim  : %s (%s)\n"
 	MsgDebugWinCleanShimSkip = "skipped"
 	MsgDebugWinCleanShimDel  = "will os.Remove"
-	MsgDebugWinCleanFooter = "[debug-windows] --------------------------------------\n"
+	MsgDebugWinCleanFooter   = "[debug-windows] --------------------------------------\n"
 
 	// JSON sink — appended NDJSON events alongside the console dump.
 	MsgDebugWinJSONFile     = "[debug-windows] json sink file   : %s\n"
 	MsgDebugWinJSONOpenFail = "[debug-windows] json sink open failed: %s (%v)\n"
-
 )
 
 // Update error messages.
 const (
-	ErrUpdateExecFind          = "Error finding executable: %v\n"
-	ErrUpdateCopyFail          = "Error creating update copy: %v\n"
-	ErrUpdateNoRunSH           = "  ✗ run.sh not found at %s — cannot update on this platform without it.\n"
-	ErrUpdateCleanupExecPath   = "Error: could not resolve executable path at active-binary: %v (operation: resolve executable, reason: os.Executable failed)\n"
-	ErrUpdateCleanupConfigRead = "Error: could not read cleanup config at %s: %v (operation: read config, reason: cleanup path resolution unavailable)\n"
-	ErrUpdateCleanupGlob       = "Error: could not enumerate cleanup matches at %s: %v (operation: glob, reason: invalid cleanup pattern)\n"
-	ErrUpdateCleanupRemove     = "Error: could not remove cleanup artifact at %s: %v (operation: remove, reason: file may be locked or missing)\n"
-	ErrUpdateCleanDelayInvalid = "Error: ignored invalid update-cleanup delay value %q (operation: parse cleanup delay, reason: env must be a positive integer)\n"
+	ErrUpdateExecFind            = "Error finding executable: %v\n"
+	ErrUpdateCopyFail            = "Error creating update copy: %v\n"
+	ErrUpdateNoRunSH             = "  ✗ run.sh not found at %s — cannot update on this platform without it.\n"
+	ErrUpdateCleanupExecPath     = "Error: could not resolve executable path at active-binary: %v (operation: resolve executable, reason: os.Executable failed)\n"
+	ErrUpdateCleanupConfigRead   = "Error: could not read cleanup config at %s: %v (operation: read config, reason: cleanup path resolution unavailable)\n"
+	ErrUpdateCleanupGlob         = "Error: could not enumerate cleanup matches at %s: %v (operation: glob, reason: invalid cleanup pattern)\n"
+	ErrUpdateCleanupRemove       = "Error: could not remove cleanup artifact at %s: %v (operation: remove, reason: file may be locked or missing)\n"
+	ErrUpdateCleanDelayInvalid   = "Error: ignored invalid update-cleanup delay value %q (operation: parse cleanup delay, reason: env must be a positive integer)\n"
 	ErrUpdatePhase3TargetMissing = "Error: could not resolve deployed binary for update-cleanup (operation: resolve cleanup handoff target, reason: no deployed binary path found)\n"
-	ErrUpdatePhase3Handoff     = "Error: could not run update cleanup via deployed binary at %s: %v (operation: launch cleanup handoff, reason: target start or execution failed)\n"
+	ErrUpdatePhase3Handoff       = "Error: could not run update cleanup via deployed binary at %s: %v (operation: launch cleanup handoff, reason: target start or execution failed)\n"
 )
 
 // Unix update messages.

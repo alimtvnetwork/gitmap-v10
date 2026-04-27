@@ -16,7 +16,8 @@ import (
 //
 // Form 1 — `gitmap r vX.Y.Z`         : in-place release of the current repo.
 // Form 2 — `gitmap r <repo> vX.Y.Z`  : cross-dir — chdir into <repo>, fetch
-//                                       + pull --rebase, release, chdir back.
+//   - pull --rebase, release, chdir back.
+//
 // See `releaserebase.go` for the cross-dir machinery.
 func runRelease(args []string) {
 	if tryCrossDirRelease(args) {

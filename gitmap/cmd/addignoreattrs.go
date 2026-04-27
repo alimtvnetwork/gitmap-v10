@@ -1,13 +1,13 @@
 // Commands `gitmap add ignore` and `gitmap add attributes`.
 //
 // Both share a near-identical pipeline:
-//   1. Validate we are inside a Git working tree.
-//   2. Resolve `common.<ext>` plus each language argument from the
-//      templates package (overlay > embed).
-//   3. Concatenate bodies with a single dedupe pass keyed on the
-//      trimmed line — comments included, blank lines preserved.
-//   4. Hand the merged body to templates.Merge under a marker block
-//      tagged "<kind>/<concatenated-langs>" so re-runs are byte-stable.
+//  1. Validate we are inside a Git working tree.
+//  2. Resolve `common.<ext>` plus each language argument from the
+//     templates package (overlay > embed).
+//  3. Concatenate bodies with a single dedupe pass keyed on the
+//     trimmed line — comments included, blank lines preserved.
+//  4. Hand the merged body to templates.Merge under a marker block
+//     tagged "<kind>/<concatenated-langs>" so re-runs are byte-stable.
 //
 // The two entry points (`runAddIgnore`, `runAddAttributes`) parameterize
 // only the kind / extension / target file / marker tag prefix and reuse

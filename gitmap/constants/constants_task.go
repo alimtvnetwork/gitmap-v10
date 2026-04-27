@@ -11,9 +11,9 @@ const (
 // Task subcommands.
 const (
 	CmdTaskCreate = "create" // gitmap:cmd skip
-	CmdTaskList   = "list" // gitmap:cmd skip
-	CmdTaskRun    = "run" // gitmap:cmd skip
-	CmdTaskShow   = "show" // gitmap:cmd skip
+	CmdTaskList   = "list"   // gitmap:cmd skip
+	CmdTaskRun    = "run"    // gitmap:cmd skip
+	CmdTaskShow   = "show"   // gitmap:cmd skip
 	CmdTaskDelete = "delete" // gitmap:cmd skip
 )
 

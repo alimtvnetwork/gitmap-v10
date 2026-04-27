@@ -13,7 +13,6 @@ import (
 	"github.com/alimtvnetwork/gitmap-v7/gitmap/verbose"
 )
 
-
 // Options holds all parameters for a release operation.
 // v15: boolean fields use the IsX prefix convention.
 type Options struct {

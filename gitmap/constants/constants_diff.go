@@ -11,24 +11,24 @@ const (
 
 // Diff flag names.
 const (
-	FlagDiffJSON              = "json"
-	FlagDiffOnlyConflicts     = "only-conflicts"
-	FlagDiffOnlyMissing       = "only-missing"
-	FlagDiffIncludeIdentical  = "include-identical"
-	FlagDiffIncludeVCS        = "include-vcs"
-	FlagDiffIncludeNodeMods   = "include-node-modules"
-	FlagDiffNoColor           = "no-color"
+	FlagDiffJSON             = "json"
+	FlagDiffOnlyConflicts    = "only-conflicts"
+	FlagDiffOnlyMissing      = "only-missing"
+	FlagDiffIncludeIdentical = "include-identical"
+	FlagDiffIncludeVCS       = "include-vcs"
+	FlagDiffIncludeNodeMods  = "include-node-modules"
+	FlagDiffNoColor          = "no-color"
 )
 
 // Diff log prefix and section headers.
 const (
-	LogPrefixDiff             = "[diff]"
-	DiffSectionMissingRight   = "Missing on RIGHT (would be added by merge-right / merge-both):"
-	DiffSectionMissingLeft    = "Missing on LEFT (would be added by merge-left / merge-both):"
-	DiffSectionConflicts      = "Conflicts (different content on both sides):"
-	DiffSectionIdentical      = "Identical files (skipped by merge-*):"
-	DiffSummaryFmt            = "%s summary: %d missing-on-left, %d missing-on-right, %d conflicts, %d identical\n"
-	DiffNothingFmt            = "%s no differences detected.\n"
+	LogPrefixDiff           = "[diff]"
+	DiffSectionMissingRight = "Missing on RIGHT (would be added by merge-right / merge-both):"
+	DiffSectionMissingLeft  = "Missing on LEFT (would be added by merge-left / merge-both):"
+	DiffSectionConflicts    = "Conflicts (different content on both sides):"
+	DiffSectionIdentical    = "Identical files (skipped by merge-*):"
+	DiffSummaryFmt          = "%s summary: %d missing-on-left, %d missing-on-right, %d conflicts, %d identical\n"
+	DiffNothingFmt          = "%s no differences detected.\n"
 )
 
 // Diff error messages.

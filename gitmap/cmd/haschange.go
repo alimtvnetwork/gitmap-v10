@@ -5,10 +5,11 @@
 // switch dimensions; --all prints structured output covering all three.
 //
 // Examples:
-//   gitmap hc gitmap                  -> true | false   (dirty working tree)
-//   gitmap hc gitmap --mode=ahead     -> true | false   (local commits not pushed)
-//   gitmap hc gitmap --mode=behind    -> true | false   (remote commits not pulled)
-//   gitmap hc gitmap --all            -> dirty=true ahead=false behind=true
+//
+//	gitmap hc gitmap                  -> true | false   (dirty working tree)
+//	gitmap hc gitmap --mode=ahead     -> true | false   (local commits not pushed)
+//	gitmap hc gitmap --mode=behind    -> true | false   (remote commits not pulled)
+//	gitmap hc gitmap --all            -> dirty=true ahead=false behind=true
 package cmd
 
 import (

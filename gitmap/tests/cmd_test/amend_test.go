@@ -218,10 +218,10 @@ func buildAuditRecord(f testAmendFlags, commits []model.CommitEntry, branch, mod
 	}
 
 	return model.AmendmentRecord{
-		Timestamp:  ts.Format(time.RFC3339),
-		Branch:     branch,
-		FromCommit: fromCommit,
-		ToCommit:   toCommit,
+		Timestamp:    ts.Format(time.RFC3339),
+		Branch:       branch,
+		FromCommit:   fromCommit,
+		ToCommit:     toCommit,
 		TotalCommits: len(commits),
 		PreviousAuthor: model.AmendAuthor{
 			Name:  prevName,

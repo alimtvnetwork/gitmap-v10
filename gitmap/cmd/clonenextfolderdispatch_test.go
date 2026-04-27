@@ -46,16 +46,16 @@ func TestHasFolderHint(t *testing.T) {
 	t.Parallel()
 
 	cases := map[string]bool{
-		"~/dev":          true,
-		"~":              true,
-		"./repo":         true,
-		"../sibling":     true,
-		"/abs/path":      true,
-		`C:\Windows`:     true,
-		"repo/sub":       true,
-		"plain-name":     false,
-		"v++":            false,
-		"":               false,
+		"~/dev":      true,
+		"~":          true,
+		"./repo":     true,
+		"../sibling": true,
+		"/abs/path":  true,
+		`C:\Windows`: true,
+		"repo/sub":   true,
+		"plain-name": false,
+		"v++":        false,
+		"":           false,
 	}
 
 	for in, want := range cases {

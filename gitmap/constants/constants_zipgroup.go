@@ -85,7 +85,7 @@ const (
 // SQL: drop zip group tables (v15 + legacy plurals retained for Reset).
 const (
 	SQLDropZipGroup      = "DROP TABLE IF EXISTS ZipGroup"
-	SQLDropZipGroups     = "DROP TABLE IF EXISTS ZipGroups"     // legacy
+	SQLDropZipGroups     = "DROP TABLE IF EXISTS ZipGroups" // legacy
 	SQLDropZipGroupItem  = "DROP TABLE IF EXISTS ZipGroupItem"
 	SQLDropZipGroupItems = "DROP TABLE IF EXISTS ZipGroupItems" // legacy
 )

@@ -114,4 +114,3 @@ func jsonRow(obj map[string]any) (Row, error) {
 
 // CSV parsing (parseCSV, csvIndex, indexCSVHeader, csvRow, get)
 // lives in parsecsv.go to keep this file under the per-file budget.
-

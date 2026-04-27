@@ -35,8 +35,8 @@ type ExtractResult struct {
 //
 //  1. xap.zip → xap/xap/<files>  becomes  destBaseDir/xap/<files>
 //     (any number of duplicate-name layers up to MaxCompactFlattenLayers
-//      is collapsed; we do not require the inner names to match xap —
-//      we just promote single-child directories until we hit content.)
+//     is collapsed; we do not require the inner names to match xap —
+//     we just promote single-child directories until we hit content.)
 //
 //  2. xlt.zip → <files>          becomes  destBaseDir/xlt/<files>
 //     (no flatten, just a wrap.)
@@ -162,7 +162,7 @@ func writeArchiveFile(entry archives.FileInfo, destPath string, written *int) er
 // safeJoin sanitizes an in-archive path against destDir to prevent
 // path-traversal (G305). Returns "" when the cleaned path escapes destDir.
 func safeJoin(destDir, name string) string {
-	clean := filepath.Clean("/" + name)              // anchor at root, strip "..", "."
+	clean := filepath.Clean("/" + name) // anchor at root, strip "..", "."
 	clean = strings.TrimPrefix(clean, string(filepath.Separator))
 	full := filepath.Join(destDir, clean)
 	abs, err := filepath.Abs(full)

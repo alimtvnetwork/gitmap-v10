@@ -105,9 +105,9 @@ func scanOneVSCodeProjectRow(row interface{ Scan(dest ...any) error }) (model.VS
 // JSON-encoded Paths column.
 func scanOneVSCodeProject(row interface{ Scan(dest ...any) error }) (model.VSCodeProject, error) {
 	var (
-		p          model.VSCodeProject
-		enabled    int64
-		pathsJSON  string
+		p         model.VSCodeProject
+		enabled   int64
+		pathsJSON string
 	)
 
 	err := row.Scan(&p.ID, &p.RootPath, &p.Name, &pathsJSON, &enabled, &p.Profile,

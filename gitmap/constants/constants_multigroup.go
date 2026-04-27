@@ -10,10 +10,10 @@ const (
 // gitmap:cmd top-level
 // Multi-group subcommands.
 const (
-	CmdMGClear  = "clear" // gitmap:cmd skip
-	CmdMGPull   = "pull" // gitmap:cmd skip
+	CmdMGClear  = "clear"  // gitmap:cmd skip
+	CmdMGPull   = "pull"   // gitmap:cmd skip
 	CmdMGStatus = "status" // gitmap:cmd skip
-	CmdMGExec   = "exec" // gitmap:cmd skip
+	CmdMGExec   = "exec"   // gitmap:cmd skip
 )
 
 // Multi-group help text is declared in constants_cli.go (HelpMultiGroup).

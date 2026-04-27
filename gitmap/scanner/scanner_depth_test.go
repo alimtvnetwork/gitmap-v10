@@ -9,7 +9,7 @@ import (
 // depth 5 is NOT. The cap is inclusive of depth 4.
 func TestScanDirDefaultMaxDepthStopsAtFour(t *testing.T) {
 	root := t.TempDir()
-	makeRepo(t, root, "d1/d2/d3/d4/in-budget")  // depth 5? d1=1 d2=2 d3=3 d4=4 in=5
+	makeRepo(t, root, "d1/d2/d3/d4/in-budget")   // depth 5? d1=1 d2=2 d3=3 d4=4 in=5
 	makeRepo(t, root, "d1/d2/d3/d4/d5/too-deep") // depth 6 — past cap
 
 	got, err := ScanDir(root, nil)
@@ -47,8 +47,8 @@ func TestScanDirDefaultDepthFindsRepoAtCap(t *testing.T) {
 // found; a repo at depth 2 is not.
 func TestScanDirCustomMaxDepthOne(t *testing.T) {
 	root := t.TempDir()
-	makeRepo(t, root, "shallow")        // depth 1
-	makeRepo(t, root, "outer/nested")   // depth 2 — should be skipped
+	makeRepo(t, root, "shallow")      // depth 1
+	makeRepo(t, root, "outer/nested") // depth 2 — should be skipped
 
 	got, err := ScanDirWithOptions(root, ScanOptions{MaxDepth: 1})
 	if err != nil {

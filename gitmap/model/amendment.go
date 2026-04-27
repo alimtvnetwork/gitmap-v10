@@ -3,17 +3,17 @@ package model
 
 // AmendmentRecord represents a single author-rewrite operation.
 type AmendmentRecord struct {
-	ID            int64           `json:"id"`
-	Timestamp     string          `json:"timestamp"`
-	Branch        string          `json:"branch"`
-	FromCommit    string          `json:"fromCommit"`
-	ToCommit      string          `json:"toCommit"`
-	TotalCommits  int             `json:"totalCommits"`
-	PreviousAuthor AmendAuthor    `json:"previousAuthor"`
-	NewAuthor      AmendAuthor    `json:"newAuthor"`
-	Mode          string          `json:"mode"`
-	ForcePushed   bool            `json:"forcePushed"`
-	Commits       []CommitEntry   `json:"commits"`
+	ID             int64         `json:"id"`
+	Timestamp      string        `json:"timestamp"`
+	Branch         string        `json:"branch"`
+	FromCommit     string        `json:"fromCommit"`
+	ToCommit       string        `json:"toCommit"`
+	TotalCommits   int           `json:"totalCommits"`
+	PreviousAuthor AmendAuthor   `json:"previousAuthor"`
+	NewAuthor      AmendAuthor   `json:"newAuthor"`
+	Mode           string        `json:"mode"`
+	ForcePushed    bool          `json:"forcePushed"`
+	Commits        []CommitEntry `json:"commits"`
 }
 
 // AmendAuthor holds a name/email pair for amendment records.

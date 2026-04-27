@@ -11,7 +11,7 @@ package constants
 // for each repo. Empty in Phase 2.1; populated starting in Phase 2.3.
 
 const (
-	TableScanFolder  = "ScanFolder"
+	TableScanFolder   = "ScanFolder"
 	TableVersionProbe = "VersionProbe"
 )
 
@@ -85,29 +85,29 @@ const (
 
 // ScanFolder error messages (Code Red zero-swallow policy).
 const (
-	ErrSFEnsure       = "failed to ensure scan folder %q: %v"
-	ErrSFList         = "failed to list scan folders: %v"
-	ErrSFFindByPath   = "no scan folder registered for path: %s"
-	ErrSFFindByID     = "no scan folder with id: %d"
-	ErrSFRemove       = "failed to remove scan folder: %v"
-	ErrSFDetachRepos  = "failed to detach repos from scan folder: %v"
-	ErrSFAbsResolve   = "failed to resolve absolute path for %q: %v"
-	ErrSFInvalidID    = "invalid scan folder id %q: %v"
-	ErrSFMissingArg   = "missing required argument: %s"
+	ErrSFEnsure      = "failed to ensure scan folder %q: %v"
+	ErrSFList        = "failed to list scan folders: %v"
+	ErrSFFindByPath  = "no scan folder registered for path: %s"
+	ErrSFFindByID    = "no scan folder with id: %d"
+	ErrSFRemove      = "failed to remove scan folder: %v"
+	ErrSFDetachRepos = "failed to detach repos from scan folder: %v"
+	ErrSFAbsResolve  = "failed to resolve absolute path for %q: %v"
+	ErrSFInvalidID   = "invalid scan folder id %q: %v"
+	ErrSFMissingArg  = "missing required argument: %s"
 )
 
 // ScanFolder user-facing CLI strings.
 const (
-	MsgSFAddedFmt        = "✓ Registered scan folder: %s (id=%d)\n"
-	MsgSFAddedExistsFmt  = "✓ Scan folder already registered: %s (id=%d, last scanned %s)\n"
-	MsgSFRemovedFmt      = "✓ Removed scan folder: %s (id=%d, %d repos detached)\n"
-	MsgSFListEmpty       = "No scan folders registered. Run `gitmap scan <dir>` or `gitmap sf add <dir>`.\n"
-	MsgSFListHeaderFmt   = "Scan folders (%d):\n"
-	MsgSFListRowFmt      = "  [%d] %s\n      label: %s | repos: %d | last scanned: %s\n"
-	MsgSFUsageHeader     = "Usage: gitmap sf <add|list|rm> [args]"
-	MsgSFUsageAdd        = "  gitmap sf add <absolute-path> [--label <text>] [--notes <text>]"
-	MsgSFUsageList       = "  gitmap sf list"
-	MsgSFUsageRm         = "  gitmap sf rm <absolute-path|id>"
+	MsgSFAddedFmt       = "✓ Registered scan folder: %s (id=%d)\n"
+	MsgSFAddedExistsFmt = "✓ Scan folder already registered: %s (id=%d, last scanned %s)\n"
+	MsgSFRemovedFmt     = "✓ Removed scan folder: %s (id=%d, %d repos detached)\n"
+	MsgSFListEmpty      = "No scan folders registered. Run `gitmap scan <dir>` or `gitmap sf add <dir>`.\n"
+	MsgSFListHeaderFmt  = "Scan folders (%d):\n"
+	MsgSFListRowFmt     = "  [%d] %s\n      label: %s | repos: %d | last scanned: %s\n"
+	MsgSFUsageHeader    = "Usage: gitmap sf <add|list|rm> [args]"
+	MsgSFUsageAdd       = "  gitmap sf add <absolute-path> [--label <text>] [--notes <text>]"
+	MsgSFUsageList      = "  gitmap sf list"
+	MsgSFUsageRm        = "  gitmap sf rm <absolute-path|id>"
 )
 
 // ScanFolder CLI tokens (avoid magic strings).

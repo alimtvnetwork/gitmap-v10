@@ -10,8 +10,8 @@ const (
 // gitmap:cmd top-level
 // CD subcommands.
 const (
-	CmdCDRepos        = "repos" // gitmap:cmd skip
-	CmdCDSetDefault   = "set-default" // gitmap:cmd skip
+	CmdCDRepos        = "repos"         // gitmap:cmd skip
+	CmdCDSetDefault   = "set-default"   // gitmap:cmd skip
 	CmdCDClearDefault = "clear-default" // gitmap:cmd skip
 )
 

@@ -92,10 +92,10 @@ func acquireSelfInstallLock(opts selfInstallOpts) lockfile.Releaser {
 // --force-lock.
 //
 // Precedence when multiple shell-mode-style flags are passed:
-//   1. --shell-mode wins (canonical, explicit).
-//   2. --profile wins over --dual-shell (newer alias beats older).
-//   3. --dual-shell upgrades the default `auto` to `both` only if no
-//      higher-precedence flag was set.
+//  1. --shell-mode wins (canonical, explicit).
+//  2. --profile wins over --dual-shell (newer alias beats older).
+//  3. --dual-shell upgrades the default `auto` to `both` only if no
+//     higher-precedence flag was set.
 //
 // All three converge onto opts.ShellMode so the rest of the program sees
 // a single resolved value.

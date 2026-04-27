@@ -4,15 +4,15 @@ package constants
 // Extracted from constants_cli.go to keep that file under the 200-line guideline.
 const (
 	// Scan flags help section.
-	HelpScanFlags     = "Scan flags:"
-	HelpConfig        = "  --config <path>     Config file (default: ./data/config.json)"
-	HelpMode          = "  --mode ssh|https    Clone URL style (default: https)"
-	HelpOutput        = "  --output csv|json|terminal  Output format (default: terminal)"
-	HelpOutputPath    = "  --output-path <dir> Output directory (default: .gitmap/output)"
-	HelpOutFile       = "  --out-file <path>   Exact output file path"
+	HelpScanFlags             = "Scan flags:"
+	HelpConfig                = "  --config <path>     Config file (default: ./data/config.json)"
+	HelpMode                  = "  --mode ssh|https    Clone URL style (default: https)"
+	HelpOutput                = "  --output csv|json|terminal  Output format (default: terminal)"
+	HelpOutputPath            = "  --output-path <dir> Output directory (default: .gitmap/output)"
+	HelpOutFile               = "  --out-file <path>   Exact output file path"
 	HelpScanFlagGitHubDesktop = "  --github-desktop    Add repos to GitHub Desktop"
-	HelpOpen          = "  --open              Open output folder after scan"
-	HelpQuiet         = "  --quiet             Suppress clone help section (for CI/scripted use)"
+	HelpOpen                  = "  --open              Open output folder after scan"
+	HelpQuiet                 = "  --quiet             Suppress clone help section (for CI/scripted use)"
 
 	// Clone flags help section.
 	HelpCloneFlags = "Clone flags:"

@@ -18,8 +18,8 @@ type ZipGroupJSON struct {
 
 // ZipGroupJSONEntry represents a single zip group with its items.
 type ZipGroupJSONEntry struct {
-	Name        string              `json:"name"`
-	ArchiveName string              `json:"archiveName,omitempty"`
+	Name        string               `json:"name"`
+	ArchiveName string               `json:"archiveName,omitempty"`
 	Items       []model.ZipGroupItem `json:"items"`
 }
 

@@ -5,11 +5,11 @@
 // `gitmap clone` would run — without actually running it. The result is a
 // diff-style report:
 //
-//	+ clone   path  (url, branch, strategy)   target missing
-//	~ pull    path  (url)                     existing git repo
-//	= skip    path  (url)                     cache fingerprint matches
-//	! invalid path                            no clone URL on the record
-//	? conflict path                           target exists but is not a git repo
+//   - clone   path  (url, branch, strategy)   target missing
+//     ~ pull    path  (url)                     existing git repo
+//     = skip    path  (url)                     cache fingerprint matches
+//     ! invalid path                            no clone URL on the record
+//     ? conflict path                           target exists but is not a git repo
 //
 // Audit never touches the network and never writes anything outside stdout.
 // It honors the same branch-selection strategy as the live clone path

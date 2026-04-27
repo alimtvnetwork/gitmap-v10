@@ -14,10 +14,10 @@ const (
 	// Reserved for Slice 3 — kept here so the dispatch table grows in
 	// one file and shorthand collisions can be detected by the existing
 	// constants-collision check.
-	CmdDownload           = "download"      // gitmap:cmd skip
-	CmdDownloadAlias      = "dl"            // gitmap:cmd skip
+	CmdDownload           = "download"       // gitmap:cmd skip
+	CmdDownloadAlias      = "dl"             // gitmap:cmd skip
 	CmdDownloadUnzip      = "download-unzip" // gitmap:cmd skip
-	CmdDownloadUnzipAlias = "du"            // gitmap:cmd skip
+	CmdDownloadUnzipAlias = "du"             // gitmap:cmd skip
 )
 
 // SettingType enum (stored as a TEXT discriminator on each Setting key).
@@ -60,18 +60,18 @@ const DefaultDownloaderConfigSeedPath = "./data/downloader-config.json"
 // large / 100MB threshold. Tiny-file profile (<2MB → 8 splits @ 100KB)
 // matches the user clarification.
 const (
-	DownloaderDefaultParallel        = 15
-	DownloaderDefaultSplits          = 15
-	DownloaderDefaultSplitSize       = "800K"
-	DownloaderDefaultLargeSplitSize  = "2M"
-	DownloaderDefaultLargeThreshold  = "100M"
-	DownloaderDefaultTinyThreshold   = "2M"
-	DownloaderDefaultTinySplitSize   = "100K"
-	DownloaderDefaultTinySplits      = 8
-	DownloaderDefaultPreferred       = "Aria2C"
-	DownloaderDefaultFallback        = "GoDownloader"
-	DownloaderDefaultAllowFallback   = true
-	DownloaderDefaultOverwriteUser   = false
+	DownloaderDefaultParallel       = 15
+	DownloaderDefaultSplits         = 15
+	DownloaderDefaultSplitSize      = "800K"
+	DownloaderDefaultLargeSplitSize = "2M"
+	DownloaderDefaultLargeThreshold = "100M"
+	DownloaderDefaultTinyThreshold  = "2M"
+	DownloaderDefaultTinySplitSize  = "100K"
+	DownloaderDefaultTinySplits     = 8
+	DownloaderDefaultPreferred      = "Aria2C"
+	DownloaderDefaultFallback       = "GoDownloader"
+	DownloaderDefaultAllowFallback  = true
+	DownloaderDefaultOverwriteUser  = false
 )
 
 // User-facing messages for downloader-config (Slice 1).

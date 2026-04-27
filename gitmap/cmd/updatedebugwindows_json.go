@@ -4,18 +4,18 @@
 // to stderr, every dump helper also emits a structured NDJSON event
 // to a timestamped file under the project's output directory:
 //
-// 	output/gitmap-debug-windows-YYYY-MM-DD_HH-MM-SS.jsonl
+//	output/gitmap-debug-windows-YYYY-MM-DD_HH-MM-SS.jsonl
 //
 // One event per line — easy to `jq`/`grep`, easy to ship to a log
 // aggregator, and (crucially) survives even when stdout/stderr are
 // swallowed by a detached Windows launcher.
 //
 // Activation:
-//   1. `--debug-windows-json` flag (boolean, defaults the path)
-//   2. `--debug-windows-json=<path>` to override the file path
-//   3. `GITMAP_DEBUG_WINDOWS_JSON=<path>` env var (also auto-forwarded
-//      to the Phase 3 cleanup child so its events append to the same
-//      file as the parent, giving one consolidated trace per handoff)
+//  1. `--debug-windows-json` flag (boolean, defaults the path)
+//  2. `--debug-windows-json=<path>` to override the file path
+//  3. `GITMAP_DEBUG_WINDOWS_JSON=<path>` env var (also auto-forwarded
+//     to the Phase 3 cleanup child so its events append to the same
+//     file as the parent, giving one consolidated trace per handoff)
 //
 // The sink is OFF by default — `--debug-windows` alone keeps the
 // console-only behaviour from v3.86. You opt-in to the file sink
@@ -111,9 +111,9 @@ func isDebugWindowsJSONFlagWithValue(arg string) bool {
 
 // openDebugWindowsJSONFile opens (once per process) the sink file in
 // append mode. Path resolution order:
-//   1. Explicit `--debug-windows-json=<path>` value
-//   2. `GITMAP_DEBUG_WINDOWS_JSON` env value
-//   3. Default: output/gitmap-debug-windows-<ts>.jsonl
+//  1. Explicit `--debug-windows-json=<path>` value
+//  2. `GITMAP_DEBUG_WINDOWS_JSON` env value
+//  3. Default: output/gitmap-debug-windows-<ts>.jsonl
 func openDebugWindowsJSONFile() *os.File {
 	debugWinJSONOnce.Do(func() {
 		path := resolveDebugWindowsJSONPath()

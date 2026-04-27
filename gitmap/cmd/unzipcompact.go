@@ -159,4 +159,3 @@ func finishArchiveRow(db *store.DB, id int64, outputPath, format string, usedTem
 	}
 	fmt.Fprintf(os.Stderr, constants.MsgArchiveHistoryRecorded+"\n", id, status)
 }
-

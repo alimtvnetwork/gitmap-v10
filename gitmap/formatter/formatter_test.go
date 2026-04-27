@@ -16,14 +16,14 @@ func testRecords() []model.ScanRecord {
 			SSHUrl: "git@github.com:u/repo-a.git", Branch: "main",
 			RelativePath: "projects/repo-a", AbsolutePath: "/home/u/projects/repo-a",
 			CloneInstruction: "git clone -b main https://github.com/u/repo-a.git projects/repo-a",
-			Notes: "",
+			Notes:            "",
 		},
 		{
 			RepoName: "repo-b", HTTPSUrl: "https://github.com/u/repo-b.git",
 			SSHUrl: "git@github.com:u/repo-b.git", Branch: "develop",
 			RelativePath: "projects/repo-b", AbsolutePath: "/home/u/projects/repo-b",
 			CloneInstruction: "git clone -b develop https://github.com/u/repo-b.git projects/repo-b",
-			Notes: "some note",
+			Notes:            "some note",
 		},
 	}
 }

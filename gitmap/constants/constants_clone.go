@@ -78,4 +78,3 @@ const ErrCloneStaleBinaryFolderURL = "" +
 	"      4. gitmap pending clear --yes   # drop any orphaned pending rows\n" +
 	"      5. retry the clone — `gitmap clone <url1> <url2>` works either\n" +
 	"         space-separated or comma-separated in PowerShell and bash.\n"
-

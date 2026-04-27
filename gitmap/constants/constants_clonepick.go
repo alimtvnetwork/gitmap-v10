@@ -148,16 +148,16 @@ const (
 	// %d = bad value.
 	ErrClonePickBadDepth = "clone-pick: --depth must be >= 0, got %d"
 	// %v = err.
-	ErrClonePickGitClone        = "clone-pick: git clone failed: %v"
-	ErrClonePickGitSparseInit   = "clone-pick: git sparse-checkout init failed: %v"
-	ErrClonePickGitSparseSet    = "clone-pick: git sparse-checkout set failed: %v"
-	ErrClonePickGitCheckout     = "clone-pick: git checkout failed: %v"
-	ErrClonePickGitLsTree       = "clone-pick: git ls-tree failed: %v"
-	ErrClonePickFsCreateDest    = "clone-pick: create dest dir: %v"
-	ErrClonePickFsRemoveDotGit  = "clone-pick: remove .git: %v"
-	ErrClonePickDBInsert        = "clone-pick: save selection: %v"
-	ErrClonePickDBLookup        = "clone-pick: lookup selection: %v"
-	ErrClonePickPickerLaunch    = "clone-pick: launch picker: %v"
+	ErrClonePickGitClone       = "clone-pick: git clone failed: %v"
+	ErrClonePickGitSparseInit  = "clone-pick: git sparse-checkout init failed: %v"
+	ErrClonePickGitSparseSet   = "clone-pick: git sparse-checkout set failed: %v"
+	ErrClonePickGitCheckout    = "clone-pick: git checkout failed: %v"
+	ErrClonePickGitLsTree      = "clone-pick: git ls-tree failed: %v"
+	ErrClonePickFsCreateDest   = "clone-pick: create dest dir: %v"
+	ErrClonePickFsRemoveDotGit = "clone-pick: remove .git: %v"
+	ErrClonePickDBInsert       = "clone-pick: save selection: %v"
+	ErrClonePickDBLookup       = "clone-pick: lookup selection: %v"
+	ErrClonePickPickerLaunch   = "clone-pick: launch picker: %v"
 )
 
 // User-cancel exit code. 130 mirrors the SIGINT convention so shell

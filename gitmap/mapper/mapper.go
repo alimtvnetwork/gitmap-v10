@@ -16,7 +16,6 @@ import (
 // BuildOptions and resolveDefaultBranch live in mapper_options.go to
 // keep this file under the project's 200-line per-file budget.
 
-
 // BuildRecords converts a list of RepoInfo into ScanRecords using the
 // per-repo RelativePath the scanner already computed (against the scan
 // dir). Kept as a thin wrapper so legacy callers (cmd/as.go,
@@ -105,7 +104,6 @@ func buildOneRecord(repo scanner.RepoInfo, opts BuildOptions) model.ScanRecord {
 		Depth: repo.Depth,
 	}
 }
-
 
 // toHTTPS converts a remote URL to HTTPS format.
 func toHTTPS(raw string) string {

@@ -10,9 +10,9 @@ import (
 
 // PathSnippetWriteResult describes the outcome of WritePathSnippet.
 type PathSnippetWriteResult struct {
-	Profile  string // resolved profile path actually touched
-	Action   string // "appended", "rewritten", or "noop"
-	Snippet  string // rendered snippet bytes (without trailing newline)
+	Profile string // resolved profile path actually touched
+	Action  string // "appended", "rewritten", or "noop"
+	Snippet string // rendered snippet bytes (without trailing newline)
 }
 
 // WritePathSnippet renders the canonical snippet for the given shell
@@ -23,10 +23,13 @@ type PathSnippetWriteResult struct {
 // shell: bash | zsh | fish | pwsh
 // dir:   resolved deploy directory to inject into the snippet
 // manager: header label, e.g. "gitmap setup" (default), "run.sh",
-//          "installer". Determines the marker line so two managers can
-//          coexist without overwriting each other's blocks.
+//
+//	"installer". Determines the marker line so two managers can
+//	coexist without overwriting each other's blocks.
+//
 // profile: explicit rc-file path. Pass "" to auto-resolve from $HOME +
-//          shell.
+//
+//	shell.
 //
 // Spec: spec/04-generic-cli/21-post-install-shell-activation/02-snippets.md
 func WritePathSnippet(shell, dir, manager, profile string) (PathSnippetWriteResult, error) {

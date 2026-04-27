@@ -28,7 +28,6 @@ func CheckoutBranch(repoPath, branch string) (string, error) {
 // StripRemotePrefix already lives in latestbranch.go (same package);
 // callers in this file reuse it directly.
 
-
 // ResolveDefaultBranchName returns the repo's default branch name by
 // asking `git symbolic-ref refs/remotes/origin/HEAD` first, then
 // falling back to constants.DefaultBranch. The returned name is

@@ -130,10 +130,10 @@ func resolveScanDir(fs *flag.FlagSet) string {
 // Exposing the full positional slice (Positional) lets runClone detect
 // the multi-URL invocation form documented in spec/01-app/104-clone-multi.md.
 type CloneFlags struct {
-	Source         string
-	FolderName     string
-	TargetDir      string
-	SSHKeyName     string
+	Source     string
+	FolderName string
+	TargetDir  string
+	SSHKeyName string
 	// DefaultBranch mirrors `gitmap scan --default-branch`: when a
 	// manifest row has an unknown / empty Branch (or a non-trustworthy
 	// BranchSource like "detached" or "unknown"), the cloner rebuilds

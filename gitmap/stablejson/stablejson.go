@@ -78,15 +78,15 @@ func WriteArray(w io.Writer, items [][]Field) error {
 // the caller-controlled per-level `indent` string. Two modes:
 //
 //   - indent == ""   → minified single-line output:
-//                      `[{"k":v,"k2":v2},{"k":v}]\n`
-//                      No inter-token whitespace, one trailing `\n`.
+//     `[{"k":v,"k2":v2},{"k":v}]\n`
+//     No inter-token whitespace, one trailing `\n`.
 //   - indent != ""   → pretty-printed multi-line output. The string
-//                      is used verbatim as the per-level prefix —
-//                      pass `"  "` for the encoding/json default,
-//                      `"\t"` for tabs, `"    "` for four spaces.
-//                      Each value line gets `indent` (level 1) and
-//                      each object key line gets `indent+indent`
-//                      (level 2), matching json.Encoder behavior.
+//     is used verbatim as the per-level prefix —
+//     pass `"  "` for the encoding/json default,
+//     `"\t"` for tabs, `"    "` for four spaces.
+//     Each value line gets `indent` (level 1) and
+//     each object key line gets `indent+indent`
+//     (level 2), matching json.Encoder behavior.
 //
 // Empty `items` always writes `[]\n` regardless of indent — this
 // matches WriteArray's pre-existing contract that downstream

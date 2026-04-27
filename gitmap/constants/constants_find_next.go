@@ -38,10 +38,10 @@ ORDER BY p.NextVersionNum DESC, r.Slug ASC`
 
 // find-next user-facing strings.
 const (
-	MsgFindNextEmpty       = "No repos with available updates. Run `gitmap probe --all` first.\n"
-	MsgFindNextHeaderFmt   = "Available updates (%d):\n"
-	MsgFindNextRowFmt      = "  %s → %s [method=%s, probed=%s]\n      %s\n"
-	MsgFindNextDoneFmt     = "Hint: run `gitmap pull` or `gitmap cn next all` to apply.\n"
+	MsgFindNextEmpty     = "No repos with available updates. Run `gitmap probe --all` first.\n"
+	MsgFindNextHeaderFmt = "Available updates (%d):\n"
+	MsgFindNextRowFmt    = "  %s → %s [method=%s, probed=%s]\n      %s\n"
+	MsgFindNextDoneFmt   = "Hint: run `gitmap pull` or `gitmap cn next all` to apply.\n"
 	// ErrFindNextQuery is the bare wrap-string used by store-side
 	// fmt.Errorf calls. No trailing \n because errors are returned,
 	// not printed. The cmd-layer counterpart (ErrFindNextQueryFmt)
