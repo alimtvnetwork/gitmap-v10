@@ -33,6 +33,13 @@ type Plan struct {
 	// CLI cfg) so the dry-run renderer and the executor see the
 	// same value, with no risk of drift.
 	Mode string
+	// OnExists is "skip" | "update" | "force" -- the policy applied
+	// when the destination already contains a git repository.
+	// Captured on the Plan for the same reason as Mode: a single
+	// source of truth shared by render + execute prevents the
+	// dry-run preview from advertising a behavior different from
+	// what the executor would actually do.
+	OnExists string
 	// Rows is the deduplicated, validated list of clones to perform.
 	// Order matches the on-disk order so dry-run output is stable
 	// across runs of the same file.

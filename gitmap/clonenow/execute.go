@@ -5,13 +5,26 @@ package clonenow
 // progress lines arrive in stable order; parallelism is a future
 // follow-up because Result has no shared state between rows.
 //
-// Skip rule mirrors clone-from: a non-empty destination directory
-// means we treat this row as `skipped` (idempotent re-runs of the
-// same scan output don't re-clone what's already there). We do NOT
-// inspect git remotes inside an existing dest -- that would require
-// shelling out per skip and would behave unpredictably on partial
-// clones. "Non-empty dir = skip" is the conservative rule users can
-// reason about without reading source.
+// Idempotency policy (Plan.OnExists):
+//
+//   - "skip" (default): a destination that's already a git repo
+//     pointing at the same URL on the same branch is reported as
+//     `skipped` with detail "already matches". Any other state
+//     (URL/branch mismatch, non-repo dir) is also skipped but with
+//     a detail line that explains WHY -- so a re-run never silently
+//     hides drift. The detail is the user's signal to re-run with
+//     `--on-exists update` or `--on-exists force`.
+//   - "update": same probe as skip; a matching repo is still a
+//     no-op (`skipped: already matches`), a mismatched repo runs
+//     `git fetch` + `git checkout <branch>` to align without
+//     destroying local commits. Implemented in update_existing.go.
+//   - "force": destination is removed (only after we confirm it's
+//     a git repo or empty -- never blow away an unrelated dir),
+//     then re-cloned from scratch. Implemented in force_reclone.go.
+//
+// All three policies share a single inspect step (inspectExistingRepo)
+// so the "what's actually on disk?" question is asked exactly once
+// per row, regardless of which branch fires next.
 
 import (
 	"fmt"
@@ -56,7 +69,7 @@ func Execute(plan Plan, cwd string, progress io.Writer) []Result {
 	}
 	out := make([]Result, 0, len(plan.Rows))
 	for i, r := range plan.Rows {
-		res := executeRow(r, plan.Mode, cwd)
+		res := executeRow(r, plan, cwd)
 		out = append(out, res)
 		writeProgress(progress, i+1, len(plan.Rows), res)
 	}
@@ -64,48 +77,36 @@ func Execute(plan Plan, cwd string, progress io.Writer) []Result {
 	return out
 }
 
-// executeRow handles one row's lifecycle: pick URL by mode, resolve
-// dest path, check skip rule, build git args, run, time, return.
-func executeRow(r Row, mode, cwd string) Result {
+// executeRow handles one row's lifecycle: pick URL, resolve dest,
+// inspect what's on disk, dispatch to the on-exists policy, run.
+//
+// The dispatch is done here (rather than buried inside a sub-helper)
+// so the four possible terminal states -- ok, skipped, failed,
+// updated -- are visible at a glance when reading the executor.
+func executeRow(r Row, plan Plan, cwd string) Result {
 	start := time.Now()
-	url := r.PickURL(mode)
+	url := r.PickURL(plan.Mode)
 	dest := r.RelativePath
 	absDest := dest
 	if !filepath.IsAbs(absDest) {
 		absDest = filepath.Join(cwd, dest)
 	}
+	base := Result{Row: r, URL: url, Dest: dest}
 	if len(url) == 0 {
-		return Result{Row: r, URL: url, Dest: dest, Status: constants.CloneNowStatusFailed,
-			Detail: constants.MsgCloneNowNoURL, Duration: time.Since(start)}
-	}
-	if shouldSkip(absDest) {
-		return Result{Row: r, URL: url, Dest: dest, Status: constants.CloneNowStatusSkipped,
-			Detail: constants.MsgCloneNowDestExists, Duration: time.Since(start)}
-	}
-	detail, ok := runGitClone(r, url, dest, cwd)
-	status := constants.CloneNowStatusOK
-	if !ok {
-		status = constants.CloneNowStatusFailed
-	}
+		base.Status = constants.CloneNowStatusFailed
+		base.Detail = constants.MsgCloneNowNoURL
+		base.Duration = time.Since(start)
 
-	return Result{Row: r, URL: url, Dest: dest, Status: status, Detail: detail,
-		Duration: time.Since(start)}
-}
-
-// shouldSkip returns true when the dest is a non-empty directory.
-// Errors reading the dir (permission denied) -> false: let git try
-// and surface a clearer message than we could craft from the syscall.
-func shouldSkip(absDest string) bool {
-	info, err := os.Stat(absDest)
-	if err != nil || !info.IsDir() {
-		return false
+		return base
 	}
-	entries, err := os.ReadDir(absDest)
-	if err != nil {
-		return false
-	}
+	state := inspectExistingRepo(absDest)
+	res := dispatchOnExists(r, url, absDest, cwd, plan.OnExists, state)
+	res.Row = r
+	res.URL = url
+	res.Dest = dest
+	res.Duration = time.Since(start)
 
-	return len(entries) > 0
+	return res
 }
 
 // runGitClone shells out to `git clone` with the row's options.

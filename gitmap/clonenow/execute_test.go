@@ -46,7 +46,11 @@ func TestPickURL_Modes(t *testing.T) {
 	}
 }
 
-func TestExecuteRow_SkipsNonEmptyDest(t *testing.T) {
+// TestExecuteRow_NonRepoDestFails pins the new safer behavior:
+// a populated non-git directory is now reported as failed (with
+// MsgCloneNowNotARepo) instead of the old silent skip. This is
+// the "we never silently hide drift" contract from the docstring.
+func TestExecuteRow_NonRepoDestFails(t *testing.T) {
 	tmp := t.TempDir()
 	dest := filepath.Join(tmp, "existing")
 	if err := os.MkdirAll(dest, 0o755); err != nil {
@@ -55,21 +59,20 @@ func TestExecuteRow_SkipsNonEmptyDest(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(dest, "marker"), []byte("x"), 0o644); err != nil {
 		t.Fatalf("write: %v", err)
 	}
-	row := Row{
-		HTTPSUrl:     "https://example.com/x.git",
-		RelativePath: "existing",
+	row := Row{HTTPSUrl: "https://example.com/x.git", RelativePath: "existing"}
+	plan := Plan{Mode: constants.CloneNowModeHTTPS, OnExists: constants.CloneNowOnExistsSkip}
+	res := executeRow(row, plan, tmp)
+	if res.Status != constants.CloneNowStatusFailed {
+		t.Errorf("status = %q, want failed", res.Status)
 	}
-	res := executeRow(row, constants.CloneNowModeHTTPS, tmp)
-	if res.Status != constants.CloneNowStatusSkipped {
-		t.Errorf("status = %q, want skipped", res.Status)
-	}
-	if res.Detail != constants.MsgCloneNowDestExists {
+	if res.Detail != constants.MsgCloneNowNotARepo {
 		t.Errorf("detail = %q", res.Detail)
 	}
 }
 
 func TestExecuteRow_NoURLIsFailure(t *testing.T) {
-	res := executeRow(Row{RelativePath: "z"}, constants.CloneNowModeHTTPS, t.TempDir())
+	plan := Plan{Mode: constants.CloneNowModeHTTPS, OnExists: constants.CloneNowOnExistsSkip}
+	res := executeRow(Row{RelativePath: "z"}, plan, t.TempDir())
 	if res.Status != constants.CloneNowStatusFailed {
 		t.Errorf("status = %q, want failed", res.Status)
 	}

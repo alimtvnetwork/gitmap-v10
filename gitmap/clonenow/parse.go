@@ -26,10 +26,11 @@ import (
 
 // ParseFile is the package's only public parser entry point.
 // `format` may be "" (auto-detect from extension) or one of
-// constants.CloneNowFormat{JSON,CSV,Text}. `mode` must already be
-// validated by the caller -- ParseFile records it on the Plan but
-// does not interpret it (that's the executor / renderer's job).
-func ParseFile(path, format, mode string) (Plan, error) {
+// constants.CloneNowFormat{JSON,CSV,Text}. `mode` and `onExists`
+// must already be validated by the caller -- ParseFile records
+// them on the Plan but does not interpret them (that's the
+// executor / renderer's job).
+func ParseFile(path, format, mode, onExists string) (Plan, error) {
 	abs, err := filepath.Abs(path)
 	if err != nil {
 		return Plan{}, fmt.Errorf(constants.ErrCloneNowAbsPath, path, err)
@@ -47,7 +48,11 @@ func ParseFile(path, format, mode string) (Plan, error) {
 		return Plan{}, fmt.Errorf(constants.ErrCloneNowEmpty, abs)
 	}
 
-	return Plan{Source: abs, Format: resolved, Mode: mode, Rows: rows}, nil
+	return Plan{
+		Source: abs, Format: resolved,
+		Mode: mode, OnExists: onExists,
+		Rows: rows,
+	}, nil
 }
 
 // detectFormat picks json / csv / text from the lowercased file

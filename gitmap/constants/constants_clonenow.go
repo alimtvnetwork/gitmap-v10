@@ -52,6 +52,25 @@ const (
 	// `gitmap clone-now scan.json --cwd ./mirror --execute`.
 	FlagCloneNowCwd     = "cwd"
 	FlagDescCloneNowCwd = "Working directory for git clone (default: current dir)."
+	// FlagCloneNowOnExists controls re-clone behavior when the
+	// destination already contains a git repo. Default "skip" keeps
+	// the historical no-op behavior. "update" runs fetch + checkout
+	// without destroying local work. "force" removes the directory
+	// and re-clones from scratch -- destructive, opt-in only.
+	FlagCloneNowOnExists     = "on-exists"
+	FlagDescCloneNowOnExists = "Behavior when target already exists: " +
+		"'skip' (default, no-op when repo+branch match), " +
+		"'update' (fetch + checkout to align with the planned URL/branch), " +
+		"'force' (remove target and re-clone -- destructive)."
+)
+
+// On-exists policy enum strings. Stable: surfaced in --on-exists,
+// the dry-run header, and the per-row Result.Detail field. Renaming
+// is a breaking change for shell scripts that grep these values.
+const (
+	CloneNowOnExistsSkip   = "skip"
+	CloneNowOnExistsUpdate = "update"
+	CloneNowOnExistsForce  = "force"
 )
 
 // Mode enum strings. Stable: surfaced in the dry-run header and the
@@ -96,6 +115,24 @@ const (
 	MsgCloneNowMissingArg    = "clone-now: <file> argument is required " +
 		"(e.g. clone-now .gitmap/output/repos.json)"
 	MsgCloneNowNoURL = "no url for selected mode"
+	// Idempotency / re-clone messages. Each lands in Result.Detail
+	// so the per-row summary tells the user exactly which branch
+	// of the on-exists policy fired. The mismatch + fail messages
+	// take printf args -- documented per-line.
+	MsgCloneNowAlreadyMatches  = "already matches (url + branch)"
+	MsgCloneNowNotARepo        = "dest exists but is not a git repo"
+	// %s = current remote, %s = expected remote.
+	MsgCloneNowURLMismatch     = "skipped: remote url differs (have=%s, want=%s)"
+	// %s = current branch, %s = expected branch.
+	MsgCloneNowBranchMismatch  = "skipped: branch differs (have=%s, want=%s)"
+	MsgCloneNowUpdated         = "updated (fetch + checkout)"
+	MsgCloneNowForceRecloned   = "force-recloned (previous dir removed)"
+	// %s = path, %v = err.
+	MsgCloneNowForceRemoveFail = "force: remove %s: %v"
+	// %s = trimmed git stderr.
+	MsgCloneNowFetchFail       = "update: git fetch failed: %s"
+	// %s = branch, %s = trimmed git stderr.
+	MsgCloneNowCheckoutFail    = "update: git checkout %s failed: %s"
 )
 
 // Errors. All use printf-style verbs documented inline.
@@ -108,8 +145,9 @@ const (
 	ErrCloneNowCSVRead    = "clone-now: read CSV: %v"
 	ErrCloneNowTextRead   = "clone-now: read text: %v"
 	// %s = bad value.
-	ErrCloneNowBadMode   = "clone-now: --mode must be 'https' or 'ssh', got %q"
-	ErrCloneNowBadFormat = "clone-now: --format must be 'json', 'csv', or 'text', got %q"
+	ErrCloneNowBadMode     = "clone-now: --mode must be 'https' or 'ssh', got %q"
+	ErrCloneNowBadFormat   = "clone-now: --format must be 'json', 'csv', or 'text', got %q"
+	ErrCloneNowBadOnExists = "clone-now: --on-exists must be 'skip', 'update', or 'force', got %q"
 	// %s = path.
 	ErrCloneNowEmpty = "clone-now: %s contains zero clonable rows"
 )

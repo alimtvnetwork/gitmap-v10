@@ -52,7 +52,7 @@ func TestParseFile_JSON(t *testing.T) {
 	  {"repoName":"b","httpsUrl":"https://example.com/b.git","relativePath":"src/b"}
 	]`
 	path := writeTemp(t, ".json", body)
-	plan, err := ParseFile(path, "", constants.CloneNowModeHTTPS)
+	plan, err := ParseFile(path, "", constants.CloneNowModeHTTPS, constants.CloneNowOnExistsSkip)
 	if err != nil {
 		t.Fatalf("ParseFile: %v", err)
 	}
@@ -78,7 +78,7 @@ func TestParseFile_CSV(t *testing.T) {
 		"a,https://example.com/a.git,git@example.com:a.git,main,HEAD,src/a,/abs/src/a,git clone https://example.com/a.git src/a,,0\r\n" +
 		"b,https://example.com/b.git,,develop,config,src/b,/abs/src/b,git clone https://example.com/b.git src/b,,1\r\n"
 	path := writeTemp(t, ".csv", body)
-	plan, err := ParseFile(path, "", constants.CloneNowModeSSH)
+	plan, err := ParseFile(path, "", constants.CloneNowModeSSH, constants.CloneNowOnExistsSkip)
 	if err != nil {
 		t.Fatalf("ParseFile: %v", err)
 	}
@@ -103,7 +103,7 @@ func TestParseFile_Text(t *testing.T) {
 		"echo not-a-clone-line",
 	}, "\n") + "\n"
 	path := writeTemp(t, ".txt", body)
-	plan, err := ParseFile(path, "", constants.CloneNowModeHTTPS)
+	plan, err := ParseFile(path, "", constants.CloneNowModeHTTPS, constants.CloneNowOnExistsSkip)
 	if err != nil {
 		t.Fatalf("ParseFile: %v", err)
 	}
@@ -131,7 +131,7 @@ func TestParseFile_ForceFormat(t *testing.T) {
 	// json must override the extension.
 	body := `[{"httpsUrl":"https://example.com/x.git","relativePath":"x"}]`
 	path := writeTemp(t, ".list", body)
-	plan, err := ParseFile(path, constants.CloneNowFormatJSON, constants.CloneNowModeHTTPS)
+	plan, err := ParseFile(path, constants.CloneNowFormatJSON, constants.CloneNowModeHTTPS, constants.CloneNowOnExistsSkip)
 	if err != nil {
 		t.Fatalf("ParseFile: %v", err)
 	}
@@ -142,7 +142,7 @@ func TestParseFile_ForceFormat(t *testing.T) {
 
 func TestParseFile_EmptyIsError(t *testing.T) {
 	path := writeTemp(t, ".txt", "# nothing to clone here\n")
-	_, err := ParseFile(path, "", constants.CloneNowModeHTTPS)
+	_, err := ParseFile(path, "", constants.CloneNowModeHTTPS, constants.CloneNowOnExistsSkip)
 	if err == nil {
 		t.Fatal("ParseFile: want empty-input error, got nil")
 	}
@@ -182,7 +182,7 @@ func TestParseFile_AbsPathPropagated(t *testing.T) {
 	// unambiguous regardless of the user's cwd. We only check the
 	// "is absolute" property -- the exact path varies per OS / temp.
 	path := writeTemp(t, ".json", `[{"httpsUrl":"https://x/a.git","relativePath":"a"}]`)
-	plan, err := ParseFile(filepath.Base(path), constants.CloneNowFormatJSON, constants.CloneNowModeHTTPS)
+	plan, err := ParseFile(filepath.Base(path), constants.CloneNowFormatJSON, constants.CloneNowModeHTTPS, constants.CloneNowOnExistsSkip)
 	// The relative open will fail (different cwd) -- that's fine, we
 	// only need the absolute-path guarantee for the success case.
 	if err == nil && !filepath.IsAbs(plan.Source) {
