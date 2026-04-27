@@ -120,9 +120,10 @@ func TestStartupListCSVContract_HeaderMatchesJSONSchema(t *testing.T) {
 		t.Fatalf("empty parse — expected at least header row")
 	}
 	header := rows[0]
-	if !equalStringSlices(header, expectedStartupListJSONSchema) {
+	wantHeader := assertSchemaKeysSlice(t, "startup-list")
+	if !equalStringSlices(header, wantHeader) {
 		t.Fatalf("CSV header drifted from JSON schema\n  json: %v\n  csv:  %v",
-			expectedStartupListJSONSchema, header)
+			wantHeader, header)
 	}
 }
 
