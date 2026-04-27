@@ -1,0 +1,29 @@
+[
+  {
+    "url": "https://github.com/acme/widget.git",
+    "dest": "widget",
+    "branch": "main",
+    "depth": 1,
+    "status": "ok",
+    "detail": "",
+    "duration_seconds": 1.234
+  },
+  {
+    "url": "https://github.com/acme/gadget.git",
+    "dest": "gadget",
+    "branch": "",
+    "depth": 0,
+    "status": "skipped",
+    "detail": "dest exists",
+    "duration_seconds": 0
+  },
+  {
+    "url": "git@github.com:acme/missing.git",
+    "dest": "missing",
+    "branch": "",
+    "depth": 0,
+    "status": "failed",
+    "detail": "fatal: repository not found",
+    "duration_seconds": 0.089
+  }
+]
