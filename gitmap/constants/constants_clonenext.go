@@ -55,6 +55,13 @@ const (
 	FlagDescCloneNextCSV          = "Read repo paths from CSV file (one path per row, header optional)"
 	FlagDescCloneNextAll          = "Walk current folder and run cn on every git repo found one level deep"
 	FlagDescCloneNextForce        = "Force flatten even when cwd is the target folder (chdir to parent, no versioned fallback)"
+	// FlagCloneNextOutput selects the human summary format. Empty
+	// (default) keeps the legacy terse stage messages. "terminal"
+	// additionally emits the standardized RepoTermBlock (branch,
+	// from, to, command) right before the clone runs so users get
+	// the same per-repo summary shape as scan/clone-from/probe.
+	FlagCloneNextOutput     = "output"
+	FlagDescCloneNextOutput = "Per-repo summary format: '' (legacy) or 'terminal' (standardized branch/from/to/command block)"
 )
 
 // Clone-next help strings for usage output.
