@@ -112,7 +112,24 @@ func executeRow(r Row, plan Plan, cwd string) Result {
 // runGitClone shells out to `git clone` with the row's options.
 // Returns (detail, ok). On success detail is empty. On failure
 // detail is a single-line summary of the trimmed stderr.
+//
+// Pre-creates the destination's parent directory so nested
+// RelativePath values (e.g. `org-a/team/repo-x`) succeed on a
+// fresh checkout where the intermediate folders don't yet exist.
+// MkdirAll is idempotent: a pre-existing parent is a no-op and
+// safe under concurrent sibling clones. Failure is logged in the
+// project's Code Red format AND surfaced as the row Detail so the
+// per-row line + summary table carry the same diagnosis.
 func runGitClone(r Row, url, dest, cwd string) (string, bool) {
+	absDest := dest
+	if !filepath.IsAbs(absDest) {
+		absDest = filepath.Join(cwd, dest)
+	}
+	parent := filepath.Dir(absDest)
+	if err := os.MkdirAll(parent, constants.DirPermission); err != nil {
+		fmt.Fprintf(os.Stderr, constants.ErrCloneNowMkdirParent, parent, err)
+		return fmt.Sprintf(constants.MsgCloneNowMkdirParentFailFmt, err), false
+	}
 	args := buildGitArgs(r, url, dest)
 	cmd := exec.Command(constants.GitBin, args...)
 	cmd.Dir = cwd
