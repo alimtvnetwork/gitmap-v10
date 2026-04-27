@@ -51,7 +51,7 @@ function buildPaletteCss(themeName: string, selector: string): string {
 export function CopyPaletteButton() {
   const { isDark } = useTheme();
   const [copied, setCopied] = useState(false);
-  const themeLabel = isDark ? "VS Code Dark+" : "VS Code Light+";
+  const themeLabel = isDark ? "Dark" : "Light";
   const selector = isDark ? ".dark" : ".light";
 
   const handleCopy = async () => {
