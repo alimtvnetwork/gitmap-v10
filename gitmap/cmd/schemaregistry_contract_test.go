@@ -1,67 +1,50 @@
 package cmd
 
-// Contract for the schema registry itself (loadSchema,
-// assertSchemaKeysArray, --accept-schema, --update-schema). Pins:
+// Contract for the schema registry itself. Pins:
+//   1. Version parsing — v10 sorts numerically above v9.
+//   2. findLatestVersion picks the highest-N file.
+//   3. listContains is comma- and whitespace-tolerant.
+//   4. --update-schema rewrites keys but preserves _doc.
+//   5. --accept-schema is version-strict (NAME@v3 ≠ v2).
+//   6. The four production schema files all parse cleanly.
 //
-//   1. Version parsing — v1, v2, v10 all sort numerically (NOT
-//      lexically — v10 must beat v9).
-//   2. findLatestVersion picks the highest-N file when multiple
-//      versions of the same schema coexist on disk.
-//   3. listContains is comma-tolerant + whitespace-tolerant.
-//   4. --update-schema rewrites the latest-version file in place,
-//      preserving the _doc field so reviewer guidance survives.
-//   5. --accept-schema is version-strict: NAME@v3 does NOT
-//      acknowledge v2 drift (the whole point is "I confirm I'm
-//      running against v3").
-//   6. The four production schema files (startup-list, find-next,
-//      latest-branch-no-top, latest-branch-with-top) all parse and
-//      have non-empty key lists.
-//
-// Drift-handling is exercised via a sub-test that swaps schemaDir
-// to a t.TempDir() before running, so failures and rewrites stay
-// out of the real testdata/schemas/ tree.
+// Drift-handling is exercised via a swap of schemaDir to a
+// t.TempDir() so writes stay out of the real testdata/schemas/.
 
 import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 )
 
-// TestSchemaRegistry_ParseVersionFromPath pins the v1/v2/v10 sort
-// invariant. A regression to lexical sort would silently leave a
-// schema stuck on v9 while a v10 file sat on disk ignored.
 func TestSchemaRegistry_ParseVersionFromPath(t *testing.T) {
 	cases := []struct {
 		path string
 		want int
 	}{
-		{"testdata/schemas/foo.v1.json", 1},
-		{"testdata/schemas/foo.v9.json", 9},
-		{"testdata/schemas/foo.v10.json", 10},
-		{"testdata/schemas/long-name-with-dashes.v42.json", 42},
-		{"testdata/schemas/no-version-in-name.json", 0},
-		{"testdata/schemas/foo.vXYZ.json", 0},
+		{"x/foo.v1.json", 1},
+		{"x/foo.v9.json", 9},
+		{"x/foo.v10.json", 10},
+		{"x/long-dashes.v42.json", 42},
+		{"x/no-version.json", 0},
+		{"x/foo.vXYZ.json", 0},
 	}
 	for _, tc := range cases {
-		t.Run(tc.path, func(t *testing.T) {
-			if got := parseVersionFromPath(tc.path); got != tc.want {
-				t.Fatalf("path=%q want %d got %d", tc.path, tc.want, got)
-			}
-		})
+		if got := parseVersionFromPath(tc.path); got != tc.want {
+			t.Errorf("path=%q want %d got %d", tc.path, tc.want, got)
+		}
 	}
 }
 
-// TestSchemaRegistry_FindLatestPicksHighestVersion verifies the
-// glob-and-sort behavior using a synthetic schema directory. v10
-// MUST win over v9; v1 with `name` mismatch MUST be ignored.
 func TestSchemaRegistry_FindLatestPicksHighestVersion(t *testing.T) {
 	dir := makeTempSchemaDir(t)
 	writeSchemaFor(t, dir, "demo", 1, []string{"a"})
 	writeSchemaFor(t, dir, "demo", 9, []string{"a", "b"})
 	writeSchemaFor(t, dir, "demo", 10, []string{"a", "b", "c"})
-	writeSchemaFor(t, dir, "other", 99, []string{"x"}) // unrelated, must be ignored
+	writeSchemaFor(t, dir, "other", 99, []string{"x"})
 	got, err := findLatestVersion("demo")
 	if err != nil {
 		t.Fatalf("findLatestVersion: %v", err)
@@ -71,23 +54,14 @@ func TestSchemaRegistry_FindLatestPicksHighestVersion(t *testing.T) {
 	}
 }
 
-// TestSchemaRegistry_FindLatestErrorsOnMissing pins the failure
-// shape so a typo in a schema name produces a useful "no schema
-// files matched" error, not a silent fall-through to a zero value.
 func TestSchemaRegistry_FindLatestErrorsOnMissing(t *testing.T) {
 	makeTempSchemaDir(t)
 	_, err := findLatestVersion("nonexistent-schema")
-	if err == nil {
-		t.Fatalf("expected error for missing schema, got nil")
-	}
-	if !strings.Contains(err.Error(), "no schema files matched") {
-		t.Fatalf("wrong error: %v", err)
+	if err == nil || !strings.Contains(err.Error(), "no schema files matched") {
+		t.Fatalf("want 'no schema files matched' error, got %v", err)
 	}
 }
 
-// TestSchemaRegistry_ListContains pins the parse rules used by
-// both --accept-schema and --update-schema. Trimming + comma split
-// + empty-string short-circuit are all part of the contract.
 func TestSchemaRegistry_ListContains(t *testing.T) {
 	cases := []struct {
 		list, want string
@@ -97,30 +71,26 @@ func TestSchemaRegistry_ListContains(t *testing.T) {
 		{"foo", "foo", true},
 		{"foo", "bar", false},
 		{"foo,bar,baz", "bar", true},
-		{"foo, bar , baz", "bar", true}, // whitespace-tolerant
+		{"foo, bar , baz", "bar", true},
 		{"foo@v1,bar@v2", "bar@v2", true},
-		{"foo@v1,bar@v2", "bar@v3", false}, // version-strict
+		{"foo@v1,bar@v2", "bar@v3", false},
 	}
 	for _, tc := range cases {
-		t.Run(tc.list+"/"+tc.want, func(t *testing.T) {
-			if got := listContains(tc.list, tc.want); got != tc.expect {
-				t.Fatalf("listContains(%q,%q): want %v got %v",
-					tc.list, tc.want, tc.expect, got)
-			}
-		})
+		if got := listContains(tc.list, tc.want); got != tc.expect {
+			t.Errorf("listContains(%q,%q): want %v got %v",
+				tc.list, tc.want, tc.expect, got)
+		}
 	}
 }
 
 // TestSchemaRegistry_WriteSchemaPreservesDoc proves --update-schema
-// rewrites the keys but keeps _doc intact. Without this guarantee,
-// every auto-update would silently strip the in-file reviewer
-// guidance and the next developer would have to grep for it.
+// rewrites keys but keeps _doc intact, so reviewer guidance survives.
 func TestSchemaRegistry_WriteSchemaPreservesDoc(t *testing.T) {
 	dir := makeTempSchemaDir(t)
 	writeSchemaFor(t, dir, "demo", 1, []string{"a", "b"})
 	loaded := loadSchema(t, "demo")
 	if loaded.Doc == "" {
-		t.Fatalf("setup: doc must be non-empty for the test to mean anything")
+		t.Fatalf("setup: doc must be non-empty")
 	}
 	if err := writeSchemaFile(loaded, []string{"a", "b", "c"}); err != nil {
 		t.Fatalf("write: %v", err)
@@ -130,32 +100,32 @@ func TestSchemaRegistry_WriteSchemaPreservesDoc(t *testing.T) {
 		t.Fatalf("keys not updated: %v", reloaded.Keys)
 	}
 	if reloaded.Doc != loaded.Doc {
-		t.Fatalf("doc lost\n  before: %q\n  after:  %q", loaded.Doc, reloaded.Doc)
+		t.Fatalf("doc lost\n  before: %q\n  after: %q", loaded.Doc, reloaded.Doc)
 	}
 }
 
-// TestSchemaRegistry_AcceptIsVersionStrict proves NAME@v3 in the
-// accept list does NOT acknowledge v2 drift. Critical: a developer
-// who already bumped to v3 and is testing against v2 (because
-// they forgot to commit the v3 file) MUST see the failure.
+// TestSchemaRegistry_AcceptIsVersionStrict pins that NAME@v3 in the
+// accept list does NOT acknowledge v2 drift — the whole point of
+// the version is to confirm "I know which version I'm running against".
 func TestSchemaRegistry_AcceptIsVersionStrict(t *testing.T) {
 	t.Setenv(envAcceptSchema, "demo@v3")
-	if isSchemaAccepted("demo", 3) != true {
+	if !isSchemaAccepted("demo", 3) {
 		t.Fatalf("v3 should be accepted")
 	}
-	if isSchemaAccepted("demo", 2) != false {
+	if isSchemaAccepted("demo", 2) {
 		t.Fatalf("v2 must NOT be accepted via @v3 entry")
 	}
-	if isSchemaAccepted("other", 3) != false {
+	if isSchemaAccepted("other", 3) {
 		t.Fatalf("name mismatch must not match")
 	}
 }
 
-// TestSchemaRegistry_FlagOverridesEnv pins the documented
-// precedence rule: when both env and flag set NAME, the flag wins.
-// Demonstrated via shouldUpdateSchema (same precedence path as
-// isSchemaAccepted).
-func TestSchemaRegistry_FlagOverridesEnv(t *testing.T) {
+// TestSchemaRegistry_FlagAndEnvBothHonored verifies env and flag
+// values are additive (both honored when both set). When the same
+// name appears in both, either source matches — the documented
+// "flag wins" rule applies to conflicts on the SAME entry, not to
+// disjoint entries.
+func TestSchemaRegistry_FlagAndEnvBothHonored(t *testing.T) {
 	t.Setenv(envUpdateSchema, "from-env")
 	previous := *schemaUpdateFlag
 	t.Cleanup(func() { *schemaUpdateFlag = previous })
@@ -164,31 +134,25 @@ func TestSchemaRegistry_FlagOverridesEnv(t *testing.T) {
 		t.Fatalf("flag value must be honored")
 	}
 	if !shouldUpdateSchema("from-env") {
-		t.Fatalf("env value must still be honored when flag also set (additive)")
+		t.Fatalf("env value must also be honored")
 	}
 }
 
 // TestSchemaRegistry_ProductionSchemasParse asserts the four real
-// schema files load cleanly and have non-empty key lists. Catches
-// a malformed JSON file before it blows up an unrelated contract
-// test downstream.
+// schema files load cleanly. Catches a malformed JSON file before
+// it blows up an unrelated contract test downstream.
 func TestSchemaRegistry_ProductionSchemasParse(t *testing.T) {
 	for _, name := range []string{
-		"startup-list",
-		"find-next",
-		"latest-branch-no-top",
-		"latest-branch-with-top",
+		"startup-list", "find-next",
+		"latest-branch-no-top", "latest-branch-with-top",
 	} {
 		t.Run(name, func(t *testing.T) {
 			s := loadSchema(t, name)
 			if s.Name != name {
-				t.Fatalf("name field %q != filename name %q", s.Name, name)
+				t.Fatalf("name %q != filename %q", s.Name, name)
 			}
-			if s.Version < 1 {
-				t.Fatalf("version must be >=1, got %d", s.Version)
-			}
-			if len(s.Keys) == 0 {
-				t.Fatalf("keys must be non-empty")
+			if s.Version < 1 || len(s.Keys) == 0 {
+				t.Fatalf("invalid schema: version=%d keys=%v", s.Version, s.Keys)
 			}
 		})
 	}
@@ -196,8 +160,7 @@ func TestSchemaRegistry_ProductionSchemasParse(t *testing.T) {
 
 // makeTempSchemaDir swaps schemaDir for a t.TempDir(), restores
 // the original on cleanup, and clears the schema cache so freshly
-// written test fixtures aren't shadowed by entries loaded from the
-// real testdata/schemas/ directory earlier in the run.
+// written fixtures aren't shadowed by previously-loaded entries.
 func makeTempSchemaDir(t *testing.T) string {
 	t.Helper()
 	previous := schemaDir
@@ -222,9 +185,8 @@ func clearSchemaCache() {
 	}
 }
 
-// writeSchemaFor writes a synthetic schema file into `dir` with
-// the given name/version/keys and a non-empty _doc field (so the
-// preserve-doc test has something to verify).
+// writeSchemaFor writes a synthetic schema file with a non-empty
+// _doc field so the preserve-doc test has something to verify.
 func writeSchemaFor(t *testing.T, dir, name string, version int, keys []string) {
 	t.Helper()
 	body := map[string]any{
@@ -237,24 +199,8 @@ func writeSchemaFor(t *testing.T, dir, name string, version int, keys []string) 
 	if err != nil {
 		t.Fatalf("marshal: %v", err)
 	}
-	path := filepath.Join(dir,
-		name+".v"+itoaInt(version)+".json")
-	if err := os.WriteFile(path, raw, 0o644); err != nil {
+	path := filepath.Join(dir, name+".v"+strconv.Itoa(version)+".json")
+	if err := os.WriteFile(path, raw, 0o644); err != nil { //nolint:gosec // Test fixture.
 		t.Fatalf("write %s: %v", path, err)
 	}
-}
-
-// itoaInt is a tiny strconv-free int-to-string helper. Avoids the
-// import just for two test fixtures and keeps the test self-contained.
-func itoaInt(n int) string {
-	if n == 0 {
-		return "0"
-	}
-	var digits []byte
-	for n > 0 {
-		digits = append([]byte{byte('0' + n%10)}, digits...)
-		n /= 10
-	}
-
-	return string(digits)
 }
