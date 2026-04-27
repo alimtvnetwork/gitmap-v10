@@ -248,3 +248,4 @@ All coding guidelines apply to test code:
 - Code Quality Improvement: `spec/05-coding-guidelines/01-code-quality-improvement.md`
 - Go Code Style: `spec/05-coding-guidelines/02-go-code-style.md`
 - Naming Conventions: `spec/05-coding-guidelines/03-naming-conventions.md`
+- Golden Fixture Regeneration: `spec/05-coding-guidelines/21-golden-fixture-regeneration.md`
