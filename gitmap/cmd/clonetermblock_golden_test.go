@@ -44,10 +44,17 @@ type goldenCase struct {
 	input   CloneTermBlockInput
 }
 
-// cloneTermGoldenCases enumerates one representative fixture per
-// clone-related command. Inputs intentionally use realistic values
-// (real-looking URLs, branches, dest paths) so a reviewer can sanity-
-// check the cmd: line by reading the golden alone.
+// cloneTermGoldenCases enumerates fixtures for every clone-related
+// command in BOTH URL modes (HTTPS and SSH). Two-mode coverage matters
+// because URL formatting flows untouched through the cmd: line — a
+// regression that mangles SSH-style `git@host:path` (e.g. by URL-
+// parsing it as if it were https://) wouldn't show up in an HTTPS-only
+// fixture. Keeping one fixture per (command, url-mode) pair makes the
+// failure message in CI point straight at the broken combination.
+//
+// Inputs intentionally use realistic values (real-looking URLs,
+// branches, dest paths) so a reviewer can sanity-check the cmd: line
+// by reading the golden alone.
 func cloneTermGoldenCases() []goldenCase {
 	const (
 		repoName = "scripts-fixer"
@@ -57,7 +64,7 @@ func cloneTermGoldenCases() []goldenCase {
 
 	return []goldenCase{
 		{
-			name:    "clone",
+			name:    "clone-https",
 			fixture: "clonetermblock_clone.golden",
 			// URL-driven `gitmap clone <url>` — matches clonetermurl.go:
 			// non-nil empty CmdExtraArgsPre = explicit "no -b" sentinel.
@@ -74,7 +81,25 @@ func cloneTermGoldenCases() []goldenCase {
 			},
 		},
 		{
-			name:    "clone-next",
+			name:    "clone-ssh",
+			fixture: "clonetermblock_clone_ssh.golden",
+			// Same shape as clone-https but with scp-style SSH URL —
+			// guards against a future change that URL-parses inputs
+			// (which would mangle `git@host:path` into nonsense).
+			input: CloneTermBlockInput{
+				Index:           1,
+				Name:            repoName,
+				Branch:          "main",
+				BranchSource:    "remote HEAD",
+				OriginalURL:     sshURL,
+				TargetURL:       sshURL,
+				Dest:            repoName,
+				CmdBranch:       "",
+				CmdExtraArgsPre: []string{},
+			},
+		},
+		{
+			name:    "clone-next-https",
 			fixture: "clonetermblock_clonenext.golden",
 			// clone-next routes through the same URL-driven helper as
 			// `gitmap clone <url>`, so the fixture matches the clone
@@ -92,7 +117,25 @@ func cloneTermGoldenCases() []goldenCase {
 			},
 		},
 		{
-			name:    "clone-now",
+			name:    "clone-next-ssh",
+			fixture: "clonetermblock_clonenext_ssh.golden",
+			// SSH counterpart of clone-next-https. clone-next reuses
+			// the URL-driven helper, so the same SSH-pass-through
+			// guarantee applies.
+			input: CloneTermBlockInput{
+				Index:           1,
+				Name:            repoName,
+				Branch:          "main",
+				BranchSource:    "remote HEAD",
+				OriginalURL:     sshURL,
+				TargetURL:       sshURL,
+				Dest:            repoName,
+				CmdBranch:       "",
+				CmdExtraArgsPre: []string{},
+			},
+		},
+		{
+			name:    "clone-now-ssh",
 			fixture: "clonetermblock_clonenow.golden",
 			// clone-now manifest row with explicit branch + SSH URL.
 			// CmdBranch=row.Branch ⇒ -b is rendered; no extra args.
@@ -108,7 +151,23 @@ func cloneTermGoldenCases() []goldenCase {
 			},
 		},
 		{
-			name:    "clone-from",
+			name:    "clone-now-https",
+			fixture: "clonetermblock_clonenow_https.golden",
+			// HTTPS counterpart of clone-now-ssh. Same row shape,
+			// same -b rendering — only the URL token changes.
+			input: CloneTermBlockInput{
+				Index:        3,
+				Name:         repoName,
+				Branch:       "develop",
+				BranchSource: "manifest",
+				OriginalURL:  httpsURL,
+				TargetURL:    httpsURL,
+				Dest:         "repos/" + repoName,
+				CmdBranch:    "develop",
+			},
+		},
+		{
+			name:    "clone-from-https",
 			fixture: "clonetermblock_clonefrom.golden",
 			// clone-from with both pinned branch and depth=1. The
 			// executor places --depth AFTER -b, so CmdExtraArgsPost
@@ -126,7 +185,25 @@ func cloneTermGoldenCases() []goldenCase {
 			},
 		},
 		{
-			name:    "clone-pick",
+			name:    "clone-from-ssh",
+			fixture: "clonetermblock_clonefrom_ssh.golden",
+			// SSH counterpart with the same depth+branch combo —
+			// also guards against drift in the locked `--depth=N`
+			// (joined) format across URL modes.
+			input: CloneTermBlockInput{
+				Index:            2,
+				Name:             repoName,
+				Branch:           "main",
+				BranchSource:     "manifest",
+				OriginalURL:      sshURL,
+				TargetURL:        sshURL,
+				Dest:             repoName,
+				CmdBranch:        "main",
+				CmdExtraArgsPost: []string{"--depth=1"},
+			},
+		},
+		{
+			name:    "clone-pick-https",
 			fixture: "clonetermblock_clonepick.golden",
 			// clone-pick uses partial-clone flags + long-form
 			// --branch/--depth, all in CmdExtraArgsPre. CmdBranch
@@ -138,6 +215,27 @@ func cloneTermGoldenCases() []goldenCase {
 				BranchSource: "manifest",
 				OriginalURL:  httpsURL,
 				TargetURL:    httpsURL,
+				Dest:         repoName,
+				CmdBranch:    "",
+				CmdExtraArgsPre: []string{
+					"--filter=blob:none", "--no-checkout",
+					"--branch", "main",
+					"--depth", "1",
+				},
+			},
+		},
+		{
+			name:    "clone-pick-ssh",
+			fixture: "clonetermblock_clonepick_ssh.golden",
+			// SSH counterpart — same long-form flag block, only the
+			// positional URL token changes.
+			input: CloneTermBlockInput{
+				Index:        1,
+				Name:         repoName,
+				Branch:       "main",
+				BranchSource: "manifest",
+				OriginalURL:  sshURL,
+				TargetURL:    sshURL,
 				Dest:         repoName,
 				CmdBranch:    "",
 				CmdExtraArgsPre: []string{

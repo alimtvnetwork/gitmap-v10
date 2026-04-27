@@ -1,0 +1,5 @@
+  1. scripts-fixer
+     branch:    main (remote HEAD)
+     from:      git@github.com:owner/scripts-fixer.git
+     to:        git@github.com:owner/scripts-fixer.git
+     command:   git clone git@github.com:owner/scripts-fixer.git scripts-fixer

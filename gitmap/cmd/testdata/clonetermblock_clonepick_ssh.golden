@@ -1,0 +1,5 @@
+  1. scripts-fixer
+     branch:    main (manifest)
+     from:      git@github.com:owner/scripts-fixer.git
+     to:        git@github.com:owner/scripts-fixer.git
+     command:   git clone --filter=blob:none --no-checkout --branch main --depth 1 git@github.com:owner/scripts-fixer.git scripts-fixer
