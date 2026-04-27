@@ -42,6 +42,16 @@ const (
 		"stdout, streamed before each clone; git progress stays on stderr)"
 )
 
+// JSON report envelope. CloneFromReportSchemaVersion is embedded as
+// `schemaVersion` at the top of every JSON report so downstream
+// consumers (jq pipelines, dashboards, custom CI gates) can branch
+// on shape changes without sniffing fields. Bump ONLY when the
+// `rows[]` field set, field rename, or envelope shape changes —
+// not for value-level changes (new status strings, etc.). The
+// matching golden test (TestCloneFromReportJSON_SchemaVersion_Pinned)
+// will fail loudly on any unintentional bump.
+const CloneFromReportSchemaVersion = 1
+
 // Status enum strings. Stable: emitted to the CSV report which
 // downstream tools may parse. Renaming any of these is a breaking
 // change for those consumers.
