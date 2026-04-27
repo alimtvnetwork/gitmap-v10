@@ -166,6 +166,9 @@ func (db *DB) Migrate() error {
 		constants.SQLCreateVSCodeProject,
 		constants.SQLCreateVSCodeProjectRootPathIndex,
 		constants.SQLCreateArchiveHistory,
+		constants.SQLCreateCloneInteractiveSelection,
+		constants.SQLCreateClonePickRepoCanonIndex,
+		constants.SQLCreateClonePickNameIndex,
 	}
 
 	for _, stmt := range statements {
