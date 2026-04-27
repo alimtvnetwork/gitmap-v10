@@ -156,6 +156,11 @@ const (
 	ErrCloneNowBadMode     = "clone-now: --mode must be 'https' or 'ssh', got %q"
 	ErrCloneNowBadFormat   = "clone-now: --format must be 'json', 'csv', or 'text', got %q"
 	ErrCloneNowBadOnExists = "clone-now: --on-exists must be 'skip', 'update', or 'force', got %q"
+	// %s = file extension (with leading dot, or "" when missing),
+	// %s = path. Emitted when auto-detect cannot map the file
+	// extension to a supported format. Use --format to override.
+	ErrCloneNowUnsupportedExt = "clone-now: unsupported file extension %q for %s; " +
+		"supported extensions are .json, .csv, .txt (or pass --format json|csv|text)"
 	// %s = path.
 	ErrCloneNowEmpty = "clone-now: %s contains zero clonable rows"
 	// MsgCloneNowMkdirParentFailFmt is the per-row Detail set when

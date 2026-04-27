@@ -127,8 +127,8 @@ func TestParseFile_Text(t *testing.T) {
 
 func TestParseFile_ForceFormat(t *testing.T) {
 	// Same JSON payload but file extension is `.list` so auto-detect
-	// would route to the text parser and produce zero rows. --format
-	// json must override the extension.
+	// would now error out. --format json must override the extension
+	// and bypass the unsupported-extension guard entirely.
 	body := `[{"httpsUrl":"https://example.com/x.git","relativePath":"x"}]`
 	path := writeTemp(t, ".list", body)
 	plan, err := ParseFile(path, constants.CloneNowFormatJSON, constants.CloneNowModeHTTPS, constants.CloneNowOnExistsSkip)
@@ -137,6 +137,67 @@ func TestParseFile_ForceFormat(t *testing.T) {
 	}
 	if plan.Format != constants.CloneNowFormatJSON || len(plan.Rows) != 1 {
 		t.Errorf("forced format ignored: %+v", plan)
+	}
+}
+
+// TestParseFile_AutoDetect_Extensions pins the auto-detect contract
+// for the three supported extensions (.json/.csv/.txt). Each writes
+// a minimal-but-valid payload for its format, then asserts ParseFile
+// chose the matching parser when --format is empty.
+func TestParseFile_AutoDetect_Extensions(t *testing.T) {
+	cases := []struct {
+		name   string
+		ext    string
+		body   string
+		want   string
+	}{
+		{"json", ".json", `[{"httpsUrl":"https://x/a.git","relativePath":"a"}]`, constants.CloneNowFormatJSON},
+		{"csv", ".csv",
+			"repoName,httpsUrl,sshUrl,branch,branchSource,relativePath,absolutePath,cloneInstruction,notes,depth\r\n" +
+				"a,https://x/a.git,,main,HEAD,a,/abs/a,git clone https://x/a.git a,,0\r\n",
+			constants.CloneNowFormatCSV},
+		{"txt", ".txt", "git clone https://x/a.git a\n", constants.CloneNowFormatText},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			path := writeTemp(t, tc.ext, tc.body)
+			plan, err := ParseFile(path, "", constants.CloneNowModeHTTPS, constants.CloneNowOnExistsSkip)
+			if err != nil {
+				t.Fatalf("ParseFile: %v", err)
+			}
+			if plan.Format != tc.want {
+				t.Errorf("format = %q, want %q", plan.Format, tc.want)
+			}
+		})
+	}
+}
+
+// TestParseFile_UnsupportedExtension verifies that auto-detect now
+// fails loudly on an unknown extension instead of silently routing
+// to the text parser. The error must mention the offending
+// extension AND the supported set so users can self-correct.
+func TestParseFile_UnsupportedExtension(t *testing.T) {
+	path := writeTemp(t, ".list", `[{"httpsUrl":"https://x/a.git","relativePath":"a"}]`)
+	_, err := ParseFile(path, "", constants.CloneNowModeHTTPS, constants.CloneNowOnExistsSkip)
+	if err == nil {
+		t.Fatal("ParseFile: want unsupported-extension error, got nil")
+	}
+	msg := err.Error()
+	if !strings.Contains(msg, ".list") {
+		t.Errorf("error %q missing offending extension", msg)
+	}
+	if !strings.Contains(msg, ".json") || !strings.Contains(msg, ".csv") || !strings.Contains(msg, ".txt") {
+		t.Errorf("error %q missing supported-extension list", msg)
+	}
+}
+
+// TestParseFile_NoExtension verifies extensionless paths also fail
+// with the same clear error rather than falling through to text.
+func TestParseFile_NoExtension(t *testing.T) {
+	path := writeTemp(t, "", "git clone https://x/a.git a\n")
+	_, err := ParseFile(path, "", constants.CloneNowModeHTTPS, constants.CloneNowOnExistsSkip)
+	if err == nil {
+		t.Fatal("ParseFile: want unsupported-extension error for extensionless file, got nil")
 	}
 }
 

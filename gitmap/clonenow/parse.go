@@ -37,7 +37,11 @@ func ParseFile(path, format, mode, onExists string) (Plan, error) {
 	}
 	resolved := format
 	if len(resolved) == 0 {
-		resolved = detectFormat(abs)
+		detected, derr := detectFormat(abs)
+		if derr != nil {
+			return Plan{}, derr
+		}
+		resolved = detected
 	}
 	rows, err := parseByFormat(abs, resolved)
 	if err != nil {
@@ -56,18 +60,23 @@ func ParseFile(path, format, mode, onExists string) (Plan, error) {
 }
 
 // detectFormat picks json / csv / text from the lowercased file
-// extension. Anything unfamiliar falls back to text -- the most
-// permissive parser -- so a malformed input surfaces as "0 rows"
-// rather than a hard "unknown format" error.
-func detectFormat(path string) string {
-	switch strings.ToLower(filepath.Ext(path)) {
+// extension. Unknown extensions return a clear error so users get
+// an actionable message ("supported extensions are .json, .csv,
+// .txt") instead of a confusing "0 rows" failure from a fallback
+// parser. Callers can still bypass extension-based dispatch by
+// passing an explicit --format.
+func detectFormat(path string) (string, error) {
+	ext := strings.ToLower(filepath.Ext(path))
+	switch ext {
 	case ".json":
-		return constants.CloneNowFormatJSON
+		return constants.CloneNowFormatJSON, nil
 	case ".csv":
-		return constants.CloneNowFormatCSV
+		return constants.CloneNowFormatCSV, nil
+	case ".txt":
+		return constants.CloneNowFormatText, nil
 	}
 
-	return constants.CloneNowFormatText
+	return "", fmt.Errorf(constants.ErrCloneNowUnsupportedExt, ext, path)
 }
 
 // parseByFormat opens the file once and dispatches the io.Reader to
