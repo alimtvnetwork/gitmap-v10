@@ -51,6 +51,8 @@ type CloneNextFlags struct {
 	// the standardized RepoTermBlock right before the clone, so the
 	// shape matches scan/clone-from/probe.
 	Output string
+	// VerifyCmdFaithful enables the dry-run argv-vs-displayed checker.
+	VerifyCmdFaithful bool
 }
 
 // parseCloneNextFlags parses flags for the clone-next command.
@@ -80,6 +82,8 @@ func parseCloneNextFlags(args []string) CloneNextFlags {
 	reportErrFlag := fs.Bool(constants.FlagScanReportErrors, false, constants.FlagDescScanReportErrors)
 	dryRunFlag := fs.Bool(constants.FlagCloneNextDryRun, false, constants.FlagDescCloneNextDryRun)
 	outputFlag := fs.String(constants.FlagCloneNextOutput, "", constants.FlagDescCloneNextOutput)
+	verifyFlag := fs.Bool(constants.FlagCloneVerifyCmdFaithful, false,
+		constants.FlagDescCloneVerifyCmdFaithful)
 	// Reorder so flags placed AFTER the positional version (e.g.
 	// `gitmap cn v+1 -f`) are still recognized. Go's stdlib flag
 	// parser stops at the first non-flag arg, so without this the
@@ -99,8 +103,9 @@ func parseCloneNextFlags(args []string) CloneNextFlags {
 		MaxConcurrency: *maxConcFlag,
 		NoProgress:     *noProgressFlag,
 		ReportErrors:   *reportErrFlag,
-		DryRun:         *dryRunFlag,
-		Output:         *outputFlag,
+		DryRun:            *dryRunFlag,
+		Output:            *outputFlag,
+		VerifyCmdFaithful: *verifyFlag,
 	}
 	if fs.NArg() > 0 {
 		out.VersionArg = fs.Arg(0)

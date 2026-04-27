@@ -154,6 +154,9 @@ type CloneFlags struct {
 	// standardized RepoTermBlock right before each clone runs so
 	// the shape matches scan/clone-next/clone-from/probe.
 	Output string
+	// VerifyCmdFaithful enables the dry-run argv-vs-displayed
+	// checker. See clonetermverify.go for behavior.
+	VerifyCmdFaithful bool
 }
 
 // parseCloneFlags parses flags for the clone command.
@@ -175,22 +178,25 @@ func parseCloneFlags(args []string) CloneFlags {
 	// `gitmap scan --help` and `gitmap clone --help` cannot drift.
 	defaultBranchFlag := fs.String(constants.FlagScanDefaultBranch, "", constants.FlagDescScanDefaultBranch)
 	outputFlag := fs.String(constants.FlagCloneTermOutput, "", constants.FlagDescCloneTermOutput)
+	verifyFlag := fs.Bool(constants.FlagCloneVerifyCmdFaithful, false,
+		constants.FlagDescCloneVerifyCmdFaithful)
 	fs.Parse(args)
 
 	return CloneFlags{
-		Source:         resolveCloneSource(fs),
-		FolderName:     resolveCloneFolderName(fs),
-		TargetDir:      *targetFlag,
-		SSHKeyName:     *sshKeyFlag,
-		DefaultBranch:  *defaultBranchFlag,
-		Positional:     fs.Args(),
-		SafePull:       *safePullFlag,
-		GHDesktop:      *ghDesktopFlag,
-		NoReplace:      *noReplaceFlag,
-		Verbose:        *verboseFlag,
-		Audit:          *auditFlag,
-		MaxConcurrency: *maxConcFlag,
-		Output:         *outputFlag,
+		Source:            resolveCloneSource(fs),
+		FolderName:        resolveCloneFolderName(fs),
+		TargetDir:         *targetFlag,
+		SSHKeyName:        *sshKeyFlag,
+		DefaultBranch:     *defaultBranchFlag,
+		Positional:        fs.Args(),
+		SafePull:          *safePullFlag,
+		GHDesktop:         *ghDesktopFlag,
+		NoReplace:         *noReplaceFlag,
+		Verbose:           *verboseFlag,
+		Audit:             *auditFlag,
+		MaxConcurrency:    *maxConcFlag,
+		Output:            *outputFlag,
+		VerifyCmdFaithful: *verifyFlag,
 	}
 }
 

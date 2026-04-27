@@ -30,7 +30,8 @@ import (
 func runClonePick(args []string) {
 	checkHelp("clone-pick", args)
 
-	rawURL, rawPaths, flags, output := parseClonePickFlags(args)
+	rawURL, rawPaths, flags, output, verify := parseClonePickFlags(args)
+	setCmdFaithfulVerify(verify)
 	plan, err := clonepick.ParseArgs(rawURL, rawPaths, flags)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -64,7 +65,7 @@ func runClonePick(args []string) {
 // two positional args. Validation that needs cross-flag knowledge
 // happens in clonepick.ParseArgs so this stays focused on flag
 // binding.
-func parseClonePickFlags(args []string) (string, string, clonepick.Flags, string) {
+func parseClonePickFlags(args []string) (string, string, clonepick.Flags, string, bool) {
 	defaults := clonepick.DefaultFlags()
 	flags := defaults
 	fs := flag.NewFlagSet("clone-pick", flag.ExitOnError)
@@ -92,6 +93,8 @@ func parseClonePickFlags(args []string) (string, string, clonepick.Flags, string
 		constants.FlagDescClonePickForce)
 	output := fs.String(constants.FlagCloneTermOutput, "",
 		constants.FlagDescCloneTermOutput)
+	verify := fs.Bool(constants.FlagCloneVerifyCmdFaithful, false,
+		constants.FlagDescCloneVerifyCmdFaithful)
 
 	reordered := reorderFlagsBeforeArgs(args)
 	fs.Parse(reordered)
@@ -106,7 +109,7 @@ func parseClonePickFlags(args []string) (string, string, clonepick.Flags, string
 		rawPaths = fs.Arg(1)
 	}
 
-	return rawURL, rawPaths, flags, *output
+	return rawURL, rawPaths, flags, *output, *verify
 }
 
 // runClonePickExecute opens the DB (best-effort), runs the

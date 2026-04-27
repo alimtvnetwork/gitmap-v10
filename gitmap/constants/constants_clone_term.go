@@ -37,4 +37,21 @@ const (
 	FlagDescCloneTermOutput = "Per-repo summary format: '' (legacy) or " +
 		"'terminal' (standardized branch/from/to/command block on " +
 		"stdout, streamed before each clone; git progress stays on stderr)"
+
+	// FlagCloneVerifyCmdFaithful is the shared boolean flag name used
+	// by every clone-related command to enable the dry-run verifier
+	// that compares the rendered `cmd:` line against the executor's
+	// real argv. Single constant so a future rename happens in one
+	// place and `gitmap <cmd> --help` stays consistent across surfaces.
+	FlagCloneVerifyCmdFaithful = "verify-cmd-faithful"
+
+	// FlagDescCloneVerifyCmdFaithful explains the flag in --help.
+	// Wording calls out that it's a SAFETY check (no execution
+	// difference, no output unless something is wrong) so users feel
+	// safe leaving it on in CI.
+	FlagDescCloneVerifyCmdFaithful = "Verify the rendered cmd: line " +
+		"matches the executor's real git argv. Prints a structured " +
+		"mismatch report to stderr on divergence; silent on match. " +
+		"Pure check — does not change clone behavior."
 )
+

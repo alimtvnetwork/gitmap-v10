@@ -96,7 +96,7 @@ func printClonePickTermBlock(plan clonepick.Plan) {
 	if len(name) == 0 {
 		name = repoNameFromURL(plan.RepoUrl)
 	}
-	maybePrintCloneTermBlock(constants.OutputTerminal, CloneTermBlockInput{
+	in := CloneTermBlockInput{
 		Index:           1,
 		Name:            name,
 		Branch:          branch,
@@ -106,7 +106,12 @@ func printClonePickTermBlock(plan clonepick.Plan) {
 		Dest:            plan.DestDir,
 		CmdBranch:       "", // explicit opt-out: clone-pick uses --branch (long form)
 		CmdExtraArgsPre: clonePickCmdPre(plan),
-	})
+	}
+	maybePrintCloneTermBlock(constants.OutputTerminal, in)
+	// Verifier: clonepick.BuildGitArgs is the same builder
+	// gitClonePartial uses, so any drift between displayed and
+	// executed argv surfaces in the report.
+	runCmdFaithfulCheck(in, clonepick.BuildGitArgs(plan, plan.DestDir))
 }
 
 // clonePickCmdPre assembles the literal pre-positional flag tokens

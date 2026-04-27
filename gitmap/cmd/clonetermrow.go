@@ -44,7 +44,7 @@ func printCloneNowTermBlockRow(index, total int, row clonenow.Row,
 		branch = detectRemoteHEAD(url)
 		source = remoteBranchSource(branch)
 	}
-	maybePrintCloneTermBlock(constants.OutputTerminal, CloneTermBlockInput{
+	in := CloneTermBlockInput{
 		Index:        index,
 		Name:         pickCloneNowName(row, dest),
 		Branch:       branch,
@@ -53,7 +53,12 @@ func printCloneNowTermBlockRow(index, total int, row clonenow.Row,
 		TargetURL:    url,
 		Dest:         dest,
 		CmdBranch:    row.Branch, // executor uses row.Branch, NOT detected
-	})
+	}
+	maybePrintCloneTermBlock(constants.OutputTerminal, in)
+	// Cross-check the printed cmd: against the executor's real argv
+	// (no-op unless --verify-cmd-faithful is on). Single source of
+	// truth: clonenow.BuildGitArgs is the same builder Execute calls.
+	runCmdFaithfulCheck(in, clonenow.BuildGitArgs(row, url, dest))
 }
 
 
@@ -82,7 +87,7 @@ func printCloneFromTermBlockRow(index, total int, row clonefrom.Row,
 	if row.Depth > 0 {
 		post = []string{fmt.Sprintf("--depth=%d", row.Depth)}
 	}
-	maybePrintCloneTermBlock(constants.OutputTerminal, CloneTermBlockInput{
+	in := CloneTermBlockInput{
 		Index:            index,
 		Name:             dest,
 		Branch:           branch,
@@ -92,5 +97,10 @@ func printCloneFromTermBlockRow(index, total int, row clonefrom.Row,
 		Dest:             dest,
 		CmdBranch:        row.Branch, // executor uses row.Branch, NOT detected
 		CmdExtraArgsPost: post,
-	})
+	}
+	maybePrintCloneTermBlock(constants.OutputTerminal, in)
+	// Cross-check displayed cmd: vs the executor's real argv. The
+	// argv builder is the SAME function execute.go calls, so any
+	// future drift between the two paths surfaces here loudly.
+	runCmdFaithfulCheck(in, clonefrom.BuildGitArgs(row, dest))
 }

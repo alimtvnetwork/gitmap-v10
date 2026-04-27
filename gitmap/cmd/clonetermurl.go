@@ -33,7 +33,7 @@ func printCloneTermBlockForURL(output string, idx int, url, dest string) {
 		}
 	}
 	branch := detectRemoteHEAD(url)
-	maybePrintCloneTermBlock(output, CloneTermBlockInput{
+	in := CloneTermBlockInput{
 		Index:        idx,
 		Name:         name,
 		Branch:       branch,
@@ -45,14 +45,16 @@ func printCloneTermBlockForURL(output string, idx int, url, dest string) {
 		// URL-driven `gitmap clone <url>` path (clonenext.go:260,
 		// clonereplace.go:93) shells out to `git clone <url> <dest>`
 		// with NO `-b`, letting git follow the remote default HEAD.
-		// The detected branch is shown on the `branch:` line for
-		// context but must not appear as `-b` in the printed cmd
-		// (would mis-represent the real invocation).
 		//
 		// Non-nil empty CmdExtraArgs is the sentinel that tells
 		// buildCloneCommand "explicit opt-out, do NOT fall back to
 		// in.Branch as the -b value" — see pickCmdBranch.
 		CmdBranch:       "",
 		CmdExtraArgsPre: []string{},
-	})
+	}
+	maybePrintCloneTermBlock(output, in)
+	// Verifier: URL-driven path runs `git clone <url> <dest>` with
+	// no extra flags, so the expected argv is just those two
+	// positionals. Mirrors executeDirectClone in clonenext.go.
+	runCmdFaithfulCheck(in, []string{"clone", url, dest})
 }
