@@ -145,6 +145,21 @@ const (
 	// CSV header row for `--format csv`. Kept here so the column
 	// order is centralized and tests can reference it.
 	StartupListCSVHeader = "name,path,exec"
+	// Filter flags. --backend scopes the listing to one Windows
+	// backend (registry or startup-folder) — Linux/macOS callers
+	// can pass either value but only entries that came from that
+	// backend will appear, which is always zero on those OSes
+	// (their single canonical backend is neither). --name matches
+	// against the entry's logical name (the same value passed to
+	// startup-add --name) so a user can verify a specific entry
+	// without grepping table output.
+	FlagStartupListBackend     = "backend"
+	FlagDescStartupListBackend = "Filter by backend: registry or startup-folder " +
+		"(default: all backends)"
+	FlagStartupListName     = "name"
+	FlagDescStartupListName = "Filter by logical entry name (same form as " +
+		"`startup-add --name`); exact match"
+	ErrStartupListBadBackend = "startup-list: unknown --backend %q (expected: registry, startup-folder)"
 )
 
 // startup-list --json-indent flag. Controls whitespace in
