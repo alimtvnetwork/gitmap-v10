@@ -16,10 +16,10 @@ const DocsLayout = ({ children }: DocsLayoutProps) => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background text-foreground">
+      <div className="h-screen flex w-full overflow-hidden bg-background text-foreground">
         <DocsSidebar />
-        <div className="flex-1 flex flex-col min-w-0">
-          <header className="sticky top-0 z-10 flex h-12 shrink-0 items-center gap-2 overflow-x-auto whitespace-nowrap border-b border-sidebar-border bg-sidebar/95 px-3 backdrop-blur-sm">
+        <div className="flex-1 flex flex-col min-w-0 min-h-0">
+          <header className="sticky top-0 z-10 flex shrink-0 flex-wrap items-center gap-2 border-b border-sidebar-border bg-sidebar/95 px-3 py-2 backdrop-blur-sm">
             <SidebarTrigger className="shrink-0 rounded-sm border border-sidebar-border bg-sidebar-accent/60 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" />
             <span className="shrink-0 text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground">Explorer</span>
             <span className="shrink-0 text-sm font-mono text-foreground">gitmap docs</span>
