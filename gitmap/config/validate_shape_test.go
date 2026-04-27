@@ -9,25 +9,15 @@ package config
 // Plus end-to-end LoadFromFile coverage so a future refactor that
 // drops a call site is caught by the test suite, not by users.
 
+// The writeTempConfigBytes helper is shared with validate_test.go.
+
 import (
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/alimtvnetwork/gitmap-v7/gitmap/model"
 )
 
-// writeTempConfigBytes is a helper to create a temporary config file for E2E tests.
-func writeTempConfigBytes(t *testing.T, content string) string {
-	t.Helper()
-	tmpDir := t.TempDir()
-	path := filepath.Join(tmpDir, "config.json")
-	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
-		t.Fatalf("failed to write temp config: %v", err)
-	}
-	return path
-}
 
 // TestValidateRawShape_RejectsWrongTypePerKey covers the canonical
 // failure mode the shape check exists for: the user wrote a number
