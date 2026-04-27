@@ -58,7 +58,7 @@ func TestGoldenDiffTotals_AccumulateMixedStatuses(t *testing.T) {
 // assertTotalsEqual centralizes the multi-field comparison so the
 // test bodies above stay one-purpose and well under 15 lines.
 func assertTotalsEqual(t *testing.T, totals goldenDiffTotals,
-	wantAdded, wantModified, wantDeleted, wantLinesAdded, wantLinesDeleted int,
+	wantAdded, wantModified, wantRenamed, wantDeleted, wantLinesAdded, wantLinesDeleted int,
 ) {
 	t.Helper()
 	mismatches := []string{}
@@ -67,6 +67,9 @@ func assertTotalsEqual(t *testing.T, totals goldenDiffTotals,
 	}
 	if totals.modified != wantModified {
 		mismatches = append(mismatches, "modified")
+	}
+	if totals.renamed != wantRenamed {
+		mismatches = append(mismatches, "renamed")
 	}
 	if totals.deleted != wantDeleted {
 		mismatches = append(mismatches, "deleted")
