@@ -30,32 +30,9 @@ type goldenDiffEntry struct {
 	deleted     int
 }
 
-// goldenDiffPathFragment scopes both `git status` and `git diff`
-// output to fixture files. Anything outside `testdata/` is filtered
-// because regenerate passes should only touch those paths.
-const goldenDiffPathFragment = "testdata/"
-
-// goldenDiffBasenameFragment further narrows the report to files
-// whose basename contains "golden" (case-insensitive). This excludes
-// unrelated `testdata/` fixtures (corpora, sample inputs, schemas)
-// that may legitimately be touched by side-effects but are not the
-// regeneration target. Per spec/05-coding-guidelines/21.
-const goldenDiffBasenameFragment = "golden"
-
-// isGoldenFixturePath reports whether p is a regeneration-relevant
-// golden file: it must live under a `testdata/` directory AND have
-// "golden" in its basename (case-insensitive). Used to gate every
-// entry shown by the diff summary.
-func isGoldenFixturePath(p string) bool {
-	if !strings.Contains(p, goldenDiffPathFragment) {
-		return false
-	}
-	base := p
-	if i := strings.LastIndex(p, "/"); i >= 0 {
-		base = p[i+1:]
-	}
-	return strings.Contains(strings.ToLower(base), goldenDiffBasenameFragment)
-}
+// Path-scope predicates (goldenDiffPathFragment, goldenDiffBasenameFragment,
+// isGoldenFixturePath) live in regoldens_diff_scope.go to keep this
+// file under the 200-line cap.
 
 // emitGoldenDiffSummary prints the post-pass-1 diff summary in the
 // requested mode ("short" | "full"). Errors from git invocations are
