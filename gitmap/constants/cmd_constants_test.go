@@ -29,6 +29,8 @@ func topLevelCmds() map[string]string {
 		"CmdPullAlias":             CmdPullAlias,
 		"CmdRescan":                CmdRescan,
 		"CmdRescanAlias":           CmdRescanAlias,
+		"CmdRescanSubtree":         CmdRescanSubtree,
+		"CmdRescanSubtreeAlias":    CmdRescanSubtreeAlias,
 		"CmdSetup":                 CmdSetup,
 		"CmdStatus":                CmdStatus,
 		"CmdStatusAlias":           CmdStatusAlias,
