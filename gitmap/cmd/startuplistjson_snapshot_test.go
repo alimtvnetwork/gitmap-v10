@@ -104,19 +104,6 @@ func TestStartupListJSONSnapshot_EmptyListHasNoObjects(t *testing.T) {
 	}
 }
 
-// mustEncodeStartupList is the determinism test's per-run helper.
-// Returns a copy of the encoded bytes so the caller can compare
-// across runs without aliasing a reused buffer.
-func mustEncodeStartupList(t *testing.T, entries []startup.Entry) []byte {
-	t.Helper()
-	var buf bytes.Buffer
-	if err := encodeStartupListJSON(&buf, entries); err != nil {
-		t.Fatalf("encode: %v", err)
-	}
-
-	return append([]byte(nil), buf.Bytes()...)
-}
-
-// Schema-check helpers (assertEveryObjectKeysExact, etc.) live in
-// jsonsnapshot_helpers_test.go so this file stays focused on the
-// startup-list-specific test cases and under the 200-line budget.
+// All shared JSON parsing + encoding helpers (mustEncodeStartupList,
+// readEveryObjectKeys, assertEveryObjectKeysExact, etc.) live in
+// jsonsnapshot_helpers_test.go so this file contains only tests.
