@@ -27,7 +27,25 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
+
+	"github.com/alimtvnetwork/gitmap-v7/gitmap/startup"
 )
+
+// mustEncodeStartupList runs encodeStartupListJSON on `entries` and
+// returns a COPY of the produced bytes (so a caller comparing two
+// runs cannot accidentally alias a reused buffer). Lives in the
+// shared helpers file rather than per-test so any future
+// startup-list-shaped snapshot can reuse it without duplicating
+// the encoder-call + buffer-copy boilerplate.
+func mustEncodeStartupList(t *testing.T, entries []startup.Entry) []byte {
+	t.Helper()
+	var buf bytes.Buffer
+	if err := encodeStartupListJSON(&buf, entries); err != nil {
+		t.Fatalf("encode: %v", err)
+	}
+
+	return append([]byte(nil), buf.Bytes()...)
+}
 
 // assertEveryObjectKeysExact parses `raw` as a top-level JSON array
 // and asserts that EVERY object in it has exactly `want` keys, in
