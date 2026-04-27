@@ -115,6 +115,24 @@ const (
 	MsgCloneNowMissingArg    = "clone-now: <file> argument is required " +
 		"(e.g. clone-now .gitmap/output/repos.json)"
 	MsgCloneNowNoURL = "no url for selected mode"
+	// Idempotency / re-clone messages. Each lands in Result.Detail
+	// so the per-row summary tells the user exactly which branch
+	// of the on-exists policy fired. The mismatch + fail messages
+	// take printf args -- documented per-line.
+	MsgCloneNowAlreadyMatches  = "already matches (url + branch)"
+	MsgCloneNowNotARepo        = "dest exists but is not a git repo"
+	// %s = current remote, %s = expected remote.
+	MsgCloneNowURLMismatch     = "skipped: remote url differs (have=%s, want=%s)"
+	// %s = current branch, %s = expected branch.
+	MsgCloneNowBranchMismatch  = "skipped: branch differs (have=%s, want=%s)"
+	MsgCloneNowUpdated         = "updated (fetch + checkout)"
+	MsgCloneNowForceRecloned   = "force-recloned (previous dir removed)"
+	// %s = path, %v = err.
+	MsgCloneNowForceRemoveFail = "force: remove %s: %v"
+	// %s = trimmed git stderr.
+	MsgCloneNowFetchFail       = "update: git fetch failed: %s"
+	// %s = branch, %s = trimmed git stderr.
+	MsgCloneNowCheckoutFail    = "update: git checkout %s failed: %s"
 )
 
 // Errors. All use printf-style verbs documented inline.
@@ -127,8 +145,9 @@ const (
 	ErrCloneNowCSVRead    = "clone-now: read CSV: %v"
 	ErrCloneNowTextRead   = "clone-now: read text: %v"
 	// %s = bad value.
-	ErrCloneNowBadMode   = "clone-now: --mode must be 'https' or 'ssh', got %q"
-	ErrCloneNowBadFormat = "clone-now: --format must be 'json', 'csv', or 'text', got %q"
+	ErrCloneNowBadMode     = "clone-now: --mode must be 'https' or 'ssh', got %q"
+	ErrCloneNowBadFormat   = "clone-now: --format must be 'json', 'csv', or 'text', got %q"
+	ErrCloneNowBadOnExists = "clone-now: --on-exists must be 'skip', 'update', or 'force', got %q"
 	// %s = path.
 	ErrCloneNowEmpty = "clone-now: %s contains zero clonable rows"
 )
