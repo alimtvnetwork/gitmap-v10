@@ -69,7 +69,7 @@ func Execute(plan Plan, cwd string, progress io.Writer) []Result {
 	}
 	out := make([]Result, 0, len(plan.Rows))
 	for i, r := range plan.Rows {
-		res := executeRow(r, plan.Mode, cwd)
+		res := executeRow(r, plan, cwd)
 		out = append(out, res)
 		writeProgress(progress, i+1, len(plan.Rows), res)
 	}
