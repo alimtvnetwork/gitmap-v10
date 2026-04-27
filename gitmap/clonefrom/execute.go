@@ -68,7 +68,10 @@ func Execute(plan Plan, cwd string, progress io.Writer) []Result {
 }
 
 // executeRow handles one row's lifecycle: resolve dest, check
-// skip rule, build git args, run, time, return.
+// skip rule, ensure the dest's parent directory exists (so nested
+// dest paths like `org-a/repo-1` preserve the original folder
+// hierarchy without surprising "could not create work tree dir"
+// failures from git), build git args, run, time, return.
 func executeRow(r Row, cwd string) Result {
 	start := time.Now()
 	dest := r.Dest
@@ -83,6 +86,10 @@ func executeRow(r Row, cwd string) Result {
 		return Result{Row: r, Dest: dest, Status: constants.CloneFromStatusSkipped,
 			Detail: constants.MsgCloneFromDestExists, Duration: time.Since(start)}
 	}
+	if detail, ok := prepareDestParent(absDest); !ok {
+		return Result{Row: r, Dest: dest, Status: constants.CloneFromStatusFailed,
+			Detail: detail, Duration: time.Since(start)}
+	}
 	detail, ok := runGitClone(r, dest, cwd)
 	status := constants.CloneFromStatusOK
 	if !ok {
@@ -91,6 +98,23 @@ func executeRow(r Row, cwd string) Result {
 
 	return Result{Row: r, Dest: dest, Status: status, Detail: detail,
 		Duration: time.Since(start)}
+}
+
+// prepareDestParent ensures the parent dir of the resolved dest
+// exists so nested dest paths (e.g. `org-a/repo-1`) work even on
+// a fresh checkout where `org-a/` doesn't yet exist. MkdirAll is
+// idempotent: pre-existing parent → no-op, no race against other
+// concurrent clones into siblings. On failure we log to stderr in
+// the project's Code Red format AND return a row Detail so the
+// per-row line + CSV report carry the same diagnosis.
+func prepareDestParent(absDest string) (string, bool) {
+	parent := filepath.Dir(absDest)
+	if err := os.MkdirAll(parent, constants.DirPermission); err != nil {
+		fmt.Fprintf(os.Stderr, constants.ErrCloneFromMkdirParent, parent, err)
+		return fmt.Sprintf(constants.MsgCloneFromMkdirParentFailFmt, err), false
+	}
+
+	return "", true
 }
 
 // shouldSkip returns true when the dest is a non-empty directory.
