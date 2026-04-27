@@ -30,7 +30,11 @@ const (
 	// FlagDescCloneTermOutput is the shared description for clone,
 	// clone-now, and clone-pick. clone-next and clone-from keep
 	// their existing descriptions verbatim to avoid breaking help
-	// snapshots; new commands use this one.
-	FlagDescCloneTermOutput = "Per-repo summary format: '' (legacy) or 'terminal' " +
-		"(standardized branch/from/to/command block printed before each clone)"
+	// snapshots; new commands use this one. Wording calls out the
+	// stream split explicitly so users know where to redirect:
+	// blocks go to stdout (machine-pipeable), git progress + the
+	// human summary go to stderr.
+	FlagDescCloneTermOutput = "Per-repo summary format: '' (legacy) or " +
+		"'terminal' (standardized branch/from/to/command block on " +
+		"stdout, streamed before each clone; git progress stays on stderr)"
 )

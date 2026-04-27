@@ -33,10 +33,13 @@ const (
 	// "default" preserves the legacy 4-line block (url/dest/branch/
 	// depth). "terminal" emits the standardized RepoTermBlock used
 	// across scan/clone-next/probe so users get one format regardless
-	// of which command produced the per-repo summary.
+	// of which command produced the per-repo summary. Wording mirrors
+	// FlagDescCloneTermOutput so the stdout-vs-stderr split is the
+	// same sentence across every clone command.
 	FlagCloneFromOutput     = "output"
-	FlagDescCloneFromOutput = "Per-row format: 'default' (legacy 4-line block) or 'terminal' " +
-		"(standardized branch/from/to/command block shared with scan, clone-next, probe)"
+	FlagDescCloneFromOutput = "Per-row format: 'default' (legacy 4-line block) " +
+		"or 'terminal' (standardized branch/from/to/command block on " +
+		"stdout, streamed before each clone; git progress stays on stderr)"
 )
 
 // Status enum strings. Stable: emitted to the CSV report which
