@@ -84,17 +84,22 @@ func executeRow(r Row, cwd string) Result {
 			Detail: detail, Duration: time.Since(start)}
 	}
 	detail, ok := runGitClone(r, dest, cwd)
-	status := constants.CloneFromStatusOK
 	if !ok {
-		status = constants.CloneFromStatusFailed
+		return Result{Row: r, Dest: dest, Status: constants.CloneFromStatusFailed,
+			Detail: detail, Duration: time.Since(start)}
+	}
+	if coDetail, coOK := runPostCloneCheckout(r, dest, cwd); !coOK {
+		return Result{Row: r, Dest: dest, Status: constants.CloneFromStatusFailed,
+			Detail: coDetail, Duration: time.Since(start)}
 	}
 
-	return Result{Row: r, Dest: dest, Status: status, Detail: detail,
-		Duration: time.Since(start)}
+	return Result{Row: r, Dest: dest, Status: constants.CloneFromStatusOK,
+		Detail: "", Duration: time.Since(start)}
 }
 
 // resolveDest, prepareDestParent, and shouldSkip live in
 // execute_dest.go to keep this file under the 200-line cap.
+// EffectiveCheckout + runPostCloneCheckout live in execute_checkout.go.
 
 // runGitClone shells out to `git clone` with the row's options.
 // Returns (detail, ok). On success detail is empty. On failure
@@ -113,7 +118,12 @@ func runGitClone(r Row, dest, cwd string) (string, bool) {
 
 // buildGitArgs translates a Row + resolved dest into the git
 // clone argument vector. Order matters for git's flag parser
-// (`--branch` and `--depth` must precede positionals).
+// (`--branch`, `--depth`, and `--no-checkout` must precede positionals).
+//
+// `--no-checkout` is emitted ONLY when the row's resolved Checkout
+// mode is "skip" — keeping the default-row argv byte-identical to
+// the pre-checkout-feature behaviour, which is what the existing
+// golden tests + --verify-cmd-faithful checker pin.
 func buildGitArgs(r Row, dest string) []string {
 	args := []string{constants.GitClone}
 	if len(r.Branch) > 0 {
@@ -121,6 +131,9 @@ func buildGitArgs(r Row, dest string) []string {
 	}
 	if r.Depth > 0 {
 		args = append(args, fmt.Sprintf(constants.CloneFromDepthFlagFmt, r.Depth))
+	}
+	if EffectiveCheckout(r) == constants.CloneFromCheckoutSkip {
+		args = append(args, constants.CloneFromNoCheckoutFlag)
 	}
 	args = append(args, r.URL, dest)
 
