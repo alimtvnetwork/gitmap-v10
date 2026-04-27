@@ -64,7 +64,7 @@ func TestStartupListJSONSnapshot_SchemaIsLocked(t *testing.T) {
 	if err := encodeStartupListJSON(&buf, entries); err != nil {
 		t.Fatalf("encode: %v", err)
 	}
-	assertEveryObjectKeysExact(t, buf.Bytes(), expectedStartupListJSONSchema)
+	assertSchemaKeysArray(t, buf.Bytes(), "startup-list")
 }
 
 // TestStartupListJSONSnapshot_DeterministicAcrossRuns proves the
