@@ -150,11 +150,21 @@ type reportRowJSON struct {
 	DurationSeconds float64 `json:"duration_seconds"`
 }
 
-// writeReportRowsJSON emits the result set as a JSON array. Always
-// writes `[]` for the empty case (never `null`) so jq pipelines and
-// downstream parsers can treat the file as an unconditional array.
-// Trailing newline matches POSIX text-file convention so editors
-// don't flag the file as missing-final-newline.
+// reportEnvelopeJSON wraps the row array with a schemaVersion field
+// so downstream parsers can branch on shape changes without sniffing
+// fields. The version is sourced from constants.CloneFromReportSchemaVersion
+// and pinned by TestCloneFromReportJSON_SchemaVersion_Pinned. Rows is
+// always serialized as `[]` (never `null`) for the empty case so jq
+// pipelines can treat it as an unconditional array.
+type reportEnvelopeJSON struct {
+	SchemaVersion int             `json:"schemaVersion"`
+	Rows          []reportRowJSON `json:"rows"`
+}
+
+// writeReportRowsJSON emits the result set as a versioned JSON
+// envelope: {"schemaVersion": N, "rows": [...]}. Rows is always an
+// array (never null) so downstream parsers can treat the file as
+// unconditional. Trailing newline matches POSIX text-file convention.
 func writeReportRowsJSON(w io.Writer, results []Result) error {
 	rows := make([]reportRowJSON, 0, len(results))
 	for _, r := range results {
@@ -164,9 +174,13 @@ func writeReportRowsJSON(w io.Writer, results []Result) error {
 			DurationSeconds: r.Duration.Seconds(),
 		})
 	}
+	envelope := reportEnvelopeJSON{
+		SchemaVersion: constants.CloneFromReportSchemaVersion,
+		Rows:          rows,
+	}
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	enc.SetEscapeHTML(false)
 
-	return enc.Encode(rows)
+	return enc.Encode(envelope)
 }
