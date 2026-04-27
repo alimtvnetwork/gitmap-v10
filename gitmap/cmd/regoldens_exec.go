@@ -10,8 +10,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"os/exec"
-	"strings"
 
 	"github.com/alimtvnetwork/gitmap-v7/gitmap/constants"
 )
