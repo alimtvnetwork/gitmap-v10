@@ -94,6 +94,21 @@ const (
 		"(expected https://, http://, ssh://, git://, file://, or scp-style host:path)"
 	// %d = bad depth.
 	ErrCloneFromNegDepth = "depth %d is negative"
+
+	// CloneFromDepthFlagFmt is the SINGLE source of truth for how
+	// clone-from renders its shallow-clone flag, both in the executed
+	// argv (clonefrom/execute.go buildGitArgs) and in every
+	// human-facing preview (render.go cloneCommandForRow + cmd/
+	// clonetermrow.go printCloneFromTermBlockRow). The joined form
+	// (`--depth=N`) is intentional — it matches what the executor
+	// hands to exec.Command exactly, so the printed cmd: line in the
+	// terminal block is byte-faithful and the --verify-cmd-faithful
+	// checker has zero false positives. Do NOT switch to the split
+	// form (`--depth N`) without updating ALL three sites + the
+	// golden fixture in cmd/testdata/clonetermblock_clonefrom.golden
+	// + TestCloneFromDepthFlagFormat_Locked.
+	// %d = depth.
+	CloneFromDepthFlagFmt = "--depth=%d"
 	// %s = directory, %v = err.
 	ErrCloneFromReportMkdir = "clone-from: mkdir %s: %v"
 	// %s = file path, %v = err.

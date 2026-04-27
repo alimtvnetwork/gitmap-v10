@@ -108,7 +108,7 @@ func cloneCommandForRow(r Row, dest string) string {
 		parts = append(parts, "-b", r.Branch)
 	}
 	if r.Depth > 0 {
-		parts = append(parts, fmt.Sprintf("--depth=%d", r.Depth))
+		parts = append(parts, fmt.Sprintf(constants.CloneFromDepthFlagFmt, r.Depth))
 	}
 	parts = append(parts, r.URL, dest)
 

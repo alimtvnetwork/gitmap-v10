@@ -133,7 +133,7 @@ func buildGitArgs(r Row, dest string) []string {
 		args = append(args, constants.GitBranchFlag, r.Branch)
 	}
 	if r.Depth > 0 {
-		args = append(args, fmt.Sprintf("--depth=%d", r.Depth))
+		args = append(args, fmt.Sprintf(constants.CloneFromDepthFlagFmt, r.Depth))
 	}
 	args = append(args, r.URL, dest)
 

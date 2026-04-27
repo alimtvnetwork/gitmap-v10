@@ -86,7 +86,7 @@ func printCloneFromTermBlockRow(index, total int, row clonefrom.Row,
 	}
 	var post []string
 	if row.Depth > 0 {
-		post = []string{fmt.Sprintf("--depth=%d", row.Depth)}
+		post = []string{fmt.Sprintf(constants.CloneFromDepthFlagFmt, row.Depth)}
 	}
 	in := CloneTermBlockInput{
 		Index:            index,
