@@ -3,22 +3,26 @@ package cmd
 // clonetermplan.go — adapters that fan a finite Plan into one
 // RepoTermBlock per row using the shared streaming helper.
 //
-// Used by clone-now and clone-pick. clone-from already has its own
-// renderer (clonefrom.RenderTerminal) that emits the same shape via
-// render.RenderRepoTermBlocks; it's wired separately so its dry-run
-// output stays byte-identical.
+// Used by:
+//   - clone-now's DRY-RUN path (printCloneNowTermBlocks): all blocks
+//     upfront, since there is no execution to interleave with.
+//   - clone-pick (printClonePickTermBlock): always one row, so
+//     "upfront" and "streamed" are the same thing.
 //
-// Each adapter is intentionally small (mapping logic only) so the
-// command files stay focused on flow control. Per the locked
-// design:
+// The EXECUTE paths for clone-now and clone-from no longer call
+// these helpers — they stream one block per row via the executor's
+// BeforeRow hook (see clonetermrow.go + execute_hooks.go in each
+// package). That puts each preview immediately before its own
+// `git clone` instead of dumping every block upfront.
+//
+// Per the locked design:
 //
 //   - URL-driven commands (clone) interleave one block per URL
 //     immediately before that URL's clone runs (see clonetermurl.go).
-//   - Plan-driven commands (clone-now, clone-pick, clone-from) print
-//     ALL blocks upfront before the first clone runs. The Plan is
-//     known up-front, so users get the full intent preview before any
-//     network traffic begins. Streaming per-row would require a
-//     callback into each executor package — out of scope here.
+//   - Plan-driven EXECUTE (clone-now, clone-from) streams via the
+//     BeforeRow hook (see clonetermrow.go).
+//   - Plan-driven DRY-RUN (clone-now) prints all blocks upfront
+//     because there's no clone progress to interleave with.
 
 import (
 	"github.com/alimtvnetwork/gitmap-v7/gitmap/clonenow"

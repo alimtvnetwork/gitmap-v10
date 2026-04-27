@@ -118,17 +118,19 @@ func runCloneFromExecute(plan clonefrom.Plan, cfg cloneFromFlags) {
 	if cfg.quiet {
 		progress = io.Discard
 	}
-	// `--output terminal`: emit the standardized RepoTermBlock for
-	// every plan row BEFORE executing, mirroring the dry-run output
-	// shape so users get the same per-repo preview whether or not
-	// they passed --execute. Plan-driven (no per-row hook into the
-	// executor) — see clonetermplan.go for the design rationale.
+	// `--output terminal`: stream one standardized RepoTermBlock per
+	// row via ExecuteWithHooks's BeforeRow callback — printed
+	// IMMEDIATELY before that row's `git clone` shells out. This
+	// interleaves per-repo previews with clone progress instead of
+	// dumping every block upfront, matching the URL-driven `clone
+	// <urls...>` behavior. Dry-run still uses RenderTerminal upfront
+	// (no execution to interleave with). A nil hook keeps the legacy
+	// path byte-identical for callers that didn't opt in.
+	var hook clonefrom.BeforeRowHook
 	if cfg.output == constants.OutputTerminal {
-		if err := clonefrom.RenderTerminal(os.Stdout, plan); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-		}
+		hook = printCloneFromTermBlockRow
 	}
-	results := clonefrom.Execute(plan, "", progress)
+	results := clonefrom.ExecuteWithHooks(plan, "", progress, hook)
 	reportPath := ""
 	if !cfg.noReport {
 		if p, err := clonefrom.WriteReport(results); err == nil {

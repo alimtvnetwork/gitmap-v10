@@ -140,18 +140,18 @@ func runCloneNowExecute(plan clonenow.Plan, cfg cloneNowFlags) {
 	if cfg.quiet {
 		progress = io.Discard
 	}
-	// `--output terminal`: print every row's standardized block
-	// upfront so the user sees the full per-repo intent before any
-	// clone progress lines start. clonenow.Execute is a single
-	// in-package call (we don't have a per-row hook here), so the
-	// block stream goes BEFORE Execute rather than interleaving
-	// with each clone — keeps the contract consistent without
-	// invasive executor surgery. URL-driven commands (`clone
-	// <url1> <url2>`) DO interleave because they own the loop.
+	// `--output terminal`: stream one standardized block per row,
+	// printed by ExecuteWithHooks's BeforeRow callback IMMEDIATELY
+	// before that row's `git clone` starts. This interleaves the
+	// per-repo preview with live clone progress instead of dumping
+	// every block upfront — matches the URL-driven `clone <urls...>`
+	// behavior. A nil hook keeps the legacy code path identical for
+	// callers that didn't opt in.
+	var hook clonenow.BeforeRowHook
 	if cfg.output == constants.OutputTerminal {
-		printCloneNowTermBlocks(plan)
+		hook = printCloneNowTermBlockRow
 	}
-	results := clonenow.Execute(plan, cfg.cwd, progress)
+	results := clonenow.ExecuteWithHooks(plan, cfg.cwd, progress, hook)
 	if err := clonenow.RenderSummary(os.Stdout, results); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 	}
