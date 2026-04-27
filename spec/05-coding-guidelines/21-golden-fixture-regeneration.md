@@ -41,6 +41,39 @@ single switch CI pins OFF, so even a leaked trigger is harmless.
 Only the literal value `"1"` unlocks the gate. `"true"`, `"yes"`,
 `"y"` are all treated as OFF — typos cannot accidentally enable it.
 
+### 1a. Determinism pre-check (third key)
+
+The two env-var keys above protect against *accidental* rewrites.
+They do **not** protect against rewriting fixtures with
+*non-deterministic bytes* (map-iteration order, embedded
+timestamps, locale-dependent floats, randomized IDs). A flaky
+writer would pass pass-1 (env vars satisfied) but fail pass-2
+(verify) — after the now-bad bytes have already landed on disk.
+
+Use `goldenguard.AllowUpdateAfterDeterminism` instead of
+`goldenguard.AllowUpdate` in any new golden test. It runs the
+writer 3 times in-process and refuses to consult the env-var gate
+unless every run produced byte-identical output:
+
+```go
+if goldenguard.AllowUpdateAfterDeterminism(t, trigger,
+    "clonefrom_report_canonical.json",
+    func() ([]byte, error) { return summary.MarshalReport(rows) },
+) {
+    os.WriteFile(path, got, 0o644)
+    return
+}
+```
+
+Existing tests using `goldenguard.AllowUpdate(t, trigger)` still
+work — adopt the new helper opportunistically when touching a
+golden test, or eagerly for any writer that has historically been
+flaky.
+
+For a pure determinism assertion (no rewrite intent),
+`goldenguard.AssertWriterDeterministic(t, label, writer)` is
+available and safe to call in regular CI runs.
+
 ---
 
 ## 2. Standard Regeneration Command
