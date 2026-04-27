@@ -18,7 +18,7 @@ into a single command, so contributors cannot accidentally:
 ## Synopsis
 
 ```
-gitmap regoldens --pattern <TestPattern> [--package <pkg>] [--skip-verify] [--dry-run] [--diff=short|full]
+gitmap regoldens --pattern <TestPattern> [--package <pkg>] [--skip-verify] [--dry-run] [--diff=short|full] [--determinism]
 gitmap rg --pattern <TestPattern>                               # short alias
 ```
 
@@ -31,6 +31,7 @@ gitmap rg --pattern <TestPattern>                               # short alias
 | `--skip-verify` | false  | Skip the determinism verification pass. **Not recommended** — the verify pass is the whole point. |
 | `--dry-run` | false       | Print the `go test` invocations that would run, then exit 0. |
 | `--diff=<mode>` | (off)  | After pass 1, print a per-file summary of which `testdata/` goldens changed. `short` = one terse line per file (status + path). `full` = adds `+adds / -deletes` line counts, rename source paths, and renamed totals. Use `--diff=short` or `--diff=full`. |
+| `--determinism` | false  | Run a determinism **pre-check** BEFORE pass 1: invokes `go test` with the per-test trigger but WITHOUT the allow-update gate, so any writer using `goldenguard.AllowUpdateAfterDeterminism` is exercised but no fixtures are written. Fails fast (exit 1) on the first non-deterministic writer; otherwise pass 1 proceeds. |
 
 ## Behavior
 
