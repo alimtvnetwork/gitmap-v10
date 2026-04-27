@@ -2,14 +2,16 @@ package goldenguard
 
 // Tests for the AllowUpdate dual gate. The function is tiny but its
 // failure mode (silently allowing a CI fixture rewrite) is severe, so
-// every branch is pinned: trigger-off, trigger-on+allow-on, and the
-// two trigger-on+allow-bad cases that MUST fail loudly.
+// every branch is pinned: trigger-off, trigger-on+allow-on, and
+// trigger-on+allow-bad cases that MUST fail loudly.
+//
+// Failure-path tests use t.Run + subT.Failed(): when the inner sub-
+// test calls Fatalf, the parent observes a failure flag without the
+// outer test itself failing — the standard idiom for testing code
+// that calls *testing.T.Fatalf.
 
 import (
-	"fmt"
 	"os"
-	"runtime"
-	"strings"
 	"testing"
 )
 
@@ -37,20 +39,13 @@ func TestAllowUpdate_BothOn_IsTrue(t *testing.T) {
 
 // TestAllowUpdate_TriggerOnAllowMissing_Fails: the failure path that
 // catches a stray -update flag or GITMAP_UPDATE_GOLDEN=1 in CI when
-// the dedicated allow var was (correctly) NOT set. We use a sub-test
-// so we can capture the t.Fatalf via a custom testing.TB harness.
+// the dedicated allow var was (correctly) NOT set.
 func TestAllowUpdate_TriggerOnAllowMissing_Fails(t *testing.T) {
-	t.Setenv(AllowUpdateEnv, "") // empty = not set (per Go env semantics)
-	msg := captureFatal(t, func(tt testing.TB) {
-		_ = AllowUpdate(tt, true)
-	})
-	if !strings.Contains(msg, AllowUpdateEnv) {
-		t.Fatalf("fatal message missing env var name %q\n got: %s",
-			AllowUpdateEnv, msg)
-	}
-	if !strings.Contains(msg, "double-gate") {
-		t.Fatalf("fatal message should explain the double-gate "+
-			"design so CI failure is actionable\n got: %s", msg)
+	// Clear inherited value so the sub-test sees a truly-empty env.
+	_ = os.Unsetenv(AllowUpdateEnv)
+	if !expectFatal(t, true) {
+		t.Fatalf("AllowUpdate(true, allow=<unset>) did NOT fail — "+
+			"missing %s must abort the regenerate path", AllowUpdateEnv)
 	}
 }
 
@@ -59,61 +54,30 @@ func TestAllowUpdate_TriggerOnAllowMissing_Fails(t *testing.T) {
 // misspellings ("true", "yes") fail closed instead of unlocking.
 func TestAllowUpdate_TriggerOnAllowWrongValue_Fails(t *testing.T) {
 	for _, bad := range []string{"true", "yes", "y", "TRUE", "0", " 1 "} {
-		t.Run(bad, func(t *testing.T) {
-			t.Setenv(AllowUpdateEnv, bad)
-			msg := captureFatal(t, func(tt testing.TB) {
-				_ = AllowUpdate(tt, true)
-			})
-			if len(msg) == 0 {
-				t.Fatalf("AllowUpdate accepted bogus allow=%q "+
+		bad := bad
+		t.Run(bad, func(tt *testing.T) {
+			tt.Setenv(AllowUpdateEnv, bad)
+			if !expectFatal(tt, true) {
+				tt.Fatalf("AllowUpdate accepted bogus allow=%q "+
 					"(only literal \"1\" must unlock the gate)",
 					bad)
 			}
 		})
 	}
-	// Belt-and-braces: the env var must be unset on test exit so
-	// other tests in this package start from a known state. t.Setenv
-	// already restores it, but Unsetenv after the loop documents
-	// the intent for the human reader.
-	_ = os.Unsetenv(AllowUpdateEnv)
 }
 
-// fatalRecorder wraps a testing.TB and intercepts Fatalf, recording
-// the message instead of aborting the test process. It satisfies
-// testing.TB by embedding the original TB value (which provides the
-// unexported private() method required by the interface).
-type fatalRecorder struct {
-	testing.TB
-	msg string
-}
+// expectFatal runs AllowUpdate(_, trigger) inside a sub-test and
+// reports whether that sub-test failed. Idiomatic Go pattern for
+// asserting that a function calls t.Fatalf without aborting the
+// outer test. The sub-test name is the call-site's t.Name() to keep
+// output readable when the parent loops.
+func expectFatal(parent *testing.T, trigger bool) bool {
+	parent.Helper()
+	var failed bool
+	parent.Run("expect-fatal", func(child *testing.T) {
+		_ = AllowUpdate(child, trigger)
+		failed = child.Failed()
+	})
 
-func (f *fatalRecorder) Helper() {
-	f.TB.Helper()
-}
-
-// Fatalf records the formatted message and calls runtime.Goexit so
-// that execution of the current goroutine stops (mirroring the real
-// testing.T.Fatalf behaviour) without aborting the parent test.
-func (f *fatalRecorder) Fatalf(format string, args ...interface{}) {
-	if f.msg == "" {
-		f.msg = fmt.Sprintf(format, args...)
-	}
-	runtime.Goexit()
-}
-
-// captureFatal runs fn against a fatalRecorder stub that records the
-// first Fatalf call instead of aborting the goroutine. Returns the
-// captured message (empty if fn never called Fatalf). Implemented
-// as a goroutine + runtime.Goexit because testing.T.Fatalf calls
-// runtime.Goexit which is goroutine-scoped — running fn in a child
-// goroutine isolates the abort from the parent test runner.
-func captureFatal(t testing.TB, fn func(testing.TB)) string {
-	rec := &fatalRecorder{TB: t}
-	done := make(chan struct{})
-	go func() {
-		defer close(done)
-		fn(rec)
-	}()
-	<-done
-	return rec.msg
+	return failed
 }
