@@ -12,11 +12,13 @@ import "github.com/alimtvnetwork/gitmap-v7/gitmap/constants"
 // into deeper directories: a row with Depth == cap is a candidate
 // for a deeper rescan.
 type ScanRecord struct {
-	ID               int64  `json:"id"               csv:"id"`
-	Slug             string `json:"slug"             csv:"slug"`
-	RepoName         string `json:"repoName"         csv:"repoName"`
+	ID               int64  `json:"id"                csv:"id"`
+	Slug             string `json:"slug"              csv:"slug"`
+	RepoID           string `json:"repoId"            csv:"repoId"`
+	RepoName         string `json:"repoName"          csv:"repoName"`
 	HTTPSUrl         string `json:"httpsUrl"          csv:"httpsUrl"`
 	SSHUrl           string `json:"sshUrl"            csv:"sshUrl"`
+	DiscoveredURL    string `json:"discoveredUrl"     csv:"discoveredUrl"`
 	Branch           string `json:"branch"            csv:"branch"`
 	BranchSource     string `json:"branchSource"      csv:"branchSource"`
 	RelativePath     string `json:"relativePath"      csv:"relativePath"`
