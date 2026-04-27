@@ -20,9 +20,17 @@ package constants
 // CLI surface. CmdCloneNow / CmdCloneNowAlias are referenced by the
 // dispatcher (rootcore.go) and the completion generator (which
 // scans for the `// gitmap:cmd top-level` marker in this package).
+//
+// CmdCloneRel / CmdCloneRelAlias are explicit-name aliases that
+// dispatch to the same runCloneNow entry. They exist to give users
+// an unambiguous "re-clone from artifact" verb that cannot collide
+// with `gitmap clone <url>` (the direct-URL clone behavior). See
+// spec/04-clone-family/ for the rationale.
 const (
 	CmdCloneNow      = "clone-now"
 	CmdCloneNowAlias = "cnow"
+	CmdCloneRel      = "relclone"
+	CmdCloneRelAlias = "rc"
 )
 
 // Flag names + descriptions. Long-form only; short flags are
