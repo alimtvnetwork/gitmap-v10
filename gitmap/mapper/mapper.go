@@ -92,11 +92,14 @@ func buildOneRecord(repo scanner.RepoInfo, opts BuildOptions) model.ScanRecord {
 	repoName := extractRepoName(remoteURL)
 	noteText := buildNote(remoteURL, opts.DefaultNote)
 	instruction := buildInstruction(cloneURL, branch, repo.RelativePath)
+	repoID := gitutil.CanonicalRepoID(remoteURL)
 
 	return model.ScanRecord{
-		Slug: buildSlug(httpsURL, repoName),
+		Slug:     buildSlug(httpsURL, repoName),
+		RepoID:   repoID,
 		RepoName: repoName, HTTPSUrl: httpsURL, SSHUrl: sshURL,
-		Branch: branch, BranchSource: branchSource,
+		DiscoveredURL: remoteURL,
+		Branch:        branch, BranchSource: branchSource,
 		RelativePath: repo.RelativePath, AbsolutePath: repo.AbsolutePath,
 		CloneInstruction: instruction, Notes: noteText,
 		Depth: repo.Depth,

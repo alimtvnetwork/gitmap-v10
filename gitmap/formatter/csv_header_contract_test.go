@@ -35,6 +35,7 @@ import (
 var expectedScanCSVHeaders = []string{
 	"repoName", "httpsUrl", "sshUrl", "branch", "branchSource",
 	"relativePath", "absolutePath", "cloneInstruction", "notes", "depth",
+	"repoId", "discoveredUrl",
 }
 
 // expectedLatestBranchCSVHeaders pins the latest-branch CSV layout.
@@ -85,13 +86,15 @@ func TestWriteCSV_ExactBytes(t *testing.T) {
 		BranchSource: "head", RelativePath: "p/repo-a",
 		AbsolutePath: "/p/repo-a", CloneInstruction: "git clone X",
 		Notes: "n", Depth: 3,
+		RepoID:        "example.com/u/repo-a",
+		DiscoveredURL: "https://example.com/u/repo-a.git",
 	}
 	var buf bytes.Buffer
 	if err := WriteCSV(&buf, []model.ScanRecord{rec}); err != nil {
 		t.Fatalf("WriteCSV: %v", err)
 	}
-	want := "repoName,httpsUrl,sshUrl,branch,branchSource,relativePath,absolutePath,cloneInstruction,notes,depth\r\n" +
-		"repo-a,https://example.com/u/repo-a.git,git@example.com:u/repo-a.git,main,head,p/repo-a,/p/repo-a,git clone X,n,3\r\n"
+	want := "repoName,httpsUrl,sshUrl,branch,branchSource,relativePath,absolutePath,cloneInstruction,notes,depth,repoId,discoveredUrl\r\n" +
+		"repo-a,https://example.com/u/repo-a.git,git@example.com:u/repo-a.git,main,head,p/repo-a,/p/repo-a,git clone X,n,3,example.com/u/repo-a,https://example.com/u/repo-a.git\r\n"
 	if got := buf.String(); got != want {
 		t.Errorf("WriteCSV bytes mismatch.\n got: %q\nwant: %q", got, want)
 	}

@@ -40,8 +40,10 @@ func canonicalScanRecords() []model.ScanRecord {
 	return []model.ScanRecord{
 		{
 			ID: 1, Slug: "acme/widget", RepoName: "widget",
+			RepoID:           "github.com/acme/widget",
 			HTTPSUrl:         "https://github.com/acme/widget.git",
 			SSHUrl:           "git@github.com:acme/widget.git",
+			DiscoveredURL:    "https://github.com/acme/widget.git",
 			Branch:           "main",
 			BranchSource:     "remote-head",
 			RelativePath:     "acme/widget",
@@ -52,8 +54,10 @@ func canonicalScanRecords() []model.ScanRecord {
 		},
 		{
 			ID: 2, Slug: "acme/gadget", RepoName: "gadget",
+			RepoID:           "github.com/acme/gadget",
 			HTTPSUrl:         "https://github.com/acme/gadget.git",
 			SSHUrl:           "git@github.com:acme/gadget.git",
+			DiscoveredURL:    "git@github.com:acme/gadget.git",
 			Branch:           "develop",
 			BranchSource:     "config",
 			RelativePath:     "acme/gadget",

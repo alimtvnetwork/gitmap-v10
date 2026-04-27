@@ -49,13 +49,16 @@ func writeCSVRows(cw *csv.Writer, records []model.ScanRecord) error {
 }
 
 // writeCSVRow converts a single record to a CSV row. Depth is
-// rendered as a base-10 integer in the trailing column so it sorts
-// numerically when the CSV is opened in a spreadsheet.
+// rendered as a base-10 integer so it sorts numerically when the
+// CSV is opened in a spreadsheet. New columns (repoId,
+// discoveredUrl) are appended at the end so legacy positional
+// readers still resolve columns 0..9 unchanged.
 func writeCSVRow(cw *csv.Writer, r model.ScanRecord) error {
 	row := []string{
 		r.RepoName, r.HTTPSUrl, r.SSHUrl, r.Branch, r.BranchSource,
 		r.RelativePath, r.AbsolutePath, r.CloneInstruction, r.Notes,
 		strconv.Itoa(r.Depth),
+		r.RepoID, r.DiscoveredURL,
 	}
 
 	return cw.Write(row)
@@ -64,6 +67,7 @@ func writeCSVRow(cw *csv.Writer, r model.ScanRecord) error {
 // ParseCSV reads records from a CSV reader.
 func ParseCSV(reader io.Reader) ([]model.ScanRecord, error) {
 	cr := csv.NewReader(reader)
+	cr.FieldsPerRecord = -1 // tolerate legacy 8/9/10-col CSVs alongside current 12-col layout
 	rows, err := cr.ReadAll()
 	if err != nil {
 		return nil, err
@@ -73,12 +77,13 @@ func ParseCSV(reader io.Reader) ([]model.ScanRecord, error) {
 }
 
 // parseCSVRows converts raw CSV rows (skipping header) into records.
-// Supports three layouts (auto-detected by column count) so older
-// CSVs keep round-tripping after the depth column was added:
+// Supports four layouts (auto-detected by column count) so older
+// CSVs keep round-tripping after each additive schema bump:
 //
 //   - legacy 8 cols : pre-branchSource layout.
-//   - 9 cols        : pre-depth layout (branchSource present, depth absent).
-//   - 10 cols       : current layout (depth in trailing column).
+//   - 9 cols        : pre-depth layout (branchSource present).
+//   - 10 cols       : pre-repoId layout (depth present).
+//   - 12 cols       : current layout (repoId, discoveredUrl appended).
 func parseCSVRows(rows [][]string) []model.ScanRecord {
 	records := make([]model.ScanRecord, 0, len(rows))
 	for i, row := range rows {
@@ -104,9 +109,9 @@ func rowToRecord(row []string) model.ScanRecord {
 	return rowToRecordLegacy(row)
 }
 
-// rowToRecordWithSource handles the 9-col (no depth) and 10-col
-// (with depth) layouts. Depth defaults to 0 when absent so legacy
-// CSVs surface as "root-level" rather than synthesizing a fake cap.
+// rowToRecordWithSource handles the 9-col (no depth), 10-col
+// (depth, no repoId), and 12-col (current) layouts. Missing fields
+// fall back to zero values so partially-populated CSVs still load.
 func rowToRecordWithSource(row []string) model.ScanRecord {
 	depth := 0
 	if len(row) >= 10 {
@@ -115,18 +120,24 @@ func rowToRecordWithSource(row []string) model.ScanRecord {
 			depth = parsed
 		}
 	}
+	repoID, discovered := "", ""
+	if len(row) >= 12 {
+		repoID = row[10]
+		discovered = row[11]
+	}
 
 	return model.ScanRecord{
 		RepoName: row[0], HTTPSUrl: row[1], SSHUrl: row[2],
 		Branch: row[3], BranchSource: row[4],
 		RelativePath: row[5], AbsolutePath: row[6],
 		CloneInstruction: row[7], Notes: row[8],
-		Depth: depth,
+		Depth:  depth,
+		RepoID: repoID, DiscoveredURL: discovered,
 	}
 }
 
 // rowToRecordLegacy handles the pre-branchSource 8-col layout.
-// BranchSource and Depth are left at their zero values.
+// BranchSource, Depth, RepoID, DiscoveredURL are left at zero values.
 func rowToRecordLegacy(row []string) model.ScanRecord {
 	notes := ""
 	if len(row) > 7 {

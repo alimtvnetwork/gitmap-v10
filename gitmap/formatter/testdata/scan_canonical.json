@@ -2,9 +2,11 @@
   {
     "id": 1,
     "slug": "acme/widget",
+    "repoId": "github.com/acme/widget",
     "repoName": "widget",
     "httpsUrl": "https://github.com/acme/widget.git",
     "sshUrl": "git@github.com:acme/widget.git",
+    "discoveredUrl": "https://github.com/acme/widget.git",
     "branch": "main",
     "branchSource": "remote-head",
     "relativePath": "acme/widget",
@@ -16,9 +18,11 @@
   {
     "id": 2,
     "slug": "acme/gadget",
+    "repoId": "github.com/acme/gadget",
     "repoName": "gadget",
     "httpsUrl": "https://github.com/acme/gadget.git",
     "sshUrl": "git@github.com:acme/gadget.git",
+    "discoveredUrl": "git@github.com:acme/gadget.git",
     "branch": "develop",
     "branchSource": "config",
     "relativePath": "acme/gadget",

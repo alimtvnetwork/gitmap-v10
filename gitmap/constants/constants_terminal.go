@@ -188,9 +188,20 @@ const (
 )
 
 // CSV headers.
+//
+// Schema bumps (additive only, append at end so legacy parsers that
+// index columns positionally still see the original layout):
+//   - v0: 8 cols (no branchSource, no depth).
+//   - +branchSource: 9 cols.
+//   - +depth: 10 cols.
+//   - +repoId, +discoveredUrl: 12 cols (current). repoId is the
+//     stable transport-neutral identifier; discoveredUrl is the raw
+//     `git remote get-url origin` value, kept verbatim so consumers
+//     can audit normalization done into httpsUrl/sshUrl.
 var ScanCSVHeaders = []string{
 	"repoName", "httpsUrl", "sshUrl", "branch", "branchSource",
 	"relativePath", "absolutePath", "cloneInstruction", "notes", "depth",
+	"repoId", "discoveredUrl",
 }
 
 var LatestBranchCSVHeaders = []string{
