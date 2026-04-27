@@ -29,6 +29,14 @@ const (
 	FlagDescCloneFromQuiet    = "Suppress per-row progress lines (summary still prints)"
 	FlagCloneFromNoReport     = "no-report"
 	FlagDescCloneFromNoReport = "Skip writing the .gitmap/clone-from-report-*.csv file"
+	// FlagCloneFromOutput selects the dry-run / per-row format.
+	// "default" preserves the legacy 4-line block (url/dest/branch/
+	// depth). "terminal" emits the standardized RepoTermBlock used
+	// across scan/clone-next/probe so users get one format regardless
+	// of which command produced the per-repo summary.
+	FlagCloneFromOutput     = "output"
+	FlagDescCloneFromOutput = "Per-row format: 'default' (legacy 4-line block) or 'terminal' " +
+		"(standardized branch/from/to/command block shared with scan, clone-next, probe)"
 )
 
 // Status enum strings. Stable: emitted to the CSV report which
