@@ -219,13 +219,14 @@ describe("DocsTooltip — non-element children fallback", () => {
         <span>extra</span>
       </>,
     );
-    // The fallback wraps multi-children in a span so Radix's
-    // Children.only doesn't throw. Focus the wrapper (Radix attaches
-    // its focus listeners to the trigger element, not descendants)
-    // and confirm the tooltip body still renders.
+    // Hover the wrapper subtree (jsdom-friendly via userEvent) to
+    // confirm the tooltip body still renders. The KEY assertion of
+    // this test is "no throw + tooltip remains usable" — the precise
+    // focus target inside the wrapper is a Radix Slot internal.
+    const user = userEvent.setup();
     const inner = screen.getByLabelText("inner btn");
     const wrapper = inner.parentElement as HTMLElement;
-    wrapper.focus();
+    await user.hover(wrapper);
     const tips = await screen.findAllByRole("tooltip");
     const matched = tips.some((t) =>
       (t.textContent ?? "").includes("fallback label"),
