@@ -89,5 +89,5 @@ func TestStartupListJSONContract_KeyOrderStable(t *testing.T) {
 	if err := encodeStartupListJSON(&buf, entries); err != nil {
 		t.Fatalf("encode: %v", err)
 	}
-	assertObjectKeyOrder(t, buf.Bytes(), []string{"name", "path", "exec"})
+	assertSchemaKeysFirstObject(t, buf.Bytes(), "startup-list")
 }
