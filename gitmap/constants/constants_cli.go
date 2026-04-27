@@ -23,6 +23,12 @@ const (
 	CmdPullAlias             = "p"
 	CmdRescan                = "rescan"
 	CmdRescanAlias           = "rsc"
+	// CmdRescanSubtree narrowly re-runs `gitmap scan` against the
+	// absolutePath of an at-cap row from a previous scan output. Default
+	// MaxDepth is bumped to RescanSubtreeDefaultMaxDepth so users get a
+	// deeper view in one step; override with --max-depth.
+	CmdRescanSubtree         = "rescan-subtree"
+	CmdRescanSubtreeAlias    = "rss"
 	CmdSetup                 = "setup"
 	CmdStatus                = "status"
 	CmdStatusAlias           = "st"
@@ -183,6 +189,12 @@ const (
 	FlagScanMaxDepth     = "max-depth"
 	FlagDescScanMaxDepth = "Max directory levels to descend below scan root (0 = default 4, negative = unlimited)"
 	DefaultScanMaxDepth  = 0
+	// RescanSubtreeDefaultMaxDepth is the cap `gitmap rescan-subtree`
+	// applies when the user does not pass an explicit --max-depth. It is
+	// deliberately deeper than DefaultScanMaxDepth (which resolves to 4
+	// inside the scanner) so the typical at-cap-rescan workflow finds
+	// the previously hidden nested repos in one shot.
+	RescanSubtreeDefaultMaxDepth = 8
 	// FlagScanDefaultBranch overrides the fallback branch name written
 	// to ScanRecord.Branch when none of the live detection steps in
 	// gitutil.DetectBranchWithDefault returned a usable name. Without

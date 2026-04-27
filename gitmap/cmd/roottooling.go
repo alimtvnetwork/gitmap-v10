@@ -21,6 +21,10 @@ func toolingDispatchEntries() []dispatchEntry {
 			[]string{constants.CmdRescan, constants.CmdRescanAlias},
 			func() { checkHelp("rescan", argsTail()); runRescan() },
 		},
+		{
+			[]string{constants.CmdRescanSubtree, constants.CmdRescanSubtreeAlias},
+			func() { runRescanSubtree(argsTail()) },
+		},
 		{[]string{constants.CmdSetup}, func() { runSetup(argsTail()) }},
 		{[]string{constants.CmdDoctor}, func() { checkHelp("doctor", argsTail()); runDoctor() }},
 		{[]string{constants.CmdLatestBranch, constants.CmdLatestBranchAlias}, func() { runLatestBranch(argsTail()) }},

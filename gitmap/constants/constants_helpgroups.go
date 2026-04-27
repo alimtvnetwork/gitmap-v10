@@ -33,7 +33,7 @@ const (
 	HelpZipGroup = "  zip-group (z) <sub> Manage named file collections for release ZIP archives"
 
 	// Compact-mode lines: command (alias) only.
-	CompactScanning   = "  scan (s), rescan (rsc), list (ls)"
+	CompactScanning   = "  scan (s), rescan (rsc), rescan-subtree (rss), list (ls)"
 	CompactCloning    = "  clone (c), clone-next (cn), desktop-sync (ds), github-desktop (gd)"
 	CompactGitOps     = "  pull (p), exec (x), status (st), watch (w), has-any-updates, latest-branch (lb)"
 	CompactNavigation = "  cd (go), group (g), multi-group (mg), alias (a), diff-profiles (dp)"

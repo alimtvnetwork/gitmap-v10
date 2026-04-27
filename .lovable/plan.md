@@ -292,3 +292,10 @@ No silent loss of delete intent is acceptable.
 - ⏳ Tests: parse, plan cone-detection, store insert/lookup, cmd dry-run + replay-not-found + missing-args
 - ⏳ Bump `Version` constant → `3.153.0`; add CHANGELOG v3.153.0 entry
 - ⏳ Verify: `go vet ./...` and `go test ./clonepick/... ./cmd/... ./store/...`
+
+## v3.154.0 rescan-subtree — 2026-04-27
+- ✅ Added `gitmap rescan-subtree <absolutePath>` (alias `rss`) — thin wrapper over `runScan` that validates the directory and injects `--max-depth 8` (constants.RescanSubtreeDefaultMaxDepth) when the user does not supply one
+- ✅ Constants: `CmdRescanSubtree` / `CmdRescanSubtreeAlias` / `RescanSubtreeDefaultMaxDepth` in `constants_cli.go`; registered in `cmd_constants_test.go` for the uniqueness/parity test
+- ✅ Dispatcher: registered in `roottooling.go`; compact help string in `constants_helpgroups.go`; LLM docs entry in `llmdocsgroups.go`
+- ✅ Helptext: `gitmap/helptext/rescan-subtree.md` (workflow, behavior, examples, exit codes), auto-discovered by `helptext/coverage_test.go`
+- ✅ Tests: `cmd/rescansubtree_test.go` covers arg-splitting (path-only / path+flags / flags+path / inline-value / errors), `--max-depth` injection (default + space override + inline override), banner extraction, and a guardrail asserting the rescan default is deeper than the scan default

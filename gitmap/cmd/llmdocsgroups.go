@@ -8,6 +8,7 @@ func buildScanningGroup() llmCmdGroup {
 		commands: []llmCmdEntry{
 			{"scan", "s", "Recursively scan a directory tree for Git repos", "gitmap scan ~/projects"},
 			{"rescan", "rsc", "Re-scan previously scanned directories using cached config", "gitmap rescan"},
+			{"rescan-subtree", "rss", "Deep-rescan a single subtree (e.g. an at-cap row's absolutePath) in one step", "gitmap rescan-subtree /home/me/work/monorepo"},
 			{"list", "ls", "Show all tracked repos (filterable by type)", "gitmap ls go"},
 			{"go-repos", "gr", "List Go projects detected by go.mod", "gitmap go-repos --json"},
 			{"node-repos", "nr", "List Node.js projects detected by package.json", "gitmap node-repos"},
