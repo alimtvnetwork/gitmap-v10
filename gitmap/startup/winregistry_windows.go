@@ -35,7 +35,6 @@ package startup
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/alimtvnetwork/gitmap-v7/gitmap/constants"
@@ -185,8 +184,3 @@ func writeTrackingSubkey(parent, name, exec, source string) error {
 func runValuePath(valueName string) string {
 	return `HKCU\` + constants.RegRunKeyPath + `\` + valueName
 }
-
-// _ avoids unused-import errors for `strings` if a future refactor
-// drops the only consumer; kept here so the import block stays
-// stable for the next editor.
-var _ = strings.HasPrefix
