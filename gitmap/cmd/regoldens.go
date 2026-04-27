@@ -92,28 +92,8 @@ func bindRegoldensFlags(fs *flag.FlagSet, cfg *regoldensFlags) {
 		constants.FlagDescRegoldensDeterminism)
 }
 
-// emitRegoldensDryRun prints both invocations without executing.
-func emitRegoldensDryRun(cfg regoldensFlags) {
-	pass1 := strings.Join(append(
-		[]string{
-			goTestUpdateTriggerEnv + "=" + goTestUpdateEnvValue,
-			goldenguard.AllowUpdateEnv + "=" + goTestUpdateEnvValue,
-		},
-		goTestArgv(cfg)...,
-	), " ")
-	pass2 := strings.Join(goTestArgv(cfg), " ")
-	if cfg.determinism {
-		precheck := strings.Join(append(
-			[]string{goTestUpdateTriggerEnv + "=" + goTestUpdateEnvValue},
-			goTestArgv(cfg)...,
-		), " ")
-		fmt.Fprintf(os.Stdout, "▸ Pre-check (would run first):\n  %s\n", precheck)
-	}
-	fmt.Fprintf(os.Stdout, constants.MsgRegoldensDryRun, pass1, pass2)
-	if cfg.hasDiff() {
-		fmt.Fprintf(os.Stdout, "  (--diff=%s: golden diff summary would print between passes)\n", cfg.diffMode)
-	}
-}
+// emitRegoldensDryRun lives in regoldens_dryrun.go (file-length cap).
+
 
 // goTestArgv returns the `go test ...` argv shared by both passes.
 // `-count=1` defeats the test cache so pass 2 actually re-runs.
