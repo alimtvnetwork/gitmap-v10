@@ -43,40 +43,49 @@ const resolveAccessibleName = (
   return undefined;
 };
 
+// Marker prop set on the fallback wrapper produced by
+// normalizeTrigger. withAccessibleName uses this to skip aria-label
+// injection on synthesized wrappers — the a11y contract only applies
+// when the caller passed a real, single React element. Callers using
+// non-element children must own their own accessible naming.
+const FALLBACK_WRAPPER_PROP = "data-docs-tooltip-fallback" as const;
+
 // Inject aria-label onto the trigger child so keyboard / screen-reader
 // users get the same information sighted users get from the tooltip.
 // We never overwrite an aria-label the child already set — the child
 // wins so callers can be more specific when they need to.
+// We also skip the synthesized fallback wrapper (see normalizeTrigger):
+// injecting aria-label onto invented markup would silently paper over
+// a misuse where the caller passed a non-element child.
 const withAccessibleName = (
   child: ReactNode,
   accessibleName: string | undefined,
 ): ReactNode => {
   if (!accessibleName) return child;
   if (!isValidElement(child)) return child;
-  const childProps = child.props as { "aria-label"?: string };
+  const childProps = child.props as Record<string, unknown>;
+  if (childProps[FALLBACK_WRAPPER_PROP]) return child;
   if (childProps["aria-label"]) return child;
   return cloneElement(child as ReactElement, { "aria-label": accessibleName });
 };
 
-// DocsTooltip is the ONLY way to attach a hover tooltip in the
-// docs header / toolbars. Centralizing here means every tooltip
-// shares the same side, offset, open/close delay (via the provider
-// in App.tsx), AND the same keyboard/screen-reader contract:
-// every icon-only trigger automatically receives an aria-label
-// derived from `label` (or the explicit `ariaLabel` prop).
-// Do NOT inline a raw <Tooltip> in docs surfaces.
 // Radix's TooltipTrigger uses Slot+React.Children.only under the hood,
 // which throws when given a string, number, fragment, null, or
 // multiple children. To make DocsTooltip safe for ANY child shape
 // (defensive rendering — never let a tooltip crash the docs chrome)
 // we normalize non-single-element children into a focusable <span>.
 // The wrapper keeps tabIndex=0 so keyboard users can still focus
-// the trigger and surface the tooltip body.
+// the trigger and surface the tooltip body. The wrapper is tagged
+// with FALLBACK_WRAPPER_PROP so withAccessibleName skips it.
 const normalizeTrigger = (child: ReactNode): ReactElement => {
   const count = Children.count(child);
   if (count === 1 && isValidElement(child)) return child;
   return (
-    <span tabIndex={0} className="inline-flex">
+    <span
+      tabIndex={0}
+      className="inline-flex"
+      {...{ [FALLBACK_WRAPPER_PROP]: true }}
+    >
       {child}
     </span>
   );
