@@ -128,6 +128,20 @@ const (
 		"(Linux Path=, macOS WorkingDirectory, Windows tracking-subkey WorkingDir)"
 )
 
+// startup-add / startup-remove --output flag. Shared so both
+// commands accept the same value set ("terminal" preserves the
+// legacy human-readable lines; "json" emits the consistent
+// startupStatus object — see cmd/startupstatusjson.go for the
+// full schema). Default is "terminal" so existing scripts keep
+// working byte-for-byte.
+const (
+	FlagStartupOutput        = "output"
+	FlagDescStartupOutput    = "Output mode: terminal (default human lines) or json (status object)"
+	ErrStartupBadOutput      = "%s: unknown --output %q (expected: terminal, json)"
+	FlagStartupJSONIndent    = "json-indent"
+	FlagDescStartupJSONIndent = "Spaces per indent level for --output=json (0 = minified, default 2). Ignored for --output=terminal."
+)
+
 // startup-list CLI flag. Reuses the project-wide OutputTerminal/CSV/
 // JSON constants for values; "table" is accepted as an alias for the
 // default human-readable rendering ("terminal" works too).
