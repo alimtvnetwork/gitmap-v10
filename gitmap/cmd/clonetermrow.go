@@ -56,9 +56,6 @@ func printCloneNowTermBlockRow(index, total int, row clonenow.Row,
 	})
 }
 
-// keep fmt referenced in this file for printCloneFromTermBlockRow's
-// --depth=N formatting (added below).
-var _ = fmt.Sprintf
 
 // printCloneFromTermBlockRow emits one RepoTermBlock for one
 // clone-from row. clone-from never rewrites URLs, so OriginalURL
