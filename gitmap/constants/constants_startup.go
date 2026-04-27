@@ -204,6 +204,7 @@ const (
 	FlagStartupRemoveDryRun      = "dry-run"
 	FlagDescStartupRemoveDryRun  = "Show what would be deleted (or refused/no-op) without touching the filesystem"
 	FlagStartupRemoveBackend     = "backend"
-	FlagDescStartupRemoveBackend = "Windows backend to remove from: registry or startup-folder " +
-		"(default: try both — registry first, then startup-folder)"
+	FlagDescStartupRemoveBackend = "Windows backend to remove from: registry, " +
+		"registry-hklm (requires admin), or startup-folder " +
+		"(default: try all — registry, then registry-hklm, then startup-folder)"
 )
