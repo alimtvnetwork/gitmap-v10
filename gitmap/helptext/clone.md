@@ -19,7 +19,7 @@ c
 | --safe-pull | false | Pull existing repos with retry + diagnostics |
 | --github-desktop | false | Auto-register with GitHub Desktop (no prompt) |
 | --audit | false | Validate planned git clone commands and print a diff-style summary; never executes |
-| --max-concurrency \<N\> | 1 | Run up to N clones in parallel (1 = sequential). Hierarchy is preserved at any N. |
+| --max-concurrency \<N\> | 0 (auto = NumCPU) | Run up to N clones in parallel. `1` = sequential, `0` = auto (one worker per CPU). Hierarchy is preserved at any N. |
 | --default-branch \<name\> | (none) | Fallback branch name when HEAD/remote-tracking detection finds nothing. Rewrites `branchSource=detached \| unknown \| empty` rows so they go through the trusted `git clone -b <name>` path instead of relying on the remote's default HEAD. Empty preserves legacy behavior. |
 | --verbose | false | Write detailed debug log |
 | --output \<mode\> | (off) | `terminal` streams a standardized branch/from/to/command block to **stdout** immediately before each URL's `git clone`. Git progress and the per-repo summary stay on **stderr**. Pipe stdout to capture just the previews. |
@@ -34,18 +34,26 @@ for every input format (CSV, JSON, text).
 
 ## Parallel execution (`--max-concurrency`)
 
-By default `gitmap clone` runs one repo at a time so the per-repo
-progress lines on stderr stay strictly ordered. Pass `--max-concurrency N`
-(N ≥ 2) to dispatch the per-record clone work across N goroutines:
+`gitmap clone` defaults to `--max-concurrency 0`, which auto-resolves
+to `runtime.NumCPU()` workers at startup. Pass `1` to force the legacy
+sequential runner (useful when scripts grep stderr for monotonically
+ordered per-repo lines), or any positive N to pin the pool size:
 
-    gitmap clone json --max-concurrency 8
+    gitmap clone json --max-concurrency 8   # pin to 8 workers
+    gitmap clone json --max-concurrency 1   # force sequential
+    gitmap clone json                       # auto = NumCPU
 
 When parallel mode is active gitmap prints a single header line
-(`↪ parallel clone enabled: 8 workers`) before the per-repo lines so
-you know it engaged. Progress lines arrive in completion order rather
-than input order; the on-disk hierarchy is unaffected. The clone-cache
-fingerprint, audit short-circuit, and safe-pull retry behavior all
-operate identically regardless of N.
+(`↪ parallel clone enabled: <N> workers`) before the per-repo lines
+so you know which value was resolved. Progress lines arrive in
+completion order rather than input order; the on-disk hierarchy is
+unaffected. The clone-cache fingerprint, audit short-circuit, and
+safe-pull retry behaviour all operate identically regardless of N.
+
+The same `--max-concurrency` flag — same name, same semantics, same
+auto-default — is also accepted by `gitmap clone-next`, `gitmap
+clone-now` (`relclone`), and `gitmap clone-from`. The single-repo
+`gitmap clone-pick` deliberately omits it (only one URL to clone).
 
 ## Audit mode
 
