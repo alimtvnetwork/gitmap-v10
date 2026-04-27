@@ -1,15 +1,8 @@
 package cmd
 
-// Contract for the schema registry itself. Pins:
-//   1. Version parsing — v10 sorts numerically above v9.
-//   2. findLatestVersion picks the highest-N file.
-//   3. listContains is comma- and whitespace-tolerant.
-//   4. --update-schema rewrites keys but preserves _doc.
-//   5. --accept-schema is version-strict (NAME@v3 ≠ v2).
-//   6. The four production schema files all parse cleanly.
-//
-// Drift-handling is exercised via a swap of schemaDir to a
-// t.TempDir() so writes stay out of the real testdata/schemas/.
+// Contract for the schema registry. Drift-handling is exercised
+// via a swap of schemaDir to a t.TempDir() so writes stay out of
+// the real testdata/schemas/ tree.
 
 import (
 	"encoding/json"
