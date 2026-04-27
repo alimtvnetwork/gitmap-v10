@@ -197,6 +197,8 @@ func topLevelCmds() map[string]string {
 		"CmdCommitRightA":             CmdCommitRightA,
 		"CmdCommitBoth":               CmdCommitBoth,
 		"CmdCommitBothA":              CmdCommitBothA,
+		"CmdClonePick":                CmdClonePick,
+		"CmdClonePickAlias":           CmdClonePickAlias,
 	}
 }
 
