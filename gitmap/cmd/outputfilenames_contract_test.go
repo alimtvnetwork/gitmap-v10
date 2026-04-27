@@ -184,8 +184,13 @@ var reErrorsReport = regexp.MustCompile(`^errors-\d+\.json$`)
 // validates the basename + extension + parent dir layout.
 func TestErrorsReportName_Contract(t *testing.T) {
 	dir := t.TempDir()
-	c := errreport.NewCollector("test", "v0.0.0-test")
-	c.AddCloneFailure("https://example.com/x.git", "clone failed", 0)
+	c := errreport.New("v0.0.0-test", "clone-next")
+	c.Add(errreport.PhaseClone, errreport.Entry{
+		RepoPath:  "/tmp/example",
+		RemoteURL: "https://example.com/x.git",
+		Step:      "clone",
+		Error:     "clone failed",
+	})
 
 	abs, err := c.WriteIfAny(dir)
 	if err != nil {
