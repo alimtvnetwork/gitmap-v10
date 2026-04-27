@@ -190,12 +190,3 @@ func writeSchemaFile(s schema, observedKeys []string) error {
 	schemaCacheMu.Unlock()
 	return nil
 }
-
-// debugSortedKeys is currently unused but kept for the test that
-// covers writeSchemaFile — exposing it through the package keeps
-// the import list honest if a future refactor needs a stable copy.
-func debugSortedKeys(in []string) []string {
-	out := append([]string(nil), in...)
-	sort.Strings(out)
-	return out
-}
