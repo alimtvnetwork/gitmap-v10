@@ -53,5 +53,22 @@ const (
 		"matches the executor's real git argv. Prints a structured " +
 		"mismatch report to stderr on divergence; silent on match. " +
 		"Pure check — does not change clone behavior."
+
+	// FlagClonePrintArgv is the shared boolean flag name used by every
+	// clone-related command to dump the exact argv tokens that would
+	// be passed to exec.Command. Companion to --verify-cmd-faithful:
+	// the verifier proves displayed==executed, this flag SHOWS the
+	// executed form so users can paste it elsewhere or grep one token
+	// at a time without re-quoting the cmd: string.
+	FlagClonePrintArgv = "print-clone-argv"
+
+	// FlagDescClonePrintArgv explains the flag in --help. Wording
+	// calls out the format (one token per line, prefixed `argv[i]=`)
+	// and the stream (stderr, not stdout) so users redirecting the
+	// terminal block to a file aren't surprised by extra noise.
+	FlagDescClonePrintArgv = "Print the exact git-clone argv tokens " +
+		"to stderr (one per line, `argv[i]=<token>`) right after each " +
+		"terminal block. Audit-only — does not change clone behavior."
 )
+
 
