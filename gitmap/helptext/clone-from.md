@@ -24,7 +24,19 @@ gitmap cf <file> --execute            # short alias
 | `--execute` | off | Actually run `git clone`. Without this flag, only the dry-run plan is printed. |
 | `--quiet` | off | Suppress per-row progress lines. The end-of-batch summary still prints. |
 | `--no-report` | off | Skip writing the `.gitmap/clone-from-report-<unixts>.csv` file. |
+| `--output <mode>` | `default` | Per-row format. `default` = legacy 4-line block. `terminal` = standardized branch/from/to/command block on **stdout**, streamed immediately before each row's `git clone`. Git's clone progress and the human summary stay on **stderr**. |
 | `--help` | off | Print this help and exit. |
+
+## Output streams (`--output terminal`)
+
+The streams are split so machine consumers can grep just the previews:
+
+| Stream | Content |
+|---|---|
+| **stdout** | One `RepoTermBlock` per row (index, name, branch + source, original URL, target URL, exact `git clone` command). Streamed: each block prints right before that row's clone starts. |
+| **stderr** | `git clone` progress, the `[i/N] status url` per-row line, the final `gitmap clone-from: …` summary, and any warnings. |
+
+Redirect example: `gitmap clone-from repos.csv --execute --output terminal > previews.txt 2> progress.log`.
 
 ## Input formats
 

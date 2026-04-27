@@ -28,7 +28,17 @@ gitmap cnow <file> --execute                       # short alias
 | `--mode` | `https` | URL mode to clone with: `https` or `ssh`. Falls back to the other mode if the preferred URL is missing on a row. |
 | `--format` | (auto) | Force input format: `json`, `csv`, or `text`. Default: detected from the file extension. |
 | `--cwd` | (current dir) | Working directory each `git clone` runs in. Useful for re-creating a tree under a fresh root. |
+| `--output <mode>` | (off) | Per-repo summary format. `terminal` = standardized branch/from/to/command block on **stdout**, streamed immediately before each row's `git clone`. Git progress and the batch summary stay on **stderr**. Empty (default) keeps the legacy output. |
 | `--help` | off | Print this help and exit. |
+
+## Output streams (`--output terminal`)
+
+| Stream | Content |
+|---|---|
+| **stdout** | One `RepoTermBlock` per row (index, name, branch + source, original URL, target URL, exact `git clone` command). Streamed: each block prints right before that row's clone starts. Dry-run prints all blocks upfront (no clone to interleave with). |
+| **stderr** | `git clone` progress, the `[i/N] status url -> dest` per-row line, the final summary, and any warnings. |
+
+Redirect example: `gitmap clone-now repos.json --execute --output terminal > previews.txt 2> progress.log`.
 
 ## Input formats
 

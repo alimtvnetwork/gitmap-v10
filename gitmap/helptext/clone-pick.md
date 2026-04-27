@@ -32,6 +32,7 @@ cpk
 | `--dry-run` | false | Print plan + git commands without executing |
 | `--quiet` | false | Suppress per-step progress on stderr |
 | `--force` | false | Allow non-empty `<dest>` |
+| `--output <mode>` | (off) | `terminal` prints the standardized branch/from/to/command block on **stdout** before the clone runs. Git progress + the saved-selection line stay on **stderr**. Empty keeps legacy output. |
 
 ## Examples
 
