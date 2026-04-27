@@ -55,4 +55,12 @@ type Row struct {
 	// Depth optionally enables a shallow clone with --depth=N.
 	// Zero → full history.
 	Depth int
+	// Checkout controls post-clone working-tree behaviour. One of
+	// "" / "auto" / "skip" / "force" (validated at parse time).
+	// Empty string means "inherit the global default" (set via
+	// --checkout on the CLI; defaults to "auto"). Per-row value
+	// always wins over the global default. See
+	// constants.FlagDescCloneFromCheckout for the semantics of each
+	// mode.
+	Checkout string
 }
