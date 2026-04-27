@@ -139,6 +139,7 @@ func TestParseStartupListFlags_BackendValidation(t *testing.T) {
 	}{
 		{"empty", []string{}, false},
 		{"registry", []string{"--backend=registry"}, false},
+		{"registry-hklm", []string{"--backend=registry-hklm"}, false},
 		{"startup-folder", []string{"--backend=startup-folder"}, false},
 		{"unknown", []string{"--backend=hkcu"}, true},
 	}
