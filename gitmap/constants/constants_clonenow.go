@@ -218,6 +218,22 @@ const (
 	MsgCloneNowManifestConflict = "reclone: cannot combine positional <file> %q with --manifest %q; pass only one\n"
 	// %d = total existing dirs, %s = on-exists policy. Header
 	// printed before the bullet list of existing destinations.
+	// %s = source path, %s = format, %s = mode, %s = on-exists,
+	// %s = resolved cwd. Top banner of the pre-execute summary.
+	MsgCloneNowSummaryHeaderFmt = "\nreclone: pre-execute summary\n" +
+		"  source     : %s (%s)\n" +
+		"  mode       : %s\n" +
+		"  on-exists  : %s\n" +
+		"  cwd        : %s\n"
+	// %d = total rows, %d = new dirs, %d = existing dirs.
+	MsgCloneNowSummaryCountsFmt = "  rows       : %d total (%d new, %d already exist)\n"
+	// Section title for the destination folder tree.
+	MsgCloneNowSummaryTreeTitle = "  destinations:\n"
+	// %s = tree-formatted line (already includes the leading
+	// indent + branch glyph). One line per visible destination.
+	MsgCloneNowSummaryTreeLineFmt = "    %s\n"
+	// %d = number of dirs not shown.
+	MsgCloneNowSummaryTreeTruncFmt = "    ... and %d more\n"
 	MsgCloneNowConfirmHeader = "reclone: %d destination folder(s) already exist on disk " +
 		"(--on-exists=%s will be applied to each):\n"
 	// %s = relative path. One bullet per existing destination, up
