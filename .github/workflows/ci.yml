@@ -188,13 +188,20 @@ jobs:
         working-directory: gitmap
         run: go test -run=^$ ./... -count=1
 
-      - name: golangci-lint
+      - name: golangci-lint (strict, fail on any error)
+        # Hard-gate. Pinned to v1.64.8 (Core memory: linter version is
+        # locked — never use @latest). `--issues-exit-code=1` is the
+        # action's default, but we set it explicitly so a future
+        # action-version bump can't silently flip the gate to
+        # non-blocking. Any reported issue fails the build; the
+        # soft-gate baseline-diff job (`lint-baseline-diff`) is the
+        # separate place where pre-existing findings are tolerated.
         if: needs.sha-check.outputs.already-built != 'true'
         uses: golangci/golangci-lint-action@v6
         with:
           version: v1.64.8
           working-directory: gitmap
-          args: --timeout=5m
+          args: --timeout=5m --issues-exit-code=1
 
   lint-regression-guard:
     # Hard-gate that fails the build on ANY occurrence of two rule
