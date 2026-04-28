@@ -5,7 +5,6 @@ package cmd
 
 import (
 	"bufio"
-	"flag"
 	"fmt"
 	"io/fs"
 	"os"
