@@ -95,57 +95,8 @@ func runCloneFrom(args []string) {
 // applyCheckoutDefault and validateCheckoutFlag live in
 // clonefrom_checkout.go to keep this file under the 200-line cap.
 
-// parseCloneFromFlags wires flags + extracts the positional file
-// argument. Exits 2 with a clear message when <file> is missing —
-// failing fast here is friendlier than parsing later and reporting
-// "open : no such file or directory".
-func parseCloneFromFlags(args []string) cloneFromFlags {
-	var cfg cloneFromFlags
-	fs := flag.NewFlagSet("clone-from", flag.ExitOnError)
-	fs.BoolVar(&cfg.execute, constants.FlagCloneFromExecute, false,
-		constants.FlagDescCloneFromExecute)
-	fs.BoolVar(&cfg.quiet, constants.FlagCloneFromQuiet, false,
-		constants.FlagDescCloneFromQuiet)
-	fs.BoolVar(&cfg.noReport, constants.FlagCloneFromNoReport, false,
-		constants.FlagDescCloneFromNoReport)
-	fs.StringVar(&cfg.output, constants.FlagCloneFromOutput, "",
-		constants.FlagDescCloneFromOutput)
-	fs.BoolVar(&cfg.verifyCmdFaithful, constants.FlagCloneVerifyCmdFaithful,
-		false, constants.FlagDescCloneVerifyCmdFaithful)
-	fs.BoolVar(&cfg.verifyCmdFaithfulExitOnMismatch,
-		constants.FlagCloneVerifyCmdFaithfulExitOnMismatch, false,
-		constants.FlagDescCloneVerifyCmdFaithfulExitOnMismatch)
-	fs.BoolVar(&cfg.printCloneArgv, constants.FlagClonePrintArgv,
-		false, constants.FlagDescClonePrintArgv)
-	fs.StringVar(&cfg.checkout, constants.FlagCloneFromCheckout, "",
-		constants.FlagDescCloneFromCheckout)
-	fs.StringVar(&cfg.emitSchema, constants.FlagCloneFromEmitSchema, "",
-		constants.FlagDescCloneFromEmitSchema)
-	maxConcFlag := fs.Int(constants.CloneFlagMaxConcurrency,
-		constants.CloneDefaultMaxConcurrency, constants.FlagDescCloneMaxConcurrency)
-	reordered := reorderFlagsBeforeArgs(args)
-	fs.Parse(reordered)
-	// --emit-schema short-circuits before the <file> requirement so
-	// users can run `gitmap clone-from --emit-schema=report` from any
-	// directory without inventing a dummy input file.
-	if cfg.emitSchema != "" {
-		return cfg
-	}
-	if fs.NArg() < 1 {
-		fmt.Fprintln(os.Stderr, constants.MsgCloneFromMissingArg)
-		os.Exit(2)
-	}
-	validateCheckoutFlag(cfg.checkout)
-	resolvedConc, ok := cloneconcurrency.Resolve(*maxConcFlag)
-	if !ok {
-		fmt.Fprintf(os.Stderr, constants.ErrCloneMaxConcurrencyInvalid, *maxConcFlag)
-		os.Exit(2)
-	}
-	cfg.maxConcurrency = resolvedConc
-	cfg.file = fs.Arg(0)
-
-	return cfg
-}
+// parseCloneFromFlags lives in clonefrom_flags.go to keep this file
+// under the 200-line cap (mem://style/code-constraints, item 3).
 
 // validateCheckoutFlag lives in clonefrom_checkout.go.
 
