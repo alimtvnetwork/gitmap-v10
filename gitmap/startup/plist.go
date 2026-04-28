@@ -30,7 +30,7 @@ import (
 	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
 )
 
-// collectManagedPlist is the macOS analogue of collectManagedDesktop.
+// collectManagedPlist is the macOS analog of collectManagedDesktop.
 // Same two-gate filter shape; different per-file reader.
 func collectManagedPlist(dir string, files []os.DirEntry) []Entry {
 	var out []Entry

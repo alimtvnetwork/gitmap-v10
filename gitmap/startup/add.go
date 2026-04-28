@@ -148,7 +148,7 @@ func platformFilename(clean string) string {
 
 // prefixedFilename ensures the on-disk name starts with the gitmap-
 // prefix exactly once. Callers passing "gitmap-foo" or "foo" both
-// land on "gitmap-foo.desktop". Linux/Unix only — the macOS analogue
+// land on "gitmap-foo.desktop". Linux/Unix only — the macOS analog
 // is prefixedFilenamePlist (different prefix shape: `gitmap.` not
 // `gitmap-`, per LaunchAgent reverse-DNS labeling convention).
 func prefixedFilename(clean string) string {

@@ -126,7 +126,7 @@ func runRegoldensPass(cfg regoldensFlags, withGate bool, header, errFmt string) 
 // developer's leaked shell export cannot silently break pass 2.
 func runGoTestPass(cfg regoldensFlags, withGate bool) int {
 	argv := goTestArgv(cfg)
-	cmd := exec.Command(argv[0], argv[1:]...) //nolint:gosec // argv built from validated CLI flags + literal "go"
+	cmd := exec.Command(argv[0], argv[1:]...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Env = buildPassEnv(withGate)

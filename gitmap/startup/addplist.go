@@ -4,8 +4,8 @@ package startup
 // addrender.go (the .desktop renderer) one-for-one so the rest of
 // add.go can stay OS-agnostic:
 //
-//   - prefixedFilenamePlist  → analogue of prefixedFilename
-//   - renderPlist            → analogue of renderDesktop
+//   - prefixedFilenamePlist  → analog of prefixedFilename
+//   - renderPlist            → analog of renderDesktop
 //
 // Why a separate file: keeps both renderers under the per-file
 // budget, and each one only has to import the format-specific

@@ -72,7 +72,7 @@ func plistBody(name string, managed bool, argv []string) string {
 	return b.String()
 }
 
-// TestList_Plist_OnlyReturnsManaged is the macOS analogue of
+// TestList_Plist_OnlyReturnsManaged is the macOS analog of
 // TestList_OnlyReturnsManaged: mixed dir contents must produce a
 // list filtered down to entries with BOTH the gitmap. prefix AND the
 // XGitmapManaged marker.

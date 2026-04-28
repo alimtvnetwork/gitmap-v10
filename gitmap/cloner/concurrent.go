@@ -49,7 +49,7 @@ func runConcurrent(records []model.ScanRecord, targetDir string, safePull bool,
 	jobs := make(chan cloneJob, len(records))
 	out := make(chan cloneOutcome, len(records))
 
-	startWorkers(workers, jobs, out, targetDir, safePull, cache)
+	startWorkers(workers, jobs, out, targetDir, safePull)
 	enqueueJobs(records, targetDir, cache, progress, jobs, out)
 	close(jobs)
 

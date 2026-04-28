@@ -18,7 +18,7 @@ import (
 	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
 )
 
-// withFakeLaunchAgentsDir is the darwin analogue of
+// withFakeLaunchAgentsDir is the darwin analog of
 // withFakeAutostartDir. Sets $HOME so darwinLaunchAgentsDir resolves
 // inside t.TempDir() and pre-creates the LaunchAgents folder.
 func withFakeLaunchAgentsDir(t *testing.T) string {
