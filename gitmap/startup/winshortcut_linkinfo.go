@@ -44,6 +44,16 @@ const (
 // Returns an error only when the target path contains characters
 // LocalBasePath cannot represent (NUL bytes — would break the
 // NUL-terminated ASCII encoding).
+//
+// Example:
+//
+//	raw, err := buildLinkInfo(`C:\Tools\gitmap.exe`)
+//	// raw[0:4]  = total LinkInfoSize (little-endian)
+//	// raw[4:8]  = 0x1C header size
+//	// raw[8:12] = 0x01 VolumeIDAndLocalBasePath flag
+//	// raw[0x1C:0x2C]                  = VolumeID block
+//	// raw[0x2C:0x2C+len(target)+1]    = target + 0x00
+//	// raw[len(raw)-1]                 = 0x00 CommonPathSuffix terminator
 func buildLinkInfo(target string) ([]byte, error) {
 	if bytes.IndexByte([]byte(target), 0) >= 0 {
 
