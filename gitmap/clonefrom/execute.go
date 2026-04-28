@@ -37,6 +37,7 @@ import (
 // keep the summary table readable).
 type Result struct {
 	Row      Row
+	Mode     string
 	Dest     string // resolved (after DeriveDest fallback)
 	Status   string
 	Detail   string
@@ -76,24 +77,24 @@ func executeRow(r Row, cwd string) Result {
 	start := time.Now()
 	dest, absDest := resolveDest(r, cwd)
 	if shouldSkip(absDest) {
-		return Result{Row: r, Dest: dest, Status: constants.CloneFromStatusSkipped,
+		return Result{Row: r, Mode: ClassifyScheme(r.URL), Dest: dest, Status: constants.CloneFromStatusSkipped,
 			Detail: constants.MsgCloneFromDestExists, Duration: time.Since(start)}
 	}
 	if detail, ok := prepareDestParent(absDest); !ok {
-		return Result{Row: r, Dest: dest, Status: constants.CloneFromStatusFailed,
+		return Result{Row: r, Mode: ClassifyScheme(r.URL), Dest: dest, Status: constants.CloneFromStatusFailed,
 			Detail: detail, Duration: time.Since(start)}
 	}
 	detail, ok := runGitClone(r, dest, cwd)
 	if !ok {
-		return Result{Row: r, Dest: dest, Status: constants.CloneFromStatusFailed,
+		return Result{Row: r, Mode: ClassifyScheme(r.URL), Dest: dest, Status: constants.CloneFromStatusFailed,
 			Detail: detail, Duration: time.Since(start)}
 	}
 	if coDetail, coOK := runPostCloneCheckout(r, dest, cwd); !coOK {
-		return Result{Row: r, Dest: dest, Status: constants.CloneFromStatusFailed,
+		return Result{Row: r, Mode: ClassifyScheme(r.URL), Dest: dest, Status: constants.CloneFromStatusFailed,
 			Detail: coDetail, Duration: time.Since(start)}
 	}
 
-	return Result{Row: r, Dest: dest, Status: constants.CloneFromStatusOK,
+	return Result{Row: r, Mode: ClassifyScheme(r.URL), Dest: dest, Status: constants.CloneFromStatusOK,
 		Detail: "", Duration: time.Since(start)}
 }
 
