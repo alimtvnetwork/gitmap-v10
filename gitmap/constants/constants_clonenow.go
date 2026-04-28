@@ -147,6 +147,44 @@ const CloneNowExistingPreviewLimit = 10
 // apart from "git clone failed".
 const CloneNowExitConfirmAborted = 2
 
+// CloneNowExitManifestInvalid is the exit code used when the
+// manifest parses cleanly but one or more rows fail semantic
+// validation (missing repo name, unusable URL, absent / absolute /
+// traversal RelativePath). Same numeric code as the bad-flag exit
+// (2) because both represent "you fed me invalid input" rather
+// than a runtime clone failure (1). Aliased to a named constant
+// so the validator's intent is self-documenting at the call site.
+const CloneNowExitManifestInvalid = 2
+
+// Manifest validation messages. All printed to stderr by the
+// pre-flight validator in reclone_validate.go. Phrases are stable
+// so tests + shell scripts can grep them, and short so the row
+// table stays scannable in an 80-column terminal.
+const (
+	// %s = manifest path, %d = bad-row count, %d = total rows.
+	MsgRecloneValidateHeaderFmt = "reclone: manifest validation failed for %s\n" +
+		"  %d issue(s) across %d row(s):\n"
+	// %d = 1-based row index, %s = repo name (or "<unnamed>"),
+	// %s = dest (or "<empty>"), %s = reason phrase.
+	MsgRecloneValidateRowFmt = "  - row %d  repo=%s  dest=%s  -- %s\n"
+	// Footer printed once after all per-row lines. Tells the user
+	// the run was aborted before any side effects occurred.
+	MsgRecloneValidateFooter = "reclone: aborted; fix the manifest and re-run " +
+		"(no clones were attempted)\n"
+	// Per-row reason phrases. Stable identifiers — do not rephrase
+	// without bumping the test fixtures and CHANGELOG.
+	MsgRecloneValidateMissingRepoName = "missing RepoName"
+	MsgRecloneValidateNoURL           = "no HTTPSUrl or SSHUrl set"
+	MsgRecloneValidateMalformedURL    = "URL is not a valid git URL " +
+		"(expected scheme://host/path or user@host:path)"
+	MsgRecloneValidateMissingDest    = "missing RelativePath"
+	MsgRecloneValidateAbsoluteDest   = "RelativePath must be relative, not absolute"
+	MsgRecloneValidateTraversalDest  = "RelativePath escapes the working dir via '..'"
+	// Placeholders for empty fields in the report table.
+	MsgRecloneValidateUnnamedRepo = "<unnamed>"
+	MsgRecloneValidateEmptyDest   = "<empty>"
+)
+
 // On-exists policy enum strings. Stable: surfaced in --on-exists,
 // the dry-run header, and the per-row Result.Detail field. Renaming
 // is a breaking change for shell scripts that grep these values.
