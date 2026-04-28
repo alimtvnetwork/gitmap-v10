@@ -170,16 +170,30 @@ type transportTallyJSON struct {
 	Other int `json:"other"`
 }
 
+// provenanceEntryJSON is one field-origin record under the envelope's
+// `provenance` array. Slice (not object) so the on-disk order is
+// stable regardless of encoding/json's map-key sort behaviour;
+// readers can scan it in the same order as reportRowJSON's columns.
+type provenanceEntryJSON struct {
+	Field string `json:"field"`
+	Stage string `json:"stage"`
+}
+
 type reportEnvelopeJSON struct {
-	SchemaVersion int                `json:"schemaVersion"`
-	Transport     transportTallyJSON `json:"transport"`
-	Rows          []reportRowJSON    `json:"rows"`
+	SchemaVersion int                   `json:"schemaVersion"`
+	Transport     transportTallyJSON    `json:"transport"`
+	Provenance    []provenanceEntryJSON `json:"provenance"`
+	Rows          []reportRowJSON       `json:"rows"`
 }
 
 // writeReportRowsJSON emits the result set as a versioned JSON
-// envelope: {"schemaVersion": N, "rows": [...]}. Rows is always an
-// array (never null) so downstream parsers can treat the file as
-// unconditional. Trailing newline matches POSIX text-file convention.
+// envelope: {"schemaVersion": N, "transport": {...},
+// "provenance": [...], "rows": [...]}. Rows is always an array
+// (never null) so downstream parsers can treat the file as
+// unconditional. Provenance is envelope-level (one entry per row
+// FIELD, not per row) — see constants.CloneFromReportProvenance for
+// the authoritative mapping. Trailing newline matches POSIX
+// text-file convention.
 func writeReportRowsJSON(w io.Writer, results []Result) error {
 	rows := make([]reportRowJSON, 0, len(results))
 	for _, r := range results {
@@ -193,6 +207,7 @@ func writeReportRowsJSON(w io.Writer, results []Result) error {
 	envelope := reportEnvelopeJSON{
 		SchemaVersion: constants.CloneFromReportSchemaVersion,
 		Transport:     transportTallyJSON{SSH: ssh, HTTPS: https, Other: other},
+		Provenance:    buildProvenanceEntries(),
 		Rows:          rows,
 	}
 	enc := json.NewEncoder(w)
@@ -200,4 +215,16 @@ func writeReportRowsJSON(w io.Writer, results []Result) error {
 	enc.SetEscapeHTML(false)
 
 	return enc.Encode(envelope)
+}
+
+// buildProvenanceEntries lifts the canonical constants.CloneFromReportProvenance
+// table into the JSON-tagged shape. Order is preserved verbatim so
+// the on-disk file is byte-stable across runs.
+func buildProvenanceEntries() []provenanceEntryJSON {
+	out := make([]provenanceEntryJSON, 0, len(constants.CloneFromReportProvenance))
+	for _, p := range constants.CloneFromReportProvenance {
+		out = append(out, provenanceEntryJSON{Field: p.Field, Stage: p.Stage})
+	}
+
+	return out
 }
