@@ -301,6 +301,10 @@ func walkParallel(root string, exclude map[string]bool, workers, maxDepth int, p
 
 	st.mu.Lock()
 	defer st.mu.Unlock()
+	// Pin a deterministic order before returning so terminal, CSV,
+	// and JSON renderers all see the same row sequence regardless of
+	// goroutine scheduling. See sort.go for the chosen key order.
+	SortRepos(st.repos)
 
 	return st.repos, st.firstErr
 }
