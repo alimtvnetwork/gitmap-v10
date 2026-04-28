@@ -132,8 +132,9 @@ type ScanOptions struct {
 
 // ScanDir walks root recursively and returns all Git repo paths found.
 // Subtrees are crawled by a bounded worker pool sized via
-// defaultWorkerCount(); result order is not guaranteed (callers that
-// depend on lexical order must sort).
+// defaultWorkerCount(); results are returned sorted by RelativePath
+// (with AbsolutePath as a tiebreaker) so terminal, CSV, and JSON
+// renderers produce byte-identical output across runs. See sort.go.
 func ScanDir(root string, excludeDirs []string) ([]RepoInfo, error) {
 	return ScanDirWithOptions(root, ScanOptions{ExcludeDirs: excludeDirs})
 }
