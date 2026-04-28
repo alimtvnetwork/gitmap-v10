@@ -220,36 +220,40 @@ Every command supports `--help` or `-h` for detailed usage with examples.
 
 ### One-Liner Install (recommended)
 
-Quick installers prompt for an install folder, then delegate to the full installer.
+The canonical installer (`install.ps1` / `install.sh`) is the **default**: no prompts, sensible install location, full PATH + data-folder setup. Use **install-quick** only when you want to choose the install drive.
 
-#### Windows (PowerShell) — Quick
-
-```powershell
-irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/install-quick.ps1 | iex
-```
-
-#### Linux / macOS — Quick
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/install-quick.sh | bash
-```
-
-#### Windows (PowerShell) — Full bootstrap (works on any machine)
-
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/gitmap/scripts/install.ps1'))
-```
-
-#### Windows (PowerShell 5+) — Short form
+#### Windows (PowerShell) — Default
 
 ```powershell
 irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/gitmap/scripts/install.ps1 | iex
 ```
 
-#### Linux / macOS (Bash)
+#### Linux / macOS (Bash) — Default
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/gitmap/scripts/install.sh | sh
+```
+
+#### Windows (PowerShell) — Full bootstrap (locked-down machines)
+
+Use when execution policy / TLS settings block the short form above.
+
+```powershell
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/gitmap/scripts/install.ps1'))
+```
+
+#### Windows (PowerShell) — Quick (drive picker)
+
+Prompts for the install drive/folder before delegating to the canonical installer.
+
+```powershell
+irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/install-quick.ps1 | iex
+```
+
+#### Linux / macOS (Bash) — Quick (drive picker)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/install-quick.sh | bash
 ```
 
 ### Installer Options
