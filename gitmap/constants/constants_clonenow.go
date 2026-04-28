@@ -159,6 +159,13 @@ const (
 		"(looked for gitmap.json then gitmap.csv). " +
 		"Run `gitmap scan` first, or pass an explicit path " +
 		"(e.g. reclone .gitmap/output/gitmap.json)."
+	// %s = scan-root value. Variant of MsgCloneNowMissingArg used
+	// when the user explicitly requested auto-pickup from a custom
+	// root via --scan-root and that root yielded no artifact —
+	// echoing the path back makes the typo / wrong-dir case obvious.
+	MsgCloneNowMissingArgScanRoot = "reclone: no scan artifact was found under " +
+		"%s/.gitmap/output/ (looked for gitmap.json then gitmap.csv). " +
+		"Run `gitmap scan` against that root first, or pass --manifest / a positional <file>."
 	// %s = auto-discovered manifest path. Printed to stderr when
 	// reclone is invoked with no <file> arg and a scan artifact is
 	// found in the conventional location. Lets users see exactly
