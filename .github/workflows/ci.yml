@@ -105,6 +105,34 @@ jobs:
             go-build-${{ runner.os }}-lint-${{ hashFiles('gitmap/go.sum') }}-
             go-build-${{ runner.os }}-lint-
 
+      - name: gofmt check (fail on unformatted .go files)
+        # Hard-gate: `gofmt -l` lists any .go file whose source
+        # differs from canonical gofmt output. We scan the entire
+        # `gitmap/` tree (excluding vendored / generated dirs that
+        # gofmt already skips by convention) and fail with the
+        # offending file list + the exact diff so the contributor
+        # can `gofmt -w` locally and recommit. Runs BEFORE `go vet`
+        # so a formatting regression is the first signal in the log,
+        # not buried under unrelated vet noise.
+        if: needs.sha-check.outputs.already-built != 'true'
+        working-directory: gitmap
+        shell: bash
+        run: |
+          set -uo pipefail
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "::error::The following .go files are not gofmt-clean:"
+            echo "$unformatted" | sed 's/^/  /'
+            echo ""
+            echo "----- gofmt -d (diff) -----"
+            gofmt -d $unformatted
+            echo "---------------------------"
+            echo ""
+            echo "Fix locally with:  cd gitmap && gofmt -w ."
+            exit 1
+          fi
+          echo "✅ All .go files are gofmt-clean."
+
       - name: Go vet
         if: needs.sha-check.outputs.already-built != 'true'
         working-directory: gitmap
