@@ -8,10 +8,10 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
@@ -101,12 +101,4 @@ func relAuditDiffLink(reportPath, diffPath string) string {
 	}
 
 	return filepath.ToSlash(rel)
-}
-
-// renderAuditDiff produces a unified diff for one file by substituting
-// every regex match with DefaultAuditLegacyReplace and emitting one
-// hunk per changed line. Returns "" when no line actually changes
-// (e.g. a false-positive match that already equals the replacement).
-func renderAuditDiff(file string, pats []*regexp.RegexpAlias) (string, error) { //nolint:revive // alias-only signature; real type below
-	return renderAuditDiffImpl(file, regexpSliceToReal(pats))
 }
