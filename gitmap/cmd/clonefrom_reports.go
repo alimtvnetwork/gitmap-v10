@@ -13,7 +13,6 @@ package cmd
 // refuse to write and surface a single actionable error instead.
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -84,10 +83,10 @@ func validateCloneFromResults(results []clonefrom.Result) error {
 		return nil
 	}
 
-	return errors.New(fmt.Sprintf(constants.ErrCloneFromReportMissingFields,
+	return fmt.Errorf(constants.ErrCloneFromReportMissingFields,
 		len(indices),
 		strings.Join(indices, ","),
-		strings.Join(summaries, "; ")))
+		strings.Join(summaries, "; "))
 }
 
 // collectMissingResultFields returns the row-index strings and the
