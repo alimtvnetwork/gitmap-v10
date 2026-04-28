@@ -30,6 +30,7 @@ type auditLegacyOpts struct {
 	Root       string
 	AsJSON     bool
 	ReportPath string // empty = no report file written
+	WriteDiffs bool   // --diffs: emit per-file unified diffs alongside the report
 }
 
 // runAuditLegacy is the dispatch entry point.
@@ -46,7 +47,8 @@ func runAuditLegacy(args []string) {
 		os.Exit(2)
 	}
 	emitAuditLegacy(opts, hits, n)
-	writeAuditLegacyReport(opts, hits, n)
+	plans := writeAuditLegacyDiffs(opts, hits)
+	writeAuditLegacyReport(opts, hits, n, plans)
 	if len(hits) > 0 {
 		os.Exit(1)
 	}

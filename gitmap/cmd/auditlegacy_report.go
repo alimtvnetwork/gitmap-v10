@@ -18,11 +18,11 @@ import (
 
 // writeAuditLegacyReport renders a Markdown audit report to disk.
 // No-op when ReportPath is empty (the user didn't pass --report).
-func writeAuditLegacyReport(opts auditLegacyOpts, hits []auditLegacyHit, fileCount int) {
+func writeAuditLegacyReport(opts auditLegacyOpts, hits []auditLegacyHit, fileCount int, plans []auditDiffPlan) {
 	if opts.ReportPath == "" {
 		return
 	}
-	body := renderAuditMarkdown(opts, hits, fileCount)
+	body := renderAuditMarkdown(opts, hits, fileCount, plans)
 	if err := writeAuditReportFile(opts.ReportPath, body); err != nil {
 		fmt.Fprintf(os.Stderr, constants.ErrAuditLegacyReportWrite, opts.ReportPath, err)
 
@@ -43,11 +43,12 @@ func writeAuditReportFile(path, body string) error {
 }
 
 // renderAuditMarkdown builds the full report body.
-func renderAuditMarkdown(opts auditLegacyOpts, hits []auditLegacyHit, fileCount int) string {
+func renderAuditMarkdown(opts auditLegacyOpts, hits []auditLegacyHit, fileCount int, plans []auditDiffPlan) string {
 	var b strings.Builder
 	writeAuditMDHeader(&b, opts, hits, fileCount)
 	writeAuditMDPatternCounts(&b, opts, hits)
-	writeAuditMDFileCounts(&b, hits)
+	writeAuditMDFileCounts(&b, hits, plans)
+	writeAuditMDDiffArtifacts(&b, plans)
 	writeAuditMDHitList(&b, hits)
 
 	return b.String()
@@ -75,19 +76,72 @@ func writeAuditMDPatternCounts(b *strings.Builder, opts auditLegacyOpts, hits []
 	fmt.Fprintln(b)
 }
 
-// writeAuditMDFileCounts writes a per-file hit-count table.
-func writeAuditMDFileCounts(b *strings.Builder, hits []auditLegacyHit) {
+// writeAuditMDFileCounts writes a per-file hit-count table. When diff
+// plans are present, an extra "Diff" column links to each artifact.
+func writeAuditMDFileCounts(b *strings.Builder, hits []auditLegacyHit, plans []auditDiffPlan) {
 	fmt.Fprintf(b, "## Counts by file\n\n")
 	if len(hits) == 0 {
 		fmt.Fprintln(b, "_None — repo is clean._\n")
 
 		return
 	}
-	fmt.Fprintf(b, "| File | Matches |\n|---|---:|\n")
+	links := indexAuditDiffPlans(plans)
+	writeAuditMDFileCountsTable(b, hits, links)
+}
+
+// writeAuditMDFileCountsTable renders the actual table rows.
+func writeAuditMDFileCountsTable(b *strings.Builder, hits []auditLegacyHit, links map[string]string) {
+	hasDiffs := len(links) > 0
+	if hasDiffs {
+		fmt.Fprintf(b, "| File | Matches | Diff |\n|---|---:|---|\n")
+	} else {
+		fmt.Fprintf(b, "| File | Matches |\n|---|---:|\n")
+	}
 	for _, row := range sortedFileCounts(hits) {
-		fmt.Fprintf(b, "| `%s` | %d |\n", row.file, row.count)
+		writeAuditMDFileCountRow(b, row, links, hasDiffs)
 	}
 	fmt.Fprintln(b)
+}
+
+// writeAuditMDFileCountRow emits one row of the file-counts table.
+func writeAuditMDFileCountRow(b *strings.Builder, row auditFileCount, links map[string]string, hasDiffs bool) {
+	if !hasDiffs {
+		fmt.Fprintf(b, "| `%s` | %d |\n", row.file, row.count)
+
+		return
+	}
+	link := links[row.file]
+	if link == "" {
+		fmt.Fprintf(b, "| `%s` | %d | — |\n", row.file, row.count)
+
+		return
+	}
+	fmt.Fprintf(b, "| `%s` | %d | [view](%s) |\n", row.file, row.count, link)
+}
+
+// writeAuditMDDiffArtifacts lists every diff artifact in a dedicated
+// section so reviewers can grab them all from one place.
+func writeAuditMDDiffArtifacts(b *strings.Builder, plans []auditDiffPlan) {
+	if len(plans) == 0 {
+		return
+	}
+	fmt.Fprintf(b, "## Per-file diffs\n\n")
+	fmt.Fprintf(b, "Each diff previews the legacy → `gitmap-v8` substitution for one file. ")
+	fmt.Fprintf(b, "Apply with `patch -p0 < <file>.diff` from the repo root.\n\n")
+	for _, p := range plans {
+		fmt.Fprintf(b, "- [`%s`](%s)\n", p.SourceFile, p.DiffRelLink)
+	}
+	fmt.Fprintln(b)
+}
+
+// indexAuditDiffPlans builds a source-file → relative-link map.
+func indexAuditDiffPlans(plans []auditDiffPlan) map[string]string {
+	out := make(map[string]string, len(plans))
+	for _, p := range plans {
+		out[p.SourceFile] = p.DiffRelLink
+	}
+
+	return out
 }
 
 // writeAuditMDHitList writes every match as `file:line: text`.

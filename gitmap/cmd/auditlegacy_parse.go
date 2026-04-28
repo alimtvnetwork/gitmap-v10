@@ -19,6 +19,8 @@ func parseAuditLegacyArgs(args []string) (auditLegacyOpts, error) {
 	asJSON := fs.Bool(constants.FlagAuditLegacyJSON, false, constants.FlagDescAuditLegacyJSON)
 	report := fs.String(constants.FlagAuditLegacyReport, "",
 		constants.FlagDescAuditLegacyReport)
+	diffs := fs.Bool(constants.FlagAuditLegacyDiffs, false,
+		constants.FlagDescAuditLegacyDiffs)
 	if err := fs.Parse(args); err != nil {
 		return auditLegacyOpts{}, err
 	}
@@ -31,6 +33,7 @@ func parseAuditLegacyArgs(args []string) (auditLegacyOpts, error) {
 	return auditLegacyOpts{
 		Patterns: compiled, Raw: raw, Root: *root,
 		AsJSON: *asJSON, ReportPath: resolveReportPath(reportSet, *report),
+		WriteDiffs: *diffs,
 	}, nil
 }
 

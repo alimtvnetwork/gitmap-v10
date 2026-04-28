@@ -134,15 +134,21 @@ const (
 	FlagDescAuditLegacyJSON     = "Emit machine-readable JSON instead of human text"
 	FlagAuditLegacyReport       = "report"
 	FlagDescAuditLegacyReport   = "Write a Markdown audit report to this path (use '' for default .gitmap/audit-legacy-report.md)"
+	FlagAuditLegacyDiffs        = "diffs"
+	FlagDescAuditLegacyDiffs    = "Also write per-file unified diffs (legacy → v8) into the report's diffs/ folder and link them"
 	DefaultAuditLegacyPatterns  = "gitmap-v[567]\\b"
 	DefaultAuditLegacyReport    = ".gitmap/audit-legacy-report.md"
+	DefaultAuditLegacyDiffsDir  = "diffs"
+	DefaultAuditLegacyReplace   = "gitmap-v8"
 	MsgAuditLegacyClean         = "  ✓ audit-legacy: no forbidden legacy strings found in %s\n"
 	MsgAuditLegacyHeader        = "  ✗ audit-legacy: %d match(es) across %d file(s) for pattern(s) %q\n"
 	MsgAuditLegacyHit           = "    %s:%d: %s\n"
 	MsgAuditLegacyReportWrote   = "  📄 audit-legacy: report written to %s\n"
+	MsgAuditLegacyDiffsWrote    = "  📎 audit-legacy: %d per-file diff(s) written to %s\n"
 	ErrAuditLegacyWalk          = "audit-legacy: walk failed for %s: %v\n"
 	ErrAuditLegacyRegex         = "audit-legacy: invalid regex %q: %v\n"
 	ErrAuditLegacyReportWrite   = "audit-legacy: failed to write report to %s: %v\n"
+	ErrAuditLegacyDiffWrite     = "audit-legacy: failed to write diff for %s: %v\n"
 )
 
 // Regoldens flag names + descriptions. The two env vars driven by
