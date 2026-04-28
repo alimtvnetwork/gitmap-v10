@@ -18,8 +18,10 @@ selected SSH/HTTPS mode.
 ## Synopsis
 
 ```
+gitmap reclone                                    # auto-pickup .gitmap/output/gitmap.json (then .csv)
 gitmap reclone  <file>                            # dry-run (default)
 gitmap reclone  <file> --execute                  # actually clone
+gitmap reclone  --execute                         # auto-pickup + execute
 gitmap reclone  <file> --mode ssh --execute       # use SSH URLs
 gitmap rec      <file> --execute                  # short alias
 gitmap clone-now <file> --execute                 # legacy alias (kept forever)
@@ -27,6 +29,19 @@ gitmap cnow     <file> --execute                  # legacy short alias
 gitmap relclone <file> --execute                  # legacy alias
 gitmap rc       <file> --execute                  # legacy short alias
 ```
+
+## Auto-pickup
+
+When `<file>` is omitted, `reclone` looks for a scan artifact in the
+conventional location relative to the current directory:
+
+1. `./.gitmap/output/gitmap.json`  (preferred — richest schema)
+2. `./.gitmap/output/gitmap.csv`   (fallback)
+
+The first match is used and its path is echoed to stderr so the run
+stays reproducible. If neither file exists, `reclone` exits with code
+`2` and tells you to run `gitmap scan` first or pass an explicit
+path. Auto-pickup never walks parent directories.
 
 ## Arguments
 
