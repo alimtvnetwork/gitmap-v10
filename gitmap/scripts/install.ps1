@@ -860,6 +860,8 @@ else {
 
 Write-InstallSummary $installedVersion $binPath $installResult.InstallDir $installResult.PathResult $NoPath.IsPresent
 
+Invoke-InstallVerification $binPath $installResult.InstallDir $NoPath.IsPresent
+
 Write-Host ""
 Write-OK "Done! Run 'gitmap --help' to get started."
 Write-Host ""
