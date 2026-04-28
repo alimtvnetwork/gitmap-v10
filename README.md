@@ -17,9 +17,108 @@
 
 _Scan, catalog, clone, and manage all your Git repositories from a single CLI._
 
+<br>
+
+<img src="docs/assets/gitmap-docs-ui.png" alt="GitMap interactive docs web UI showing the Home page with install / uninstall quick-action terminals and the left-hand command explorer" width="900">
+
 </div>
 
 ---
+
+## About GitMap
+
+### Why it exists — the two-hour origin story
+
+GitMap started as a one-evening fix for a very ordinary problem.
+The author needed to **migrate every single Git repository from one
+laptop to a brand-new machine** — dozens of folders, scattered across
+nested directories, each with its own remote, branch, and personal
+quirks. Cloning them by hand would have taken a weekend; copying the
+working trees would have dragged along build artifacts, half-finished
+branches, and IDE junk that did not belong on a fresh box.
+
+So in **about two hours, with the help of AI coding tools**, the
+first version of `gitmap` was built: walk a folder, find every Git
+repo, write a list of `git clone` commands, run them on the new
+machine, and end up with the **exact same folder layout** — no
+artifacts, no garbage, just the canonical source of every project.
+
+That tiny utility worked. Then it kept growing. After **months of
+daily use, refactors, and feature additions** it has turned into the
+all-in-one Git workspace CLI you see today — a tool the author now
+reaches for before almost any other Git operation.
+
+### What GitMap actually does
+
+At its heart `gitmap` does one thing extremely well: it treats your
+disk as a **map of Git repositories** and lets you operate on that
+map as a single object. Every command flows from that idea.
+
+#### 🗺️ Scan & catalog
+- Recursively walks any folder tree and discovers every Git repo
+  underneath it (no matter how deeply nested).
+- Records each repo's remote URLs (HTTPS **and** SSH), branch,
+  relative path, and discovery URL into a deterministic
+  `.gitmap/output/gitmap.{json,csv,txt}` manifest.
+- Emits the same data as ready-to-run `git clone` instructions, so
+  the catalog is **also** the migration script.
+
+#### 🚚 Round-trip clone (`reclone`)
+- Re-creates the **exact folder layout** of a previous scan on any
+  new machine, using the recorded relative paths verbatim.
+- Pre-flight safety prompt + dry-run summary + row-level manifest
+  validation — you always see what's about to happen before any
+  side effect touches your disk.
+- Concurrent workers (`--max-concurrency`), `--on-exists` policy
+  (skip / update / force), and HTTPS ⇄ SSH mode switching.
+
+#### 🔢 Version tracking & history
+- `clone-next` flattens versioned URLs (`…-v7`, `…-v8`, …) into a
+  single base folder and records every cloned version in a local
+  SQLite **`RepoVersionHistory`** table.
+- `history`, `stats`, and `release` commands give you a per-repo
+  timeline — when you cloned what, from where, on which machine.
+
+#### 🤝 AI-tool friendly
+- First-class helpers for working with **Lovable, Claude, Cursor,
+  GitHub Copilot, and other AI coding agents**: structured manifests
+  the agent can read, deterministic outputs that survive being
+  diffed across runs, and command output formats designed to be
+  pasted straight into a chat.
+- Built-in `LLM.md` + `spec/` directory makes the codebase itself
+  legible to AI — an explicit design choice, not an accident.
+
+#### 🛠️ Self-managing installation
+- `gitmap self-install` / `self-uninstall` manage the binary itself
+  on every supported platform.
+- Quick installers (`install-quick.ps1` / `install-quick.sh`) prompt
+  for an install drive, then handle PATH, data folder, and version
+  resolution — strict-tag mode for reproducible CI, parallel sibling
+  probe + `releases/latest` fallback for everyday use.
+- `gitmap-updater` keeps the binary fresh; `self-uninstall` cleans
+  up the PATH marker block and (optionally) the user data folder.
+
+#### 🔀 Workspace operations
+- `mv`, `merge-both`, `merge-left`, `merge-right` — move or merge
+  two working trees with an interactive **L / R / S / A / B / Q**
+  prompt and `--prefer-*` flags for non-interactive runs.
+- `as` / `release-alias` (`ra`) / `release-alias-pull` (`rap`) —
+  create labelled aliases of a release with concurrency-safe
+  auto-stash/pop.
+- `regoldens` (`rg`) — automated two-pass golden-fixture
+  regeneration with built-in determinism verification.
+
+#### 🖥️ Web docs UI
+The repository ships with an **interactive documentation site**
+(shown above) that mirrors every CLI command, every flag, and every
+exit code — searchable, copy-paste-able, and synchronised with the
+release metadata so the docs can never drift from the binary.
+
+### TL;DR
+
+> **A single CLI that maps, migrates, versions, and manages every
+> Git repository on your machine — born from a two-hour migration
+> hack, hardened into the author's daily driver.**
 
 > **One-stop install/update reference**: [`spec/01-app/108-cross-platform-install-update.md`](spec/01-app/108-cross-platform-install-update.md) — the full Windows / macOS / Linux install · update · uninstall · verify matrix is also rendered in the docs at `/install-gitmap`.
 
