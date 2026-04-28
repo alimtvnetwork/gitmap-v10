@@ -78,6 +78,8 @@ func (b Backend) String() string {
 		return constants.StartupBackendStartupFolder
 	case BackendRegistryHKLM:
 		return constants.StartupBackendRegistryHKLM
+	case BackendUnspecified:
+		return ""
 	default:
 		return ""
 	}
@@ -116,6 +118,9 @@ func addWindows(clean string, opts AddOptions) (AddResult, error) {
 	case BackendRegistryHKLM:
 
 		return addWindowsRegistryHKLM(clean, opts)
+	case BackendUnspecified:
+
+		return AddResult{}, fmt.Errorf(constants.ErrStartupAddBadBackend, backend.String())
 	default:
 
 		return AddResult{}, fmt.Errorf(constants.ErrStartupAddBadBackend, backend.String())
