@@ -47,7 +47,8 @@ func runAuditLegacy(args []string) {
 		os.Exit(2)
 	}
 	emitAuditLegacy(opts, hits, n)
-	writeAuditLegacyReport(opts, hits, n)
+	plans := writeAuditLegacyDiffs(opts, hits)
+	writeAuditLegacyReport(opts, hits, n, plans)
 	if len(hits) > 0 {
 		os.Exit(1)
 	}
