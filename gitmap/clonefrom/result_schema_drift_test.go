@@ -42,7 +42,6 @@ package clonefrom
 import (
 	"reflect"
 	"sort"
-	"strings"
 	"testing"
 	"time"
 )
