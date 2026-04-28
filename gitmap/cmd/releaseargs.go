@@ -37,6 +37,10 @@ func reorderFlagsBeforeArgs(args []string) []string {
 		// `path.json` as a positional <file>, triggering the
 		// manifest-vs-positional conflict and exiting 2.
 		"--manifest": true,
+		// reclone --scan-root <dir>: redirects auto-pickup root.
+		// Same reordering hazard as --manifest — without this entry
+		// the directory would land in the positional slot.
+		"--scan-root": true,
 	}
 
 	for i := 0; i < len(args); i++ {
