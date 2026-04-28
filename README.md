@@ -91,10 +91,11 @@ map as a single object. Every command flows from that idea.
 #### 🛠️ Self-managing installation
 - `gitmap self-install` / `self-uninstall` manage the binary itself
   on every supported platform.
-- Quick installers (`install-quick.ps1` / `install-quick.sh`) prompt
-  for an install drive, then handle PATH, data folder, and version
-  resolution — strict-tag mode for reproducible CI, parallel sibling
-  probe + `releases/latest` fallback for everyday use.
+- Canonical installers (`gitmap/scripts/install.ps1` /
+  `install.sh`) are the **default** one-liners — no prompts, sensible
+  defaults, full PATH + data-folder setup. Quick installers
+  (`install-quick.ps1` / `install-quick.sh`) layer a drive-picker
+  prompt on top for users who want to install on a specific drive.
 - `gitmap-updater` keeps the binary fresh; `self-uninstall` cleans
   up the PATH marker block and (optionally) the user data folder.
 
@@ -124,23 +125,9 @@ release metadata so the docs can never drift from the binary.
 
 ## Quick Start
 
-### Install — Quick (pick your install folder)
+### Install — Default (recommended)
 
-Prompts for the install drive/folder (press Enter for the default), then runs the full installer.
-
-#### Windows (PowerShell)
-
-```powershell
-irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/install-quick.ps1 | iex
-```
-
-#### Linux / macOS
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/install-quick.sh | bash
-```
-
-### Install — Full (defaults, no prompt)
+Runs the canonical installer with sensible defaults. **No prompts. No drive picker. Just installs.** This is what 99% of users want.
 
 #### Windows (PowerShell)
 
@@ -152,6 +139,22 @@ irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/gitmap/script
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/gitmap/scripts/install.sh | sh
+```
+
+### Install — Quick (pick your install drive)
+
+Use this **only** when you want to choose a specific drive or folder (e.g. install to `D:\` instead of the default location). It prompts for the install drive/folder, then delegates to the canonical installer above.
+
+#### Windows (PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/install-quick.ps1 | iex
+```
+
+#### Linux / macOS
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/install-quick.sh | bash
 ```
 
 > **How install resolves a version:** every installer follows the generic contract in [`spec/07-generic-release/09-generic-install-script-behavior.md`](spec/07-generic-release/09-generic-install-script-behavior.md). In short — **strict tag mode** (`--version <tag>` / `-Version <tag>`) installs that exact release with **no fallback whatsoever** (no `latest`, no sibling probe, no main-branch HEAD; missing tag → exit 1). **Discovery mode** (no tag supplied) probes the next 20 `-v<N+i>` sibling repos in parallel, then falls back to `releases/latest`, and finally to the default branch HEAD as a last resort.
@@ -218,36 +221,40 @@ Every command supports `--help` or `-h` for detailed usage with examples.
 
 ### One-Liner Install (recommended)
 
-Quick installers prompt for an install folder, then delegate to the full installer.
+The canonical installer (`install.ps1` / `install.sh`) is the **default**: no prompts, sensible install location, full PATH + data-folder setup. Use **install-quick** only when you want to choose the install drive.
 
-#### Windows (PowerShell) — Quick
-
-```powershell
-irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/install-quick.ps1 | iex
-```
-
-#### Linux / macOS — Quick
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/install-quick.sh | bash
-```
-
-#### Windows (PowerShell) — Full bootstrap (works on any machine)
-
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/gitmap/scripts/install.ps1'))
-```
-
-#### Windows (PowerShell 5+) — Short form
+#### Windows (PowerShell) — Default
 
 ```powershell
 irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/gitmap/scripts/install.ps1 | iex
 ```
 
-#### Linux / macOS (Bash)
+#### Linux / macOS (Bash) — Default
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/gitmap/scripts/install.sh | sh
+```
+
+#### Windows (PowerShell) — Full bootstrap (locked-down machines)
+
+Use when execution policy / TLS settings block the short form above.
+
+```powershell
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/gitmap/scripts/install.ps1'))
+```
+
+#### Windows (PowerShell) — Quick (drive picker)
+
+Prompts for the install drive/folder before delegating to the canonical installer.
+
+```powershell
+irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/install-quick.ps1 | iex
+```
+
+#### Linux / macOS (Bash) — Quick (drive picker)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/install-quick.sh | bash
 ```
 
 ### Installer Options

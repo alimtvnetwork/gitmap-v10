@@ -91,8 +91,8 @@ const InstallGitmapPage = () => {
         <section className="mb-12">
           <SectionHeader
             icon={Download}
-            title="Install — default (no prompt)"
-            kicker="Discovery mode: probes 20 sibling -vN+i repos in parallel, falls back to releases/latest, then HEAD."
+            title="Install — default (recommended)"
+            kicker="Canonical install.ps1 / install.sh. No prompts. Sensible install location. This is what 99% of users want."
           />
           <PlatformBlock commands={installCmds} />
         </section>
@@ -101,8 +101,8 @@ const InstallGitmapPage = () => {
         <section className="mb-12">
           <SectionHeader
             icon={Download}
-            title="Install — pick install folder"
-            kicker="Prompts for the install drive/folder (Enter for default), then runs the full installer."
+            title="Install — quick (pick install drive)"
+            kicker="Use only when you want to install on a specific drive (e.g. D:\\). Prompts for drive/folder, then delegates to the canonical installer."
           />
           <PlatformBlock commands={installPromptCmds} />
         </section>
