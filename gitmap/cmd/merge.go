@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/alimtvnetwork/gitmap-v8/gitmap/cliexit"
 	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
 	"github.com/alimtvnetwork/gitmap-v8/gitmap/movemerge"
 )
@@ -27,8 +28,7 @@ func runMerge(spec mergeSpec, args []string) {
 	rightEP := mustResolve(right, false, opts)
 	logResolved(leftEP, rightEP, opts)
 	if err := movemerge.RunMerge(leftEP, rightEP, spec.direction, opts); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		cliexit.Fail(spec.cmd, "merge", leftEP.DisplayName+" <-> "+rightEP.DisplayName, err, 1)
 	}
 }
 
