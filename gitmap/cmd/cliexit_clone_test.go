@@ -84,7 +84,11 @@ func TestCloneCLI_FailureExitCodes(t *testing.T) {
 // canceled exit (CloneNowExitConfirmAborted = 2) for the only
 // command in the family with a non-TTY-safe cancel path. We seed a
 // manifest whose row's RelativePath already exists on disk; with no
-// --yes and no TTY, the confirm gate aborts with code 2.
+// --yes and no TTY (the subprocess inherits /dev/null for stdin via
+// the test harness), the confirm gate must abort with exactly code
+// 2. We also assert the gate's stderr message is present so a
+// future regression that exits 2 from an unrelated path can't
+// silently satisfy this test.
 func TestCloneNowCLI_UserCanceledNonTTY(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
@@ -102,15 +106,13 @@ func TestCloneNowCLI_UserCanceledNonTTY(t *testing.T) {
 		manifest,
 	}
 	code, stdout, stderr := runGitmap(t, args, "")
-	// Acceptable codes:
-	//   2  -- confirm aborted (the path we expect when the binary
-	//         actually got past parse + into the confirm gate)
-	//   1  -- platform-specific manifest validation rejected the
-	//         seeded row (acceptable: still proves "user input
-	//         leads to a clean refusal", not a successful clone)
-	if code != 2 && code != 1 {
-		t.Fatalf("clone-now non-TTY confirm: exit=%d want 1 or 2\nstdout=%s\nstderr=%s",
-			code, stdout, stderr)
+	if code != constants.CloneNowExitConfirmAborted {
+		t.Fatalf("clone-now non-TTY confirm: exit=%d want %d (CloneNowExitConfirmAborted)\nstdout=%s\nstderr=%s",
+			code, constants.CloneNowExitConfirmAborted, stdout, stderr)
+	}
+	if !strings.Contains(stderr, constants.MsgCloneNowConfirmNonTTY) {
+		t.Fatalf("clone-now non-TTY confirm: stderr missing non-TTY gate message\nwant substring=%q\nstderr=%s",
+			constants.MsgCloneNowConfirmNonTTY, stderr)
 	}
 }
 
