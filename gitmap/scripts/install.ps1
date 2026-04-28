@@ -35,7 +35,15 @@ param(
     [switch]$NoPath,
     [switch]$Uninstall,
     [switch]$NoDiscovery,
-    [int]$ProbeCeiling = 30
+    [int]$ProbeCeiling = 30,
+    # --- Uninstall safety knobs ---
+    # -Force: skip the "is this really a gitmap install?" guard AND
+    #         skip the keep-data prompt (defaults to keep).
+    # -KeepData / -PurgeData: explicit data-folder choice; when both
+    #         are absent the user is prompted interactively.
+    [switch]$Force,
+    [switch]$KeepData,
+    [switch]$PurgeData
 )
 
 $ErrorActionPreference = "Stop"
