@@ -139,10 +139,21 @@ func validateCSVSchema(r io.Reader) error {
 
 // validateCSVHeader checks every header column against the known
 // field set and confirms at least one URL column is present.
+// Headers are normalized via normalizeHeaderName before lookup so
+// real-world quirks (UTF-8 BOM on the first column, surrounding
+// double-quotes preserved by some exporters, leading/trailing
+// whitespace) don't trigger false "unknown column" rejections.
+// Empty/whitespace-only header cells are tolerated and ignored —
+// they're a common artifact of trailing commas in spreadsheet
+// exports and the row payload would be empty for that column anyway.
 func validateCSVHeader(header []string) error {
 	hasURL := false
 	for _, col := range header {
-		name := strings.TrimSpace(col)
+		name := normalizeHeaderName(col)
+		if len(name) == 0 {
+
+			continue
+		}
 		if !knownScanFields[name] {
 			return fmt.Errorf(constants.ErrCloneNowUnknownCSVField, name, knownFieldList())
 		}
@@ -155,6 +166,22 @@ func validateCSVHeader(header []string) error {
 	}
 
 	return nil
+}
+
+// normalizeHeaderName returns a header cell ready for the known-
+// field lookup. Strips a UTF-8 BOM (only meaningful on the first
+// cell, but cheap to apply uniformly), one optional pair of
+// surrounding double-quotes (some exporters quote header names
+// even when not required), and surrounding whitespace.
+func normalizeHeaderName(col string) string {
+	const utf8BOM = "\ufeff"
+	s := strings.TrimPrefix(col, utf8BOM)
+	s = strings.TrimSpace(s)
+	if len(s) >= 2 && s[0] == '"' && s[len(s)-1] == '"' {
+		s = s[1 : len(s)-1]
+	}
+
+	return strings.TrimSpace(s)
 }
 
 // knownFieldList returns the known field names sorted alphabetically
