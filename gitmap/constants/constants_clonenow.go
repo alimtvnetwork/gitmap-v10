@@ -131,8 +131,16 @@ const (
 	// %d ok, %d skipped, %d failed, %d total.
 	MsgCloneNowSummaryHeader = "\ngitmap clone-now: %d ok, %d skipped, %d failed (%d total)\n"
 	MsgCloneNowDestExists    = "dest exists"
-	MsgCloneNowMissingArg    = "clone-now: <file> argument is required " +
-		"(e.g. clone-now .gitmap/output/repos.json)"
+	MsgCloneNowMissingArg = "reclone: <file> argument is required and " +
+		"no scan artifact was found under ./.gitmap/output/ " +
+		"(looked for gitmap.json then gitmap.csv). " +
+		"Run `gitmap scan` first, or pass an explicit path " +
+		"(e.g. reclone .gitmap/output/gitmap.json)."
+	// %s = auto-discovered manifest path. Printed to stderr when
+	// reclone is invoked with no <file> arg and a scan artifact is
+	// found in the conventional location. Lets users see exactly
+	// which file fed the run instead of guessing.
+	MsgCloneNowAutoPickup = "reclone: using scan artifact %s (auto-discovered; pass an explicit path to override)\n"
 	MsgCloneNowNoURL = "no url for selected mode"
 	// Idempotency / re-clone messages. Each lands in Result.Detail
 	// so the per-row summary tells the user exactly which branch
