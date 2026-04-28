@@ -48,7 +48,11 @@ if ! command -v grep >/dev/null 2>&1; then
   exit 2
 fi
 
-GREP_ARGS=(-RInE)
+
+# -H forces grep to always prefix matches with the filename, even when
+# scanning a single-file ROOT. Without it, single-file scans emit just
+# `lineno:text` and the file:line:text parsing below would mis-attribute.
+GREP_ARGS=(-RHInE)
 for d in "${EXCLUDE_DIRS[@]}"; do
   GREP_ARGS+=(--exclude-dir="$d")
 done
