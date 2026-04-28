@@ -147,7 +147,6 @@ func hermeticEnv() []string {
 		}
 	}
 	out = append(out, "NO_COLOR=1")
-	out = append(out, "GITMAP_DISABLE_TASKS=1")
 
 	return out
 }
