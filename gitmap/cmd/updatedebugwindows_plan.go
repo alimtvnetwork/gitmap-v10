@@ -141,7 +141,7 @@ func collectAndPrintMatches(matches []string, selfPath, matchFmt string) []strin
 
 // dumpPlannedSwapDirs prints every *.gitmap-tmp-* dir the cleanup
 // pass will pass to os.RemoveAll. Mirrors removeCloneSwapDirsIn so
-// the dump cannot drift from the live behaviour. Returns the matched
+// the dump cannot drift from the live behavior. Returns the matched
 // dirs so the JSON sink can record them too.
 func dumpPlannedSwapDirs(ctx updateCleanupContext) []map[string]any {
 	dirs := uniqueParentDirs(ctx.tempPatterns, ctx.backupPatterns)

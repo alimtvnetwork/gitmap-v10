@@ -10,7 +10,7 @@ package cmd
 //   0   -- dry-run rendered OR clone succeeded
 //   1   -- runtime failure (git, fs, db)
 //   2   -- bad CLI usage (missing args, invalid flag value)
-//   130 -- user cancelled the picker (reserved for --ask v2)
+//   130 -- user canceled the picker (reserved for --ask v2)
 //
 // The picker (--ask) and --replay are scaffolded as stubs in v1: the
 // flag is accepted and the value flows to the Plan, but the picker

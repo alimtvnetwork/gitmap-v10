@@ -91,7 +91,7 @@ func recordProbeResult(db *store.DB, repo model.ScanRecord, result probe.Result)
 }
 
 // tallyProbe updates the running counters and (unless jsonOut) prints the
-// per-repo summary line. Caller is responsible for serialising access to
+// per-repo summary line. Caller is responsible for serializing access to
 // the counters; with the worker pool that's `counterMu` in runProbePool.
 func tallyProbe(repo model.ScanRecord, r probe.Result, ok, none, fail int, jsonOut bool) (int, int, int) {
 	if r.Error != "" {

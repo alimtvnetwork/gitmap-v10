@@ -8,7 +8,7 @@ package cmd
 //   2. scanner.ScanDirWithOptions discovers the worktrees.
 //   3. mapper.BuildRecords (mode=https / mode=ssh) populates the
 //      HTTPSUrl + SSHUrl columns from the real git remote.
-//   4. formatter.WriteJSON / formatter.WriteCSV serialise the
+//   4. formatter.WriteJSON / formatter.WriteCSV serialize the
 //      records to disk via a real *os.File.
 //   5. The exported scan file is transformed into a clone-from
 //      manifest by reading the column the mode selected
@@ -87,7 +87,7 @@ func scanAndBuildRecords(t *testing.T, root, mode string) []model.ScanRecord {
 // exportRecords writes the records via the production WriteJSON /
 // WriteCSV writers to a tempdir file and returns the absolute path.
 // The path is logged so a failure mid-pipeline points at the bytes
-// that actually got serialised.
+// that actually got serialized.
 func exportRecords(t *testing.T, records []model.ScanRecord, format string) string {
 	t.Helper()
 	dir := t.TempDir()
@@ -105,7 +105,7 @@ func exportRecords(t *testing.T, records []model.ScanRecord, format string) stri
 }
 
 // pickFormatterWriter returns the formatter writer matching format.
-// Centralised so exportRecords stays under the per-function budget.
+// Centralized so exportRecords stays under the per-function budget.
 func pickFormatterWriter(format string) func(*os.File, []model.ScanRecord) error {
 	if format == "json" {
 		return func(f *os.File, r []model.ScanRecord) error { return formatter.WriteJSON(f, r) }

@@ -67,7 +67,7 @@ func loadSchemaFile(t *testing.T, filename string) map[string]any {
 	return s
 }
 
-// stringSliceFromAny converts a JSON-unmarshalled []any into
+// stringSliceFromAny converts a JSON-unmarshaled []any into
 // []string. Returns nil on any non-string element so the caller's
 // equality check fails loudly rather than silently coercing.
 func stringSliceFromAny(v any) []string {

@@ -54,9 +54,9 @@ func TestApplyDefaultBranchFallback_RewritesUntrustedRows(t *testing.T) {
 					gitutil.BranchSourceDefault, out[0].BranchSource)
 			}
 			// And the strategy now picks -b trunk, closing the loop.
-			strat := pickCloneStrategy(out[0])
-			if !strat.useBranch || strat.branch != "trunk" {
-				t.Errorf("strategy after fallback: want useBranch=true branch=trunk, got %+v", strat)
+			strategy := pickCloneStrategy(out[0])
+			if !strategy.useBranch || strategy.branch != "trunk" {
+				t.Errorf("strategy after fallback: want useBranch=true branch=trunk, got %+v", strategy)
 			}
 			// Breadcrumb must be present so audits can tell what happened.
 			if !strings.Contains(out[0].Notes, "default-branch fallback applied: trunk") {

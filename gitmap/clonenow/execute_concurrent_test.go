@@ -17,7 +17,7 @@ package clonenow
 // The actual `git clone` shell-out is exercised by the existing
 // sequential tests (executeRow + execute_mkdir_test.go); the
 // concurrent runner reuses the same per-row helper, so re-testing
-// network behaviour here would just duplicate those.
+// network behavior here would just duplicate those.
 
 import (
 	"bytes"

@@ -41,7 +41,7 @@ const (
 		"or 'terminal' (standardized branch/from/to/command block on " +
 		"stdout, streamed before each clone; git progress stays on stderr)"
 	// FlagCloneFromCheckout sets the GLOBAL default for post-clone
-	// working-tree behaviour. Per-row `checkout` (JSON/CSV column)
+	// working-tree behavior. Per-row `checkout` (JSON/CSV column)
 	// overrides this. Modes: "auto" (default — git clone materializes
 	// the working tree), "skip" (passes --no-checkout, no working
 	// tree), "force" (explicit `git checkout <branch>` after clone,

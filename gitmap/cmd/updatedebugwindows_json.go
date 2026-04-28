@@ -18,7 +18,7 @@
 //     file as the parent, giving one consolidated trace per handoff)
 //
 // The sink is OFF by default — `--debug-windows` alone keeps the
-// console-only behaviour from v3.86. You opt-in to the file sink
+// console-only behavior from v3.86. You opt-in to the file sink
 // because writing under the project tree has user-visible side effects.
 //
 // Failure policy: file open / write errors are swallowed and degrade

@@ -113,7 +113,7 @@ func replaceSmartQuotes(s string) string {
 
 // trimMatchingWrappers strips one matched pair of `'`, `"`, or backticks
 // surrounding the token. Only matched pairs are stripped — a stray
-// trailing quote stays, so the caller still sees a recognisably broken
+// trailing quote stays, so the caller still sees a recognizably broken
 // URL rather than a silently "fixed" one.
 func trimMatchingWrappers(s string) string {
 	if len(s) < 2 {

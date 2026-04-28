@@ -55,7 +55,7 @@ func handoffLogPath() string {
 // the update flow. Concurrent calls from the dispatcher and the
 // (potentially separate) cleanup child are serialized within the
 // process via handoffLogMu; cross-process appends rely on the OS
-// O_APPEND atomicity guarantee for small writes (Windows does honour
+// O_APPEND atomicity guarantee for small writes (Windows does honor
 // this for sub-PIPE_BUF-sized writes when O_APPEND is used).
 func logHandoffEvent(phase, event string, fields map[string]string) {
 	line := formatHandoffLogLine(phase, event, fields)

@@ -78,7 +78,7 @@ type Plan struct {
 // Execute so the cmd layer can pick an exit code without
 // re-implementing success/failure heuristics.
 type Result struct {
-	// Status is one of "ok" | "failed" | "cancelled" (British "ll"
+	// Status is one of "ok" | "failed" | "canceled" (the wire value
 	// kept on the wire for backwards compat with existing JSON
 	// consumers). Numeric exit code mapping lives in the cmd layer
 	// (cmd/clonepick.go) so the constants stay co-located with the

@@ -27,7 +27,7 @@ import (
 
 // TestBuildShortcutBytes_HeaderShape locks in the 76-byte header
 // layout. Any change to LinkFlags / ShowCommand would shift Windows
-// shell behaviour and must be a deliberate decision.
+// shell behavior and must be a deliberate decision.
 func TestBuildShortcutBytes_HeaderShape(t *testing.T) {
 	data := mustBuildShortcut(t, `C:\Windows\System32\notepad.exe`)
 	le := binary.LittleEndian
@@ -53,7 +53,7 @@ func TestBuildShortcutBytes_HeaderShape(t *testing.T) {
 // TestBuildShortcutBytes_LinkInfoOffsets verifies the LinkInfo
 // internal offset chain (every offset points inside the block and
 // each section is reachable). A broken offset would cause Windows
-// shell to fall back to "this shortcut is empty" behaviour at
+// shell to fall back to "this shortcut is empty" behavior at
 // dispatch time.
 func TestBuildShortcutBytes_LinkInfoOffsets(t *testing.T) {
 	target := `C:\Program Files\App\app.exe`

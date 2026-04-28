@@ -8,7 +8,7 @@ package cmd
 //
 //  1. Top-level dispatch: parse flags, resolve targets, hand off.
 //  2. Fan-out: stand up an opts.workers-sized pool, slot results back
-//     into input order, and serialise counter updates through one mutex.
+//     into input order, and serialize counter updates through one mutex.
 
 import (
 	"fmt"
@@ -144,7 +144,7 @@ func runProbePool(db *store.DB, targets []model.ScanRecord, opts probeOptions) (
 
 // probeWorker drains the job channel, writes its result to its own
 // index in entries (no contention — each index is owned by exactly one
-// job), and serialises counter/print updates through counterMu so the
+// job), and serializes counter/print updates through counterMu so the
 // final tallies and the human progress lines stay coherent. opts is
 // passed by value so each worker reads jsonOut/depth without locking.
 func probeWorker(db *store.DB, jobs <-chan probeJob, entries []probeJSONEntry,

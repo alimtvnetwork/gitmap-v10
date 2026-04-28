@@ -84,7 +84,7 @@ type Flags struct {
 }
 
 // DefaultFlags returns the flag bundle with the spec'd defaults.
-// Centralised so cmd/clonepick.go and tests stay in sync.
+// Centralized so cmd/clonepick.go and tests stay in sync.
 func DefaultFlags() Flags {
 	return Flags{
 		Ask:     false,

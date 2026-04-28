@@ -3,7 +3,7 @@ package clonepick
 // sparse.go: the actual git-clone + sparse-checkout pipeline.
 //
 // Each step shells out to git (no go-git dependency) so we get the
-// exact behaviour users see when they run the same commands by hand.
+// exact behavior users see when they run the same commands by hand.
 // Errors are wrapped with constants.ErrClonePickGit* so the cmd-layer
 // can render a single-line failure message without exposing exec
 // internals.
@@ -128,7 +128,7 @@ func gitSparseSet(plan Plan, dest string, progress io.Writer) error {
 	return runGit(progress, dest, args...)
 }
 
-// gitCheckout materialises the working tree against the active
+// gitCheckout materializes the working tree against the active
 // sparse pattern. We use the default branch (whatever HEAD points to
 // after the partial clone) -- plan.Branch was already honored by
 // gitClonePartial via --branch.

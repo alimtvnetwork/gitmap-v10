@@ -4,7 +4,7 @@ package cmd
 // that file stays under the 200-line per-file cap
 // (mem://style/code-constraints, item 3).
 //
-// Behavioural notes worth preserving when editing this file:
+// Behavioral notes worth preserving when editing this file:
 //
 //   - --emit-schema short-circuits BEFORE the <file> requirement so
 //     `gitmap clone-from --emit-schema=report` works without a

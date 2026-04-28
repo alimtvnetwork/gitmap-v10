@@ -46,7 +46,7 @@ func TestParseFile_JSON_CheckoutFieldRejectsBogus(t *testing.T) {
 	}
 }
 
-// TestParseFile_CSV_CheckoutColumn confirms the CSV header recogniser
+// TestParseFile_CSV_CheckoutColumn confirms the CSV header recognizer
 // picks up the new column at any position (here: between dest and
 // branch) and lower-cases the value.
 func TestParseFile_CSV_CheckoutColumn(t *testing.T) {

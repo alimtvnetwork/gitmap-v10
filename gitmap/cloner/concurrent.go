@@ -7,7 +7,7 @@
 // Each worker pulls one record at a time from a buffered job channel,
 // performs the clone-or-pull through the same cloneOrPullOne path used
 // by the sequential runner, and reports outcomes back through a single
-// result channel. The collector goroutine serialises Progress / cache /
+// result channel. The collector goroutine serializes Progress / cache /
 // summary updates so the public Progress + CloneCache types only need
 // the lightweight mutex they already carry.
 //
