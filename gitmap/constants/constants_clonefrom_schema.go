@@ -39,7 +39,7 @@ const (
 	// $id base for emitted schemas. Versioned URL scheme so a future
 	// breaking change publishes under a new path. Not network-fetched
 	// by gitmap itself; consumers may resolve it for documentation.
-	CloneFromSchemaIDReport = "https://gitmap.dev/schema/clone-from-report-v2.json"
+	CloneFromSchemaIDReport = "https://gitmap.dev/schema/clone-from-report-v3.json"
 	CloneFromSchemaIDInput  = "https://gitmap.dev/schema/clone-now-input-v1.json"
 
 	// JSONSchemaDialect2020_12 is the canonical $schema URI emitted at
