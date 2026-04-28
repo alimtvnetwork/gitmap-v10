@@ -149,4 +149,26 @@ gitmap reclone .gitmap/output/repos.json
 
 - `0` — dry-run completed, OR every row was ok/skipped on `--execute`.
 - `1` — file open / parse error, OR any row failed on `--execute`.
-- `2` — bad CLI usage (missing `<file>`, invalid flag value), OR the safety prompt was declined / refused (existing destinations + non-TTY without `--yes`).
+- `2` — bad CLI usage (missing `<file>`, invalid flag value), the safety prompt was declined / refused (existing destinations + non-TTY without `--yes`), OR the manifest failed semantic validation (see below).
+
+## Manifest validation
+
+Every run — dry-run and `--execute` alike — gates on a row-level
+validation pass that fires immediately after the manifest is parsed.
+Each row must satisfy:
+
+- `RepoName` is non-empty.
+- At least one of `HTTPSUrl` / `SSHUrl` is set, AND the URL selected
+  by `--mode` (with fallback to the other) is a valid git URL —
+  either `scheme://host/path` (https, ssh, git, file, ...) or the
+  scp-like `user@host:path` shorthand.
+- `RelativePath` is non-empty, **relative** (not absolute), and does
+  not escape the working directory via `..`.
+
+When any row fails, `reclone` prints a per-row report to stderr (one
+line per issue, with the 1-based row index, repo name, dest, and a
+short reason) and exits `2` without attempting any clones. There is
+no opt-out flag: a malformed manifest is a usage error, and silently
+proceeding would either crash inside `git` or write to a path you
+did not intend. Fix the manifest and re-run.
+
