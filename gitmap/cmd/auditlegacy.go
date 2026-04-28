@@ -76,11 +76,6 @@ func parseAuditLegacyArgs(args []string) (auditLegacyOpts, error) {
 		return auditLegacyOpts{}, err
 	}
 	reportPath := resolveReportPath(reportSet, *report)
-	compiled, raw, err := compileAuditPatterns(*pats)
-	if err != nil {
-		return auditLegacyOpts{}, err
-	}
-	reportPath := resolveReportPath(reportSet, *report)
 
 	return auditLegacyOpts{
 		Patterns: compiled, Raw: raw, Root: *root,
