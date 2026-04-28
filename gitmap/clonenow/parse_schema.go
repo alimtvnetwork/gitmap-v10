@@ -185,12 +185,13 @@ func validateCSVSchema(r io.Reader) error {
 }
 
 // validateCSVBody streams the remaining CSV records (header already
-// consumed) and asserts each data row has the expected column count
-// and a non-empty URL in either httpsUrl or sshUrl. Stops at the
-// first row-level failure so users fix one issue at a time.
+// consumed) and asserts each data row has a non-empty URL in either
+// httpsUrl or sshUrl. Field-count drift is intentionally NOT
+// enforced here — the header validator already tolerates trailing
+// empty columns, and uneven trailing emptiness is harmless. Stops
+// at the first row-level failure so users fix one issue at a time.
 func validateCSVBody(cr *csv.Reader, header []string) error {
 	urlIdxs := urlColumnIndexes(header)
-	want := len(header)
 	for dataRow := 1; ; dataRow++ {
 		rec, err := cr.Read()
 		if err == io.EOF {
@@ -199,10 +200,6 @@ func validateCSVBody(cr *csv.Reader, header []string) error {
 		}
 		if err != nil {
 			return fmt.Errorf(constants.ErrCloneNowCSVRowRead, dataRow, err)
-		}
-		if len(rec) != want {
-			return fmt.Errorf(constants.ErrCloneNowCSVRowFieldCount,
-				dataRow, len(rec), want)
 		}
 		if !rowHasURL(rec, urlIdxs) {
 			return fmt.Errorf(constants.ErrCloneNowCSVRowMissingURL, dataRow)
