@@ -59,7 +59,7 @@ func emitGoldenDiffSummary(mode string) {
 // isGitWorkingTree returns true when the current directory is inside
 // a git repository. Used to gate the diff feature gracefully.
 func isGitWorkingTree() bool {
-	cmd := exec.Command("git", "rev-parse", "--is-inside-work-tree") //nolint:gosec // literal argv
+	cmd := exec.Command("git", "rev-parse", "--is-inside-work-tree")
 	cmd.Stderr = nil
 	out, err := cmd.Output()
 	if err != nil {
@@ -158,7 +158,7 @@ func readNumstatCounts() (map[string][2]int, error) {
 			continue
 		}
 		added, _ := strconv.Atoi(fields[0])   // "-" (binary) becomes 0
-		deleted, _ := strconv.Atoi(fields[1]) //nolint:errcheck // intentional 0 fallback
+		deleted, _ := strconv.Atoi(fields[1])
 		result[fields[2]] = [2]int{added, deleted}
 	}
 	return result, nil
@@ -182,7 +182,7 @@ func mergeStatusAndNumstat(statuses map[string]goldenDiffEntry, counts map[strin
 // runGitCapture executes a git subcommand and returns trimmed stdout.
 // stderr is captured into the returned error so failures are visible.
 func runGitCapture(args ...string) (string, error) {
-	cmd := exec.Command("git", args...) //nolint:gosec // literal "git" + caller-controlled flags
+	cmd := exec.Command("git", args...)
 	var stderr strings.Builder
 	cmd.Stderr = &stderr
 	out, err := cmd.Output()

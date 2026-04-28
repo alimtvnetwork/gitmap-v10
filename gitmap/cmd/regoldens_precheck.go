@@ -51,7 +51,7 @@ func runDeterminismPrecheck(cfg regoldensFlags) {
 // post-hoc marker scanning. Returns the captured combined bytes.
 func runPrecheckGoTest(cfg regoldensFlags) []byte {
 	argv := goTestArgv(cfg)
-	cmd := exec.Command(argv[0], argv[1:]...) //nolint:gosec // argv built from validated CLI flags + literal "go"
+	cmd := exec.Command(argv[0], argv[1:]...)
 	var buf bytes.Buffer
 	cmd.Stdout = io.MultiWriter(os.Stdout, &buf)
 	cmd.Stderr = io.MultiWriter(os.Stderr, &buf)

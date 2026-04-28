@@ -137,7 +137,7 @@ func isLikelyBoolFlag(token string) bool {
 func resolveRescanSubtreePath(path string) (string, error) {
 	abs, err := filepath.Abs(path)
 	if err != nil {
-		return "", fmt.Errorf("  Error: cannot resolve %q: %v", path, err)
+		return "", fmt.Errorf("  Error: cannot resolve %q: %w", path, err)
 	}
 	info, err := os.Stat(abs)
 	if err != nil {
@@ -147,7 +147,7 @@ func resolveRescanSubtreePath(path string) (string, error) {
 					"         Did you copy the absolutePath from a row that has since moved?",
 				abs)
 		}
-		return "", fmt.Errorf("  Error: cannot stat %s: %v", abs, err)
+		return "", fmt.Errorf("  Error: cannot stat %s: %w", abs, err)
 	}
 	if !info.IsDir() {
 		return "", fmt.Errorf(

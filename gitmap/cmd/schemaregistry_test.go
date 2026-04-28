@@ -179,7 +179,7 @@ func parseVersionFromPath(path string) int {
 // the test failure message names the offending file and the
 // json.UnmarshalTypeError field.
 func readSchemaFile(path string) (schema, error) {
-	raw, err := os.ReadFile(path) //nolint:gosec // Test fixture path.
+	raw, err := os.ReadFile(path)
 	if err != nil {
 
 		return schema{}, fmt.Errorf("read: %w", err)

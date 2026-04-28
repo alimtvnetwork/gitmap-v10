@@ -21,7 +21,6 @@ func TestWithDirectionLabel(t *testing.T) {
 		{"empty suffix", "[commit-right]", "", "[commit-right] "},
 	}
 	for _, tc := range cases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			got := withDirectionLabel(Options{LogPrefix: tc.prefix}, tc.suffix)

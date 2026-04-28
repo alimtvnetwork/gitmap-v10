@@ -193,7 +193,7 @@ func writeSchemaFor(t *testing.T, dir, name string, version int, keys []string) 
 		t.Fatalf("marshal: %v", err)
 	}
 	path := filepath.Join(dir, name+".v"+strconv.Itoa(version)+".json")
-	if err := os.WriteFile(path, raw, 0o644); err != nil { //nolint:gosec // Test fixture.
+	if err := os.WriteFile(path, raw, 0o644); err != nil {
 		t.Fatalf("write %s: %v", path, err)
 	}
 }

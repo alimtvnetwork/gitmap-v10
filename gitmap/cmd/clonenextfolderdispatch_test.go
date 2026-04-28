@@ -11,6 +11,7 @@
 package cmd
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -116,7 +117,7 @@ func TestResolveCloneNextFolder(t *testing.T) {
 
 	t.Run("file (not dir) returns errCNFolderNotDir", func(t *testing.T) {
 		_, err := resolveCloneNextFolder(regularFile)
-		if err != errCNFolderNotDir {
+		if !errors.Is(err, errCNFolderNotDir) {
 			t.Errorf("got %v, want errCNFolderNotDir", err)
 		}
 	})

@@ -54,7 +54,6 @@ func TestAllowUpdate_TriggerOnAllowMissing_Fails(t *testing.T) {
 // misspellings ("true", "yes") fail closed instead of unlocking.
 func TestAllowUpdate_TriggerOnAllowWrongValue_Fails(t *testing.T) {
 	for _, bad := range []string{"true", "yes", "y", "TRUE", "0", " 1 "} {
-		bad := bad
 		t.Run(bad, func(tt *testing.T) {
 			tt.Setenv(AllowUpdateEnv, bad)
 			if !expectFatal(tt, true) {

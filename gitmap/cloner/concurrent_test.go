@@ -31,7 +31,6 @@ func TestNormalizeWorkers(t *testing.T) {
 		{"empty job list keeps requested", 4, 0, 4},
 	}
 	for _, tc := range cases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			got := normalizeWorkers(tc.requested, tc.jobs)
@@ -66,7 +65,6 @@ func TestCloneAllPreservesNestedHierarchy(t *testing.T) {
 	}
 
 	for _, workers := range []int{1, 3} {
-		workers := workers
 		t.Run(modeName(workers), func(t *testing.T) {
 			tmp := t.TempDir()
 			records := makeRecordsWithRemotes(t, tmp, relPaths)

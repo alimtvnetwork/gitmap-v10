@@ -170,7 +170,7 @@ func writeSchemaFile(s schema, observedKeys []string) error {
 		return fmt.Errorf("marshal: %w", err)
 	}
 	body = append(body, '\n')
-	if err := os.WriteFile(path, body, 0o644); err != nil { //nolint:gosec // Test fixture.
+	if err := os.WriteFile(path, body, 0o644); err != nil {
 		return fmt.Errorf("write %s: %w", path, err)
 	}
 	// Invalidate cache so a subsequent loadSchema in the same run
