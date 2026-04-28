@@ -40,7 +40,7 @@ func readCSVRows(cr *csv.Reader, idx csvIndex) ([]Row, error) {
 	rowNum := 1 // header was row 1; first data row is 2
 	for {
 		rec, err := cr.Read()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		rowNum++
