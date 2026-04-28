@@ -159,9 +159,10 @@ jobs:
         if: needs.sha-check.outputs.already-built != 'true'
         shell: bash
         env:
+          LINTER: misspell
           BASELINE: /tmp/lint-misspell-baseline/report.json
           CURRENT_OUT: /tmp/lint-misspell-current/report.json
-        run: bash .github/scripts/check-misspell-diff.sh gitmap
+        run: bash .github/scripts/check-single-linter-diff.sh gitmap
 
       - name: Save misspell baseline (main only)
         if: |
@@ -183,6 +184,97 @@ jobs:
         with:
           path: /tmp/lint-misspell-baseline
           key: golangci-misspell-baseline-main-${{ github.sha }}
+
+      # ---- gocritic diff (hard-gate, same contract as misspell) -----
+      - name: Restore gocritic baseline (rolling, single slot)
+        id: gocritic-baseline-cache
+        if: needs.sha-check.outputs.already-built != 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/lint-gocritic-baseline
+          key: golangci-gocritic-baseline-main-${{ github.sha }}
+          restore-keys: |
+            golangci-gocritic-baseline-main-
+
+      - name: Gocritic diff (hard-gate, full-path only)
+        # Same contract as the misspell step: only `gocritic` runs,
+        # path-less findings are dropped, and only NEW (vs baseline)
+        # issues fail the build. Catches regressions like
+        # `appendAssign`, `badCall`, etc. without requiring a clean
+        # historical tree.
+        if: needs.sha-check.outputs.already-built != 'true'
+        shell: bash
+        env:
+          LINTER: gocritic
+          BASELINE: /tmp/lint-gocritic-baseline/report.json
+          CURRENT_OUT: /tmp/lint-gocritic-current/report.json
+        run: bash .github/scripts/check-single-linter-diff.sh gitmap
+
+      - name: Save gocritic baseline (main only)
+        if: |
+          needs.sha-check.outputs.already-built != 'true' &&
+          github.ref == 'refs/heads/main' &&
+          github.event_name == 'push'
+        shell: bash
+        run: |
+          mkdir -p /tmp/lint-gocritic-baseline
+          cp /tmp/lint-gocritic-current/report.json \
+             /tmp/lint-gocritic-baseline/report.json
+
+      - name: Persist gocritic baseline cache (main only)
+        if: |
+          needs.sha-check.outputs.already-built != 'true' &&
+          github.ref == 'refs/heads/main' &&
+          github.event_name == 'push'
+        uses: actions/cache/save@v4
+        with:
+          path: /tmp/lint-gocritic-baseline
+          key: golangci-gocritic-baseline-main-${{ github.sha }}
+
+      # ---- exhaustive diff (hard-gate, same contract as misspell) ---
+      - name: Restore exhaustive baseline (rolling, single slot)
+        id: exhaustive-baseline-cache
+        if: needs.sha-check.outputs.already-built != 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/lint-exhaustive-baseline
+          key: golangci-exhaustive-baseline-main-${{ github.sha }}
+          restore-keys: |
+            golangci-exhaustive-baseline-main-
+
+      - name: Exhaustive switch diff (hard-gate, full-path only)
+        # Catches NEW "missing cases in switch" findings (e.g.
+        # `startup.BackendUnspecified` not handled). Pre-existing
+        # incomplete switches stay in the baseline; only freshly
+        # introduced ones block the merge.
+        if: needs.sha-check.outputs.already-built != 'true'
+        shell: bash
+        env:
+          LINTER: exhaustive
+          BASELINE: /tmp/lint-exhaustive-baseline/report.json
+          CURRENT_OUT: /tmp/lint-exhaustive-current/report.json
+        run: bash .github/scripts/check-single-linter-diff.sh gitmap
+
+      - name: Save exhaustive baseline (main only)
+        if: |
+          needs.sha-check.outputs.already-built != 'true' &&
+          github.ref == 'refs/heads/main' &&
+          github.event_name == 'push'
+        shell: bash
+        run: |
+          mkdir -p /tmp/lint-exhaustive-baseline
+          cp /tmp/lint-exhaustive-current/report.json \
+             /tmp/lint-exhaustive-baseline/report.json
+
+      - name: Persist exhaustive baseline cache (main only)
+        if: |
+          needs.sha-check.outputs.already-built != 'true' &&
+          github.ref == 'refs/heads/main' &&
+          github.event_name == 'push'
+        uses: actions/cache/save@v4
+        with:
+          path: /tmp/lint-exhaustive-baseline
+          key: golangci-exhaustive-baseline-main-${{ github.sha }}
 
   lint-baseline-diff:
     # Soft-gate companion to `lint`. Runs golangci-lint with --issues-exit-code=0
