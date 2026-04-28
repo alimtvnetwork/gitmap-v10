@@ -9,6 +9,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/alimtvnetwork/gitmap-v8/gitmap/clonefrom"
 	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
