@@ -159,9 +159,21 @@ type reportRowJSON struct {
 // and pinned by TestCloneFromReportJSON_SchemaVersion_Pinned. Rows is
 // always serialized as `[]` (never `null`) for the empty case so jq
 // pipelines can treat it as an unconditional array.
+// transportTallyJSON mirrors the terminal `transport: N ssh, N https,
+// N other` line so JSON consumers see the SAME counts without having
+// to re-derive them from row URLs. Field names match the terminal
+// label words exactly. Always emitted (even when all zero) so the
+// envelope shape is unconditional.
+type transportTallyJSON struct {
+	SSH   int `json:"ssh"`
+	HTTPS int `json:"https"`
+	Other int `json:"other"`
+}
+
 type reportEnvelopeJSON struct {
-	SchemaVersion int             `json:"schemaVersion"`
-	Rows          []reportRowJSON `json:"rows"`
+	SchemaVersion int                `json:"schemaVersion"`
+	Transport     transportTallyJSON `json:"transport"`
+	Rows          []reportRowJSON    `json:"rows"`
 }
 
 // writeReportRowsJSON emits the result set as a versioned JSON
@@ -177,8 +189,10 @@ func writeReportRowsJSON(w io.Writer, results []Result) error {
 			DurationSeconds: r.Duration.Seconds(),
 		})
 	}
+	ssh, https, other := TransportTally(results)
 	envelope := reportEnvelopeJSON{
 		SchemaVersion: constants.CloneFromReportSchemaVersion,
+		Transport:     transportTallyJSON{SSH: ssh, HTTPS: https, Other: other},
 		Rows:          rows,
 	}
 	enc := json.NewEncoder(w)

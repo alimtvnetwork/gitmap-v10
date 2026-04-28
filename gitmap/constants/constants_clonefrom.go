@@ -72,7 +72,7 @@ const (
 // not for value-level changes (new status strings, etc.). The
 // matching golden test (TestCloneFromReportJSON_SchemaVersion_Pinned)
 // will fail loudly on any unintentional bump.
-const CloneFromReportSchemaVersion = 1
+const CloneFromReportSchemaVersion = 2
 
 // Status enum strings. Stable: emitted to the CSV report which
 // downstream tools may parse. Renaming any of these is a breaking
