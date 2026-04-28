@@ -67,10 +67,10 @@ changelog-check:
 	@cd scripts/changelog && $(GO) run . -mode=check -version=$(VERSION) -repo=../.. -since=$(SINCE) -release-tag=$(RELEASE_TAG)
 
 ## Goldens-regen — regenerate golden fixtures for a specific test pattern.
-## REQUIRES RUN=<pattern> (forwarded to `go test -run`). Sets BOTH gating
-## env vars (GITMAP_UPDATE_GOLDEN=1 + GITMAP_ALLOW_GOLDEN_UPDATE=1) so the
-## determinism pre-check and AllowUpdate gate both unlock. PKG defaults to
-## ./... but should be narrowed for speed (e.g. PKG=./cmd/...).
+## REQUIRES RUN=<pattern>. Delegates to `gitmap regoldens`, which is the
+## ONLY sanctioned entry point that may unlock the golden-update gate
+## (see spec/05-coding-guidelines/21-golden-fixture-regeneration.md §6).
+## PKG defaults to ./... but should be narrowed for speed.
 ## Usage:
 ##   make goldens-regen RUN=TestStartupListJSONContract
 ##   make goldens-regen RUN=FindNextJSONContract PKG=./cmd/...
@@ -80,9 +80,8 @@ goldens-regen:
 		echo "ERROR: RUN=<test pattern> is required (e.g. make goldens-regen RUN=TestFooContract)"; \
 		exit 2; \
 	fi
-	@echo "▸ Regenerating goldens: pattern=$(RUN) pkg=$(PKG)"
-	@cd $(MODULE) && GITMAP_UPDATE_GOLDEN=1 GITMAP_ALLOW_GOLDEN_UPDATE=1 \
-		$(GO) test $(PKG) -run '$(RUN)' -count=1 -v
+	@echo "▸ Regenerating goldens via gitmap regoldens: pattern=$(RUN) pkg=$(PKG)"
+	@cd $(MODULE) && $(GO) run . regoldens --run '$(RUN)' --pkg '$(PKG)'
 
 ## Goldens-verify — re-run the same pattern WITHOUT the gating env vars to
 ## confirm regenerated fixtures pass cleanly. This is the mandatory second
