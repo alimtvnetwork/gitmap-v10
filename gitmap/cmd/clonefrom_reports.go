@@ -7,9 +7,7 @@ package cmd
 // paths.
 
 import (
-	"fmt"
-	"os"
-
+	"github.com/alimtvnetwork/gitmap-v8/gitmap/cliexit"
 	"github.com/alimtvnetwork/gitmap-v8/gitmap/clonefrom"
 	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
 )
@@ -27,7 +25,7 @@ func writeCloneFromReports(results []clonefrom.Result, cfg cloneFromFlags) (stri
 	if p, err := clonefrom.WriteReport(results); err == nil {
 		csvPath = p
 	} else {
-		fmt.Fprintln(os.Stderr, err)
+		cliexit.Reportf(constants.CmdCloneFrom, "write-csv-report", cfg.file, err)
 	}
 
 	if cfg.output != constants.OutputTerminal {
@@ -38,7 +36,7 @@ func writeCloneFromReports(results []clonefrom.Result, cfg cloneFromFlags) (stri
 	if p, err := clonefrom.WriteReportJSON(results); err == nil {
 		jsonPath = p
 	} else {
-		fmt.Fprintln(os.Stderr, err)
+		cliexit.Reportf(constants.CmdCloneFrom, "write-json-report", cfg.file, err)
 	}
 
 	return csvPath, jsonPath
