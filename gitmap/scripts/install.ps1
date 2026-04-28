@@ -677,6 +677,61 @@ function Write-InstallSummary([string]$version, [string]$binPath, [string]$insta
     Write-Host ""
 }
 
+# --- Post-install verification ---
+
+# Invoke-InstallVerification runs the three post-install checks the
+# user asked for: (1) print installed version by invoking the binary
+# directly, (2) confirm `gitmap` resolves via Get-Command in the
+# refreshed session PATH, (3) ensure the per-install data folder
+# exists (create on miss). All checks emit PASS/WARN; none throw,
+# because the binary is already on disk and the user can recover.
+function Invoke-InstallVerification([string]$binPath, [string]$installDir, [bool]$isNoPath) {
+    $dataDir = Join-Path $installDir "data"
+
+    Write-Host ""
+    Write-Step "Verifying installation"
+
+    # 1. Version
+    if (Test-Path $binPath) {
+        try {
+            $verLine = (& $binPath version 2>&1 | Out-String).Trim().Split("`n")[0]
+            Write-Host ("    PASS  Version: {0}" -f $verLine) -ForegroundColor Green
+        }
+        catch {
+            Write-Host ("    WARN  Could not run {0} version: {1}" -f $binPath, $_) -ForegroundColor Yellow
+        }
+    }
+    else {
+        Write-Host ("    WARN  Binary missing: {0}" -f $binPath) -ForegroundColor Yellow
+    }
+
+    # 2. PATH active in this session
+    $resolved = Get-Command $BinaryName -ErrorAction SilentlyContinue
+    if ($resolved) {
+        Write-Host ("    PASS  PATH active: {0} -> {1}" -f $BinaryName, $resolved.Source) -ForegroundColor Green
+    }
+    elseif ($isNoPath) {
+        Write-Host ("    WARN  PATH skipped (-NoPath); invoke with full path: {0}" -f $binPath) -ForegroundColor Yellow
+    }
+    else {
+        Write-Host ("    WARN  {0} not on PATH yet — open a new terminal or reload `$PROFILE." -f $BinaryName) -ForegroundColor Yellow
+    }
+
+    # 3. Data folder
+    if (Test-Path $dataDir) {
+        Write-Host ("    PASS  Data folder exists: {0}" -f $dataDir) -ForegroundColor Green
+    }
+    else {
+        try {
+            New-Item -ItemType Directory -Path $dataDir -Force | Out-Null
+            Write-Host ("    PASS  Data folder created: {0}" -f $dataDir) -ForegroundColor Green
+        }
+        catch {
+            Write-Host ("    WARN  Could not create data folder: {0}" -f $dataDir) -ForegroundColor Yellow
+        }
+    }
+}
+
 # --- Main ---
 
 function Main {
