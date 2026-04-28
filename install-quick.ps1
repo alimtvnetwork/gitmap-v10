@@ -25,6 +25,8 @@ param(
     [string]$InstallDir       = "",
     [string]$Version          = "",
     [switch]$NoDiscovery,
+    [switch]$Interactive,
+    [string]$LogFile          = "",
     # Legacy fail-fast knob (retained for back-compat). The canonical knob
     # per spec/07-generic-release/09 §6 is -DiscoveryWindow (default 20,
     # capped at 20 anonymous / 50 with $env:GITHUB_TOKEN).
@@ -38,6 +40,49 @@ $ProgressPreference    = "SilentlyContinue"
 $Repo          = "alimtvnetwork/gitmap-v8"
 $InstallerUrl  = "https://raw.githubusercontent.com/$Repo/main/gitmap/scripts/install.ps1"
 $DefaultDir    = "D:\gitmap"
+
+# ---------------------------------------------------------------------------
+# Logging + Invoke-Safe helper
+# ---------------------------------------------------------------------------
+# Why this exists: install-quick.ps1 is run via `irm | iex`, which means a
+# raw exception aborts the pipeline with no breadcrumb. We wrap every IO /
+# network / filesystem step in Invoke-Safe so we capture the failure, keep
+# going where it's safe, and print a final summary pointing to a log file.
+
+if ([string]::IsNullOrWhiteSpace($LogFile)) {
+    $stamp   = (Get-Date).ToString("yyyyMMdd-HHmmss")
+    $LogFile = Join-Path $env:TEMP "gitmap-install-quick-$stamp.log"
+}
+$script:InstallErrors = New-Object System.Collections.Generic.List[string]
+
+function Write-Log([string]$message, [string]$level = "INFO") {
+    $line = "[{0}] [{1}] {2}" -f (Get-Date -Format "yyyy-MM-dd HH:mm:ss"), $level, $message
+    try { Add-Content -Path $LogFile -Value $line -Encoding UTF8 -ErrorAction SilentlyContinue } catch {}
+}
+
+function Invoke-Safe {
+    param(
+        [Parameter(Mandatory)][string]$Step,
+        [Parameter(Mandatory)][scriptblock]$Action,
+        [switch]$Fatal
+    )
+    Write-Log "BEGIN: $Step"
+    try {
+        $result = & $Action
+        Write-Log "OK:    $Step"
+        return $result
+    } catch {
+        $msg = "FAIL:  $Step :: $($_.Exception.Message)"
+        Write-Log $msg "ERROR"
+        Write-Log ($_.ScriptStackTrace) "ERROR"
+        $script:InstallErrors.Add("$Step -> $($_.Exception.Message)")
+        Write-Host "  [ERROR] $Step : $($_.Exception.Message)" -ForegroundColor Red
+        if ($Fatal) { throw }
+        return $null
+    }
+}
+
+Write-Log "install-quick.ps1 started (Repo=$Repo, Interactive=$Interactive)"
 
 # ---------------------------------------------------------------------------
 # Versioned repo discovery (spec/01-app/95-installer-script-find-latest-repo.md)
