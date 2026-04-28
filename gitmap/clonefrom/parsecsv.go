@@ -35,7 +35,10 @@ func parseCSV(r io.Reader) ([]Row, error) {
 }
 
 // readCSVRows is the inner loop split out so parseCSV stays under
-// the function-length budget.
+// the function-length budget. Per-row failures are wrapped with the
+// 1-indexed row number AND, when the failure is attributable to a
+// single field, the offending column name — so an operator editing
+// a 5,000-row spreadsheet can jump straight to the bad cell.
 func readCSVRows(cr *csv.Reader, idx csvIndex) ([]Row, error) {
 	var out []Row
 	rowNum := 1 // header was row 1; first data row is 2
@@ -48,14 +51,25 @@ func readCSVRows(cr *csv.Reader, idx csvIndex) ([]Row, error) {
 		if err != nil {
 			return nil, fmt.Errorf(constants.ErrCloneFromCSVRow, rowNum, err)
 		}
-		row, err := csvRow(rec, idx)
+		row, col, err := csvRow(rec, idx)
 		if err != nil {
-			return nil, fmt.Errorf(constants.ErrCloneFromCSVRow, rowNum, err)
+			return nil, wrapCSVRowErr(rowNum, col, err)
 		}
 		out = append(out, row)
 	}
 
 	return out, nil
+}
+
+// wrapCSVRowErr picks the column-aware format when a column is
+// known, falling back to the row-only format otherwise. Centralized
+// so every caller produces identical wording.
+func wrapCSVRowErr(rowNum int, col string, err error) error {
+	if len(col) == 0 {
+		return fmt.Errorf(constants.ErrCloneFromCSVRow, rowNum, err)
+	}
+
+	return fmt.Errorf(constants.ErrCloneFromCSVRowCol, rowNum, col, err)
 }
 
 // csvIndex maps logical column names to record indices. Negative
@@ -69,15 +83,15 @@ func indexCSVHeader(header []string) csvIndex {
 	idx := csvIndex{url: -1, dest: -1, branch: -1, depth: -1, checkout: -1}
 	for i, name := range header {
 		switch strings.ToLower(strings.TrimSpace(name)) {
-		case "url":
+		case constants.CSVColumnURL:
 			idx.url = i
-		case "dest":
+		case constants.CSVColumnDest:
 			idx.dest = i
-		case "branch":
+		case constants.CSVColumnBranch:
 			idx.branch = i
-		case "depth":
+		case constants.CSVColumnDepth:
 			idx.depth = i
-		case "checkout":
+		case constants.CSVColumnCheckout:
 			idx.checkout = i
 		}
 	}
@@ -86,8 +100,10 @@ func indexCSVHeader(header []string) csvIndex {
 }
 
 // csvRow extracts one Row from a parsed CSV record using the
-// pre-computed column index. Returns a wrapped error on bad depth.
-func csvRow(rec []string, idx csvIndex) (Row, error) {
+// pre-computed column index. Returns the offending column name
+// alongside the error so wrapCSVRowErr can name the bad cell.
+// Returns "" for col when the failure is row-wide (e.g. dedup).
+func csvRow(rec []string, idx csvIndex) (Row, string, error) {
 	row := Row{
 		URL:      strings.TrimSpace(get(rec, idx.url)),
 		Dest:     strings.TrimSpace(get(rec, idx.dest)),
@@ -97,12 +113,16 @@ func csvRow(rec []string, idx csvIndex) (Row, error) {
 	if depthStr := strings.TrimSpace(get(rec, idx.depth)); len(depthStr) > 0 {
 		d, err := strconv.Atoi(depthStr)
 		if err != nil {
-			return row, fmt.Errorf(constants.ErrCloneFromBadDepth, depthStr)
+			return row, constants.CSVColumnDepth,
+				fmt.Errorf(constants.ErrCloneFromBadDepth, depthStr)
 		}
 		row.Depth = d
 	}
+	if col, err := validateRowWithColumn(row); err != nil {
+		return row, col, err
+	}
 
-	return row, validateRow(row)
+	return row, "", nil
 }
 
 // get is a bounds-safe slice accessor. Returns empty string when
