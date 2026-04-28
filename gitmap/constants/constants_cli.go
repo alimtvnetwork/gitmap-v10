@@ -116,14 +116,14 @@ const (
 	CmdRegoldens      = "regoldens"
 	CmdRegoldensAlias = "rg"
 	// CmdAuditLegacy scans the workspace for forbidden legacy strings
-	// (e.g. gitmap-v5/v6/v7) and exits non-zero on any hit. Used as a
+	// (e.g. gitmap-v5/v6/v7) and exits non-zero on any hit. Used as a // gitmap-legacy-ref-allow
 	// regression guard for remixes / rename commits. Help: audit-legacy.md.
 	CmdAuditLegacy      = "audit-legacy"
 	CmdAuditLegacyAlias = "al"
 )
 
 // Audit-legacy defaults + flag names. Patterns are comma-separated regexes.
-// Defaults catch the gitmap-v5/v6/v7 → v8 rename regression class.
+// Defaults catch the gitmap-v5/v6/v7 → v8 rename regression class. // gitmap-legacy-ref-allow
 const (
 	FlagAuditLegacyPatterns     = "patterns"
 	FlagDescAuditLegacyPatterns = "Comma-separated regex patterns to flag (default: gitmap-v[567])"
