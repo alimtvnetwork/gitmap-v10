@@ -17,12 +17,10 @@ package cmd
 // the first needs a different command.
 
 import (
-	"flag"
 	"fmt"
 	"io"
 	"os"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/cloneconcurrency"
 	"github.com/alimtvnetwork/gitmap-v8/gitmap/clonefrom"
 	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
 )
