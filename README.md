@@ -1884,6 +1884,58 @@ gitmap clone gitmap.json --target-dir D:\wp-work --github-desktop --safe-pull
 #   and pulls if any of them already exist on disk.
 ```
 
+##### Clone-from report schema (JSON & CSV output)
+
+After every `gitmap clone` run on a structured input file, a per-row
+report is written to `./.gitmap/clone-from-report-<unixts>.<ext>`.
+Both formats carry the **same field set**, sourced 1:1 from
+`clonefrom.Result` (see `gitmap/clonefrom/execute.go` and
+`gitmap/clonefrom/summary.go`). The schema is pinned by
+`constants.CloneFromReportSchemaVersion` and guarded by
+`TestCloneFromReportJSON_SchemaVersion_Pinned`.
+
+**JSON envelope** (`clone-from-report-<unixts>.json`):
+
+```json
+{
+  "schemaVersion": 1,
+  "transport": { "ssh": 0, "https": 0, "other": 0 },
+  "rows": [ { "url": "...", "dest": "...", "...": "..." } ]
+}
+```
+
+`rows` is always a JSON array (never `null`) and `transport` is
+always emitted, even when all counters are zero, so downstream
+parsers can treat the envelope shape as unconditional.
+
+**CSV report** (`clone-from-report-<unixts>.csv`): UTF-8, CRLF line
+endings (matches every other gitmap CSV — see
+`csvcrlf_contract_test.go`), one header row + one row per result.
+Column order matches the JSON field order below.
+
+| Field (JSON / CSV column) | Type    | Source on `clonefrom.Result`                       | Populated by                                        |
+|---------------------------|---------|----------------------------------------------------|-----------------------------------------------------|
+| `url`                     | string  | `Result.Row.URL`                                   | `parse.go` / `parsecsv.go` (verbatim from input).   |
+| `dest`                    | string  | `Result.Dest`                                      | `executeRow` → `resolveDest` (after `DeriveDest` fallback when `Row.Dest` is empty). |
+| `branch`                  | string  | `Result.Row.Branch`                                | Input row; empty means "use remote HEAD".           |
+| `depth`                   | number  | `Result.Row.Depth`                                 | Input row; `0` means full history.                  |
+| `status`                  | string  | `Result.Status`                                    | `executeRow` — one of `ok` / `skipped` / `failed` (`constants.CloneFromStatus*`). |
+| `detail`                  | string  | `Result.Detail`                                    | `executeRow`: empty for `ok`, `dest exists` for `skipped`, trimmed git stderr (capped at `GitErrorTrimLimit`) for `failed`. |
+| `duration_seconds`        | number  | `Result.Duration.Seconds()` (3-decimal CSV format) | `executeRow` (`time.Since(start)` around the whole row, including skip/parent-dir/checkout phases). |
+
+Envelope-only fields (JSON only — not present in CSV):
+
+| Field             | Type   | Source                                                                                      |
+|-------------------|--------|---------------------------------------------------------------------------------------------|
+| `schemaVersion`   | number | `constants.CloneFromReportSchemaVersion`.                                                   |
+| `transport.ssh`   | number | `clonefrom.TransportTally(results)` — count of rows whose `Row.URL` classifies as SSH.      |
+| `transport.https` | number | `clonefrom.TransportTally(results)` — count of HTTPS rows.                                  |
+| `transport.other` | number | `clonefrom.TransportTally(results)` — count of rows that are neither SSH nor HTTPS.         |
+
+The `transport` tally matches the terminal `transport: N ssh, N https, N other`
+line emitted by `RenderSummary` byte-for-byte, so JSON consumers never
+have to re-derive it from the row URLs.
+
 → Detailed help: [scan](gitmap/helptext/scan.md) · [rescan](gitmap/helptext/rescan.md) · [clone](gitmap/helptext/clone.md) · [clone-next](gitmap/helptext/clone-next.md)
 
 <div align="center">
