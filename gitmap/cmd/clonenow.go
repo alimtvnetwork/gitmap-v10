@@ -59,18 +59,6 @@ type cloneNowFlags struct {
 	printCloneArgv                  bool
 	maxConcurrency                  int
 }
-	execute  bool
-	quiet    bool
-	mode     string
-	format   string
-	cwd      string
-	onExists string
-	output   string
-	verifyCmdFaithful               bool
-	verifyCmdFaithfulExitOnMismatch bool
-	printCloneArgv                  bool
-	maxConcurrency                  int
-}
 
 // runCloneNow is the dispatcher entry. checkHelp handles `--help`
 // per the project help-system convention before any flag parsing
