@@ -65,6 +65,27 @@ file exists, `reclone` exits with code `2` and tells you to run
 `gitmap scan` first (or pass `--manifest` / a positional path).
 Auto-pickup never walks parent or sibling directories.
 
+## Safety prompt (existing destinations)
+
+Before any `git clone` runs under `--execute`, `reclone` checks
+whether any planned `RelativePath` already exists under `--cwd`
+(default: current directory). If at least one does:
+
+- **Interactive TTY**: lists up to 10 existing destinations + total
+  count and prompts `Proceed with git clone against these
+  destinations? [y/N]:`. Only `y` proceeds; anything else aborts
+  with exit `2` and no side effects.
+- **Non-TTY** (CI, piped, redirected stdin): refuses with exit `2`
+  and tells you to pass `--yes`. There is no silent fallthrough —
+  you must opt in explicitly.
+- **`--yes` passed**: skips the prompt entirely.
+
+The per-row `--on-exists` policy (`skip` / `update` / `force`)
+still controls what actually happens to each existing directory;
+this gate is a single high-level confirmation that fires *before*
+any side effect, so an accidental `--on-exists force` against a
+populated tree is impossible without explicit confirmation.
+
 ## Arguments
 
 | Argument | Required | Description |
