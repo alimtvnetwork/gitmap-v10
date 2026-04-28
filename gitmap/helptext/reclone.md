@@ -133,4 +133,4 @@ gitmap reclone .gitmap/output/repos.json
 
 - `0` — dry-run completed, OR every row was ok/skipped on `--execute`.
 - `1` — file open / parse error, OR any row failed on `--execute`.
-- `2` — bad CLI usage (missing `<file>` or invalid flag value).
+- `2` — bad CLI usage (missing `<file>`, invalid flag value), OR the safety prompt was declined / refused (existing destinations + non-TTY without `--yes`).
