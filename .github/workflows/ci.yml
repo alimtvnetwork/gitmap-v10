@@ -133,6 +133,41 @@ jobs:
           fi
           echo "✅ All .go files are gofmt-clean."
 
+      - name: goimports check (import grouping + formatting)
+        # Hard-gate companion to the `gofmt` step. `goimports` is a
+        # superset of gofmt that ALSO normalizes import blocks
+        # (adds missing imports, removes unused ones, and groups
+        # std / third-party / local imports in canonical order).
+        # Run in check mode by collecting `goimports -l` output and
+        # failing if any file would be rewritten. We pin a specific
+        # version (no `@latest`, per the project's static-analysis
+        # rule) and surface the full `-d` diff so a contributor can
+        # apply the suggested edits with `goimports -w` locally.
+        #
+        # Local-prefix is set to the module path so internal imports
+        # are grouped in their own block separated from third-party.
+        if: needs.sha-check.outputs.already-built != 'true'
+        working-directory: gitmap
+        shell: bash
+        run: |
+          set -uo pipefail
+          go install golang.org/x/tools/cmd/goimports@v0.24.0
+          GOIMPORTS="$(go env GOPATH)/bin/goimports"
+          LOCAL_PREFIX="$(awk '/^module /{print $2; exit}' go.mod)"
+          unformatted=$("$GOIMPORTS" -l -local "$LOCAL_PREFIX" .)
+          if [ -n "$unformatted" ]; then
+            echo "::error::The following .go files have goimports issues (import grouping or formatting):"
+            echo "$unformatted" | sed 's/^/  /'
+            echo ""
+            echo "----- goimports -d (diff) -----"
+            "$GOIMPORTS" -d -local "$LOCAL_PREFIX" $unformatted
+            echo "-------------------------------"
+            echo ""
+            echo "Fix locally with:  cd gitmap && goimports -w -local $LOCAL_PREFIX ."
+            exit 1
+          fi
+          echo "✅ All .go files pass goimports (local prefix: $LOCAL_PREFIX)."
+
       - name: Go vet
         if: needs.sha-check.outputs.already-built != 'true'
         working-directory: gitmap
