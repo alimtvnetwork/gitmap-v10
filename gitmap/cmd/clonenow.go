@@ -82,6 +82,7 @@ func runCloneNow(args []string) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	validateRecloneManifestOrExit(plan)
 	if !cfg.execute {
 		runCloneNowDry(plan, cfg)
 		maybeExitOnCmdFaithfulMismatch()
