@@ -29,7 +29,7 @@ import (
 // report must declare. Bumping requires: (1) editing this literal,
 // (2) editing constants.CloneFromReportSchemaVersion to match, (3)
 // regenerating both JSON goldens, (4) noting the break in CHANGELOG.md.
-const expectedSchemaVersionPinned = 2
+const expectedSchemaVersionPinned = 3
 
 // envelopePeek is a minimal decoder used only by this test — we
 // deliberately do NOT reuse reportEnvelopeJSON so a rename of the
