@@ -1347,7 +1347,20 @@ jobs:
           go-version-file: gitmap/go.mod
           cache-dependency-path: gitmap/go.sum
 
-      - name: Pre-build provenance stamp (stale-checkout guard)
+      # Cross-compile matrix: GOCACHE entries are partitioned by
+      # GOOS/GOARCH (the cache stores per-target compiled artifacts),
+      # so include both in the cache key to avoid one matrix leg
+      # invalidating another's saved entry.
+      - name: Cache Go build cache (GOCACHE)
+        if: needs.sha-check.outputs.already-built != 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/go-build
+          key: go-build-${{ runner.os }}-build-${{ matrix.os }}-${{ matrix.arch }}-${{ hashFiles('gitmap/go.sum') }}-${{ github.sha }}
+          restore-keys: |
+            go-build-${{ runner.os }}-build-${{ matrix.os }}-${{ matrix.arch }}-${{ hashFiles('gitmap/go.sum') }}-
+            go-build-${{ runner.os }}-build-${{ matrix.os }}-${{ matrix.arch }}-
+
         # Prints the exact commit SHA, branch, declared `constants.Version`,
         # and a sha256 fingerprint of the two historically-problematic
         # cmd/ files (updaterepo.go + updatedebugwindows.go) so a stale
