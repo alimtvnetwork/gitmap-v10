@@ -21,6 +21,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/alimtvnetwork/gitmap-v8/gitmap/cliexit"
 	"github.com/alimtvnetwork/gitmap-v8/gitmap/cloneconcurrency"
 	"github.com/alimtvnetwork/gitmap-v8/gitmap/clonenow"
 	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
