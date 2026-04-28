@@ -935,6 +935,20 @@ jobs:
           go-version-file: gitmap/go.mod
           cache-dependency-path: gitmap/go.sum
 
+      # See `lint` job for rationale. Per-shard cache slot
+      # (matrix.name) so parallel shards don't race on the same
+      # save key — each shard owns its own GOCACHE entry but can
+      # still warm-restore from any prior entry on the same go.sum.
+      - name: Cache Go build cache (GOCACHE)
+        if: needs.sha-check.outputs.already-built != 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/go-build
+          key: go-build-${{ runner.os }}-test-${{ matrix.name }}-${{ hashFiles('gitmap/go.sum') }}-${{ github.sha }}
+          restore-keys: |
+            go-build-${{ runner.os }}-test-${{ matrix.name }}-${{ hashFiles('gitmap/go.sum') }}-
+            go-build-${{ runner.os }}-test-${{ matrix.name }}-
+            go-build-${{ runner.os }}-test-
       - name: Run tests
         if: needs.sha-check.outputs.already-built != 'true'
         working-directory: gitmap
