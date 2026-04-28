@@ -75,8 +75,7 @@ func runCloneFrom(args []string) {
 	setCmdPrintArgv(cfg.printCloneArgv)
 	plan, err := clonefrom.ParseFile(cfg.file)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		cliexit.Fail(constants.CmdCloneFrom, "parse-manifest", cfg.file, err, 1)
 	}
 	applyCheckoutDefault(&plan, cfg.checkout)
 	if !cfg.execute {
