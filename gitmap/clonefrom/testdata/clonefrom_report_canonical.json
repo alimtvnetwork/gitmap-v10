@@ -1,10 +1,40 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "transport": {
     "ssh": 1,
     "https": 2,
     "other": 0
   },
+  "provenance": [
+    {
+      "field": "url",
+      "stage": "scan"
+    },
+    {
+      "field": "dest",
+      "stage": "mapper"
+    },
+    {
+      "field": "branch",
+      "stage": "scan"
+    },
+    {
+      "field": "depth",
+      "stage": "scan"
+    },
+    {
+      "field": "status",
+      "stage": "clonefrom"
+    },
+    {
+      "field": "detail",
+      "stage": "clonefrom"
+    },
+    {
+      "field": "duration_seconds",
+      "stage": "clonefrom"
+    }
+  ],
   "rows": [
     {
       "url": "https://github.com/acme/widget.git",

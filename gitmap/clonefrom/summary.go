@@ -12,7 +12,6 @@ package clonefrom
 
 import (
 	"encoding/csv"
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -139,65 +138,7 @@ func writeReportRows(w io.Writer, results []Result) error {
 	return cw.Error()
 }
 
-// reportRowJSON is the on-disk JSON shape per result. Field names
-// (and JSON tags) mirror the CSV column set 1:1 so consumers can
-// flip --report-format json|csv without a schema delta. Keep this
-// type private; the only path to a JSON report is writeReportRowsJSON.
-type reportRowJSON struct {
-	URL             string  `json:"url"`
-	Dest            string  `json:"dest"`
-	Branch          string  `json:"branch"`
-	Depth           int     `json:"depth"`
-	Status          string  `json:"status"`
-	Detail          string  `json:"detail"`
-	DurationSeconds float64 `json:"duration_seconds"`
-}
-
-// reportEnvelopeJSON wraps the row array with a schemaVersion field
-// so downstream parsers can branch on shape changes without sniffing
-// fields. The version is sourced from constants.CloneFromReportSchemaVersion
-// and pinned by TestCloneFromReportJSON_SchemaVersion_Pinned. Rows is
-// always serialized as `[]` (never `null`) for the empty case so jq
-// pipelines can treat it as an unconditional array.
-// transportTallyJSON mirrors the terminal `transport: N ssh, N https,
-// N other` line so JSON consumers see the SAME counts without having
-// to re-derive them from row URLs. Field names match the terminal
-// label words exactly. Always emitted (even when all zero) so the
-// envelope shape is unconditional.
-type transportTallyJSON struct {
-	SSH   int `json:"ssh"`
-	HTTPS int `json:"https"`
-	Other int `json:"other"`
-}
-
-type reportEnvelopeJSON struct {
-	SchemaVersion int                `json:"schemaVersion"`
-	Transport     transportTallyJSON `json:"transport"`
-	Rows          []reportRowJSON    `json:"rows"`
-}
-
-// writeReportRowsJSON emits the result set as a versioned JSON
-// envelope: {"schemaVersion": N, "rows": [...]}. Rows is always an
-// array (never null) so downstream parsers can treat the file as
-// unconditional. Trailing newline matches POSIX text-file convention.
-func writeReportRowsJSON(w io.Writer, results []Result) error {
-	rows := make([]reportRowJSON, 0, len(results))
-	for _, r := range results {
-		rows = append(rows, reportRowJSON{
-			URL: r.Row.URL, Dest: r.Dest, Branch: r.Row.Branch,
-			Depth: r.Row.Depth, Status: r.Status, Detail: r.Detail,
-			DurationSeconds: r.Duration.Seconds(),
-		})
-	}
-	ssh, https, other := TransportTally(results)
-	envelope := reportEnvelopeJSON{
-		SchemaVersion: constants.CloneFromReportSchemaVersion,
-		Transport:     transportTallyJSON{SSH: ssh, HTTPS: https, Other: other},
-		Rows:          rows,
-	}
-	enc := json.NewEncoder(w)
-	enc.SetIndent("", "  ")
-	enc.SetEscapeHTML(false)
-
-	return enc.Encode(envelope)
-}
+// JSON-report emit logic (reportRowJSON, reportEnvelopeJSON,
+// transportTallyJSON, provenanceEntryJSON, writeReportRowsJSON,
+// buildProvenanceEntries) lives in summary_json.go to keep this
+// file under the 200-line per-file cap (mem://style/code-constraints).

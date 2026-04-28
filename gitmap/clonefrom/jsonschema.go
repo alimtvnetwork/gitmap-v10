@@ -68,12 +68,23 @@ func EmitReportSchema() ([]byte, error) {
 		kv("https", intSchema("HTTPS-classified URL count.")),
 		kv("other", intSchema("Catch-all URL count.")),
 	)
+	provenanceItem := objectSchema(orderedProps(
+		kv("field", strSchema("Row-level field name (matches a key under rows[].).")),
+		kv("stage", enumSchema("Pipeline stage that populates the field.", []string{
+			constants.ProvenanceStageScan,
+			constants.ProvenanceStageMapper,
+			constants.ProvenanceStageClonefrom,
+		})),
+	), []string{"field", "stage"}, "One field-origin record.")
 	rootProps := orderedProps(
 		kv("schemaVersion", constIntSchema(constants.CloneFromReportSchemaVersion,
 			"Pinned envelope version; bumped only on shape changes.")),
 		kv("transport", objectSchema(transportProps,
 			[]string{"ssh", "https", "other"},
 			"Per-mode tally matching the terminal summary line.")),
+		kv("provenance", arraySchema(provenanceItem,
+			"Envelope-level field-origin map (one entry per row field, "+
+				"shared by all rows). Order matches rows[] column order.")),
 		kv("rows", arraySchema(objectSchema(rowProps,
 			[]string{"url", "dest", "branch", "depth", "status", "detail", "duration_seconds"},
 			"One result per planned clone."),
@@ -81,7 +92,7 @@ func EmitReportSchema() ([]byte, error) {
 	)
 	root := rootSchema(constants.CloneFromSchemaIDReport,
 		"gitmap clone-from JSON report envelope.",
-		rootProps, []string{"schemaVersion", "transport", "rows"})
+		rootProps, []string{"schemaVersion", "transport", "provenance", "rows"})
 
 	return marshalSchema(root)
 }
