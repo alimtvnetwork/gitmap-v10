@@ -125,9 +125,7 @@ func cloneFamilyCmds() []string {
 		"clone-from",
 		"clone-now",
 		"clone-next",
-		"clone-multi",
 		"clone-pick",
-		"clone-audit",
 	}
 }
 
