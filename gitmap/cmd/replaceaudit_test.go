@@ -19,7 +19,7 @@ func TestBuildAuditNeedles(t *testing.T) {
 	got := buildAuditNeedles("gitmap", []int{4, 5})
 	want := [][]byte{
 		[]byte("gitmap-v4"), []byte("gitmap/v4"),
-		[]byte("gitmap-v9"), []byte("gitmap/v5"),
+		[]byte("gitmap-v5"), []byte("gitmap/v5"),
 	}
 	if len(got) != len(want) {
 		t.Fatalf("len = %d, want %d", len(got), len(want))
