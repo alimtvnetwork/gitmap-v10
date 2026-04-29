@@ -49,6 +49,14 @@ param(
 $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
 
+# Force UTF-8 output so glyphs like the warning sign render correctly
+# instead of cp437/Windows-1252 mojibake (e.g. "ΓÜá" for "⚠").
+try {
+    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+    $OutputEncoding = [System.Text.Encoding]::UTF8
+    if ($PSStyle) { $PSStyle.OutputRendering = 'PlainText' }
+} catch {}
+
 $Repo = "alimtvnetwork/gitmap-v9"
 $BinaryName = "gitmap.exe"
 $InstallerVersion = "1.0.0"
