@@ -41,9 +41,9 @@ param(
     [switch]$R,
     [Alias("t")]
     [switch]$Test,
-    [Alias("uninstall","u")]
+    [Alias("u")]
     [switch]$Uninstall,
-    [Alias("reinstall","ri")]
+    [Alias("ri")]
     [switch]$Reinstall,
     [switch]$DebugRepoDetect,
     [switch]$Quiet,
