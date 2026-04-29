@@ -25,37 +25,45 @@ _Scan, catalog, clone, and manage all your Git repositories from a single CLI._
 
 ---
 
-## Install
+## 🚀 Install
 
-### Install — Default (recommended)
+GitMap is a **Windows-first** project. The commands below install the latest release with sensible defaults — no prompts, no drive picker. Use the **Quick** block if you want to pick a custom install drive.
 
-Runs the canonical installer with sensible defaults. **No prompts. No drive picker. Just installs.** This is what 99% of users want.
-
-#### Windows (PowerShell)
+### 🪟 Windows · PowerShell (latest)
 
 ```powershell
 irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v9/main/gitmap/scripts/install.ps1 | iex
 ```
 
-#### Linux / macOS
+### 🐧 macOS · Linux · Bash (latest)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v9/main/gitmap/scripts/install.sh | sh
 ```
 
-### Install — Quick (pick your install drive)
+### 📌 Pinned version (`v3.69.0`)
+
+```powershell
+# Windows · PowerShell
+irm https://github.com/alimtvnetwork/gitmap-v9/releases/download/v3.69.0/release-version-v3.69.0.ps1 | iex
+```
+
+```bash
+# macOS · Linux · Bash
+curl -fsSL https://github.com/alimtvnetwork/gitmap-v9/releases/download/v3.69.0/release-version-v3.69.0.sh | bash
+```
+
+### 🎯 Install — Quick (pick your install drive)
 
 Use this **only** when you want to choose a specific drive or folder (e.g. install to `D:\` instead of the default location). It prompts for the install drive/folder, then delegates to the canonical installer above.
 
-#### Windows (PowerShell)
-
 ```powershell
+# Windows · PowerShell
 irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v9/main/install-quick.ps1 | iex
 ```
 
-#### Linux / macOS
-
 ```bash
+# macOS · Linux · Bash
 curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v9/main/install-quick.sh | bash
 ```
 
