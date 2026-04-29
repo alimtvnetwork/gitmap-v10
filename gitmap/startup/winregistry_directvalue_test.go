@@ -13,8 +13,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 	"golang.org/x/sys/windows/registry"
+
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 )
 
 // TestAddWindowsRegistry_NoSiblingMarker is the contract test for

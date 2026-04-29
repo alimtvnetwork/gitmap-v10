@@ -3,8 +3,9 @@ package tui
 import (
 	"testing"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/model"
 	tea "github.com/charmbracelet/bubbletea"
+
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/model"
 )
 
 func testRepos() []model.ScanRecord {

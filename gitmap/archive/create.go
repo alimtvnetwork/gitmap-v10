@@ -23,8 +23,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 	"github.com/mholt/archives"
+
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 )
 
 // CompressionMode is the user-facing knob persisted in

@@ -10,8 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 	"github.com/mholt/archives"
+
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 )
 
 // ExtractResult is what a compact-extract returns to the caller so it can

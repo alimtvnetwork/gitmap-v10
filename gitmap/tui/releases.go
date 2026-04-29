@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"strings"
 
+	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 	"github.com/alimtvnetwork/gitmap-v9/gitmap/model"
 	"github.com/alimtvnetwork/gitmap-v9/gitmap/store"
-	tea "github.com/charmbracelet/bubbletea"
 )
 
 type releasesModel struct {

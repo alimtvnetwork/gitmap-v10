@@ -27,8 +27,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 	"golang.org/x/sys/windows/registry"
+
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 )
 
 // withIsolatedAppData redirects %APPDATA% to t.TempDir() so the

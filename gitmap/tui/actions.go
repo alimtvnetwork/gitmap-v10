@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 	"github.com/alimtvnetwork/gitmap-v9/gitmap/model"
-	tea "github.com/charmbracelet/bubbletea"
 )
 
 type actionsModel struct {

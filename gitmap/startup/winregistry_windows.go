@@ -40,8 +40,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 	"golang.org/x/sys/windows/registry"
+
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 )
 
 // hiveLabel is the user-visible registry-hive prefix written into

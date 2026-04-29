@@ -1,6 +1,6 @@
 package tui
 
-import "github.com/charmbracelet/bubbletea"
+import tea "github.com/charmbracelet/bubbletea"
 
 // keyMap defines all TUI key bindings.
 type keyMap struct{}

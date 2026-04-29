@@ -22,9 +22,10 @@ import (
 	"fmt"
 	"unsafe"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/registry"
+
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 )
 
 // addWindowsRegistryHKLM is the HKLM Add path. Validates elevation

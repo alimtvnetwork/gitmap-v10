@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/model"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/sahilm/fuzzy"
+
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/model"
 )
 
 type browserModel struct {
