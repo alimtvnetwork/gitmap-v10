@@ -183,6 +183,40 @@ All PRs must pass these automated gates before merge:
 | Build | `go build` / `vite build` | Yes |
 | Vulnerability scan | `govulncheck` | Advisory |
 
+### When CI runs (and when it doesn't)
+
+CI is wired in [`.github/workflows/ci.yml`](.github/workflows/ci.yml). The triggers are:
+
+| Event | Runs CI? | Notes |
+|---|:---:|---|
+| Push to **any branch** (incl. `main`, feature branches, Lovable branches) | ✅ | Configured via `branches: ['**']` |
+| Push to `release/**` | ❌ | Owned by [`release.yml`](.github/workflows/release.yml) — avoids duplicate builds |
+| Push of a `v*` tag | ❌ | Same — release pipeline handles it |
+| Pull request → `main` | ✅ | Runs as a `pull_request` event |
+| Manual "Run workflow" (workflow_dispatch) | ✅ | Useful for re-running with `lint_baseline_disable=true` |
+
+**You do not need to open a PR to get CI feedback** — every push to a feature branch fires the full pipeline.
+
+### When `sha-check` may skip a run
+
+The first real job, **`sha-check`**, looks up a cache entry keyed by `ci-passed-${{ github.sha }}`. On a hit, every downstream job short-circuits and prints `✅ SHA … already passed`. This looks like "CI didn't run" but is intentional dedup.
+
+A run will be deduped (skipped) when:
+
+1. **The same commit SHA already passed CI** on another branch or in another run (e.g. a feature branch was fast-forward-merged into `main` — the merge commit is identical).
+2. **A force-push retargets an existing commit** (the SHA was already validated, so no re-run).
+3. **Re-running a previously green workflow** for a SHA that's still in the cache.
+
+A run will **not** be deduped (full pipeline executes) when:
+
+- Any file changed → new SHA → cache miss.
+- The cache entry was evicted by GitHub (caches expire after ~7 days of no access, or when the repo exceeds 10 GB of cache).
+- You manually invalidate by bumping `lint_baseline_cache_version` via "Run workflow".
+
+### How to confirm what happened
+
+Open the Actions run → check the **Diagnostics** job (always runs, never skipped). It prints the exact branch, SHA, event, and actor. The **Summary** tab also shows a "Fresh build" or "Deduped" verdict at the top, so you can tell in one glance whether downstream jobs did real work or short-circuited.
+
 ---
 
 ## Release Process
