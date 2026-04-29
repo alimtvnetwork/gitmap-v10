@@ -203,6 +203,28 @@ jobs:
           working-directory: gitmap
           args: --timeout=5m --issues-exit-code=1
 
+  lint-script-tests:
+    # Unit tests for the lint diff/guard scripts under .github/scripts/.
+    # Locks in the "new issues only" baseline-diff contract that
+    # `check-single-linter-diff.sh` now enforces for all five guarded
+    # linters (unused, gosec G115, misspell, gocritic, exhaustive).
+    # Runs in seconds — pure bash + jq, no Go toolchain needed.
+    name: Lint Script Unit Tests
+    runs-on: ubuntu-latest
+    needs: sha-check
+    steps:
+      - name: Already validated
+        if: needs.sha-check.outputs.already-built == 'true'
+        run: echo "SHA ${{ github.sha }} already passed lint-script tests"
+
+      - uses: actions/checkout@v6
+        if: needs.sha-check.outputs.already-built != 'true'
+
+      - name: Run lint-script unit tests
+        if: needs.sha-check.outputs.already-built != 'true'
+        shell: bash
+        run: bash .github/scripts/tests/run-tests.sh
+
   lint-baseline-guard:
     # BASELINE-DIFF job: every linter wired below uses the same contract
     # — only NEW findings (vs the cached main-branch baseline) fail the
