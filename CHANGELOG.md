@@ -8,7 +8,7 @@ Routine minor bump rolling up recent CI fixes:
 - `goldenguard` determinism pre-check stability fixes.
 - Completion generator regenerated for the `aul` alias.
 - `gofmt` alignment in `constants/cmd_constants_test.go`.
-- Legacy-ref test data migrated from `gitmap-v5/v7` to `gitmap-v8`.
+- Legacy-ref test data migrated to the current `gitmap-v9` repo namespace.
 - `cliexit` test helper forces stdin to a pipe so non-TTY gates fire
   reliably under `/dev/null`.
 
