@@ -72,11 +72,13 @@ func TestAllowUpdate_TriggerOnAllowWrongValue_Fails(t *testing.T) {
 // output readable when the parent loops.
 func expectFatal(parent *testing.T, trigger bool) bool {
 	parent.Helper()
-	var failed bool
-	parent.Run("expect-fatal", func(child *testing.T) {
+	// parent.Run returns false if the sub-test failed (including via
+	// Fatalf -> Goexit, which prevents any post-call assignment in the
+	// closure from running). Inverting the return value gives us the
+	// "did the sub-test fail?" signal we need.
+	passed := parent.Run("expect-fatal", func(child *testing.T) {
 		_ = AllowUpdate(child, trigger)
-		failed = child.Failed()
 	})
 
-	return failed
+	return !passed
 }
