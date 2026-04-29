@@ -1,5 +1,17 @@
 # Changelog
 
+## v3.179.0 — (2026-04-29) — Minor version bump rolling up recent CI fixes
+
+Routine minor bump rolling up recent CI fixes:
+
+- Help-exit test coverage for `clone-audit` and other utility commands.
+- `goldenguard` determinism pre-check stability fixes.
+- Completion generator regenerated for the `aul` alias.
+- `gofmt` alignment in `constants/cmd_constants_test.go`.
+- Legacy-ref test data migrated from `gitmap-v5/v7` to `gitmap-v8`.
+- `cliexit` test helper forces stdin to a pipe so non-TTY gates fire
+  reliably under `/dev/null`.
+
 ## v3.119.0 — (2026-04-24) — `gitmap inject` / `inj`: register an existing folder with Desktop + VS Code (+ DB)
 
 New command for "I already have this repo on disk, just plug it into
