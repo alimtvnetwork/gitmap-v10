@@ -28,11 +28,13 @@
 #   $BASELINE     — path to baseline JSON report (optional; missing/empty
 #                   means "seeding mode": warn, don't fail)
 #   $CURRENT_OUT  — where to write the current JSON report (REQUIRED)
-#
-# Exit codes:
-#   0 — no new findings (or seeding mode)
-#   1 — at least one new finding from $LINTER with a full file path
-#   2 — toolchain missing / unrecoverable error / missing required env
+#   $TEXT_FILTER  — OPTIONAL regex; when set, only findings whose .Text
+#                   matches are kept (used to scope `gosec` to a single
+#                   rule like G115). Applied uniformly to current AND
+#                   baseline so the diff stays apples-to-apples.
+#   $LABEL        — OPTIONAL display label for log/annotation banners
+#                   (defaults to $LINTER; set to e.g. "gosec-G115" when
+#                   TEXT_FILTER scopes a single rule).
 
 set -euo pipefail
 
