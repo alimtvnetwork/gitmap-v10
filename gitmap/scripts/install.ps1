@@ -174,7 +174,13 @@ function Write-Err([string]$msg) {
     Write-Host "  $msg" -ForegroundColor Red
 }
 
+function Set-InstallerExitCode([int]$exitCode) {
+    $global:LASTEXITCODE = $exitCode
+    [System.Environment]::ExitCode = $exitCode
+}
+
 function Write-FatalError($record, [int]$exitCode = 1) {
+    Set-InstallerExitCode $exitCode
     $message = "Unknown PowerShell error"
     if ($record) {
         if ($record.Exception -and -not [string]::IsNullOrWhiteSpace($record.Exception.Message)) {
@@ -237,7 +243,7 @@ function Write-FatalError($record, [int]$exitCode = 1) {
     }
 
     Write-Host ""
-    exit $exitCode
+    return
 }
 
 # --- Resolve install directory ---
