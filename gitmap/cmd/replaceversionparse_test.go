@@ -65,7 +65,7 @@ func TestPairsForTarget(t *testing.T) {
 	if len(got) != 2 {
 		t.Fatalf("expected 2 pairs, got %d", len(got))
 	}
-	if got[0].old != "gitmap-v4" || got[0].new != "gitmap-v9" {
+	if got[0].old != "gitmap-v4" || got[0].new != "gitmap-v7" {
 		t.Errorf("dash form wrong: %+v", got[0])
 	}
 	if got[1].old != "gitmap/v4" || got[1].new != "gitmap/v7" {
