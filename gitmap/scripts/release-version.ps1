@@ -512,4 +512,5 @@ try {
 }
 catch {
     Write-FatalError $_ $EXIT_NETWORK
+    return
 }
