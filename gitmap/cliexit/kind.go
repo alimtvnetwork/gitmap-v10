@@ -68,24 +68,24 @@ const (
 // kindCodes is the single authoritative table. Wrapper scripts and
 // the cliexit_*_test.go suite both grep these numbers.
 var kindCodes = map[Kind]int{
-	KindSuccess:             0,
-	KindExecutionFailed:     1,
-	KindUserCanceled:        2,
-	KindInvalidInput:        2,
-	KindVerifyFailed:        3,
-	KindPreconditionFailed:  4,
+	KindSuccess:            0,
+	KindExecutionFailed:    1,
+	KindUserCanceled:       2,
+	KindInvalidInput:       2,
+	KindVerifyFailed:       3,
+	KindPreconditionFailed: 4,
 }
 
 // kindLabels is the short tag rendered in human/JSON output so the
 // user sees *why* the process is exiting with that code, not just
 // the number.
 var kindLabels = map[Kind]string{
-	KindSuccess:             "success",
-	KindExecutionFailed:     "execution-failed",
-	KindUserCanceled:        "user-canceled",
-	KindInvalidInput:        "invalid-input",
-	KindVerifyFailed:        "verify-failed",
-	KindPreconditionFailed:  "precondition-failed",
+	KindSuccess:            "success",
+	KindExecutionFailed:    "execution-failed",
+	KindUserCanceled:       "user-canceled",
+	KindInvalidInput:       "invalid-input",
+	KindVerifyFailed:       "verify-failed",
+	KindPreconditionFailed: "precondition-failed",
 }
 
 // KindCode returns the canonical exit code for a Kind. Unknown

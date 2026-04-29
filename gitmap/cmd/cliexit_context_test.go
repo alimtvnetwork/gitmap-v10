@@ -6,7 +6,6 @@ import (
 	"testing"
 )
 
-
 // Integration tests asserting that user-facing failure stderr from
 // scan and clone-family commands carries the standardized context
 // fields produced by gitmap/cliexit:

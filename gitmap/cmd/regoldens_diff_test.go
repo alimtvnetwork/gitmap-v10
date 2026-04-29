@@ -115,11 +115,11 @@ func TestIsGoldenFixturePath_AcceptsTestdataGoldenBasename(t *testing.T) {
 
 func TestIsGoldenFixturePath_RejectsNonGoldenOrNonTestdata(t *testing.T) {
 	cases := []string{
-		"gitmap/clonefrom/testdata/corpus.json",                // no "golden"
-		"gitmap/clonefrom/testdata/sample_input.txt",           // no "golden"
-		"src/golden/main.go",                                   // not under testdata/
-		"docs/golden-rules.md",                                 // not under testdata/
-		"testdata-not-a-dir/foo.golden.json",                   // wrong segment
+		"gitmap/clonefrom/testdata/corpus.json",      // no "golden"
+		"gitmap/clonefrom/testdata/sample_input.txt", // no "golden"
+		"src/golden/main.go",                         // not under testdata/
+		"docs/golden-rules.md",                       // not under testdata/
+		"testdata-not-a-dir/foo.golden.json",         // wrong segment
 	}
 	for _, p := range cases {
 		if isGoldenFixturePath(p) {

@@ -111,19 +111,19 @@ const (
 // constants_cli.go) so all startup-related strings live together and
 // the flag parser file imports just one constants block.
 const (
-	FlagStartupAddName          = "name"
-	FlagStartupAddExec          = "exec"
-	FlagStartupAddDisplay       = "display-name"
-	FlagStartupAddComment       = "comment"
-	FlagStartupAddNoDisplay     = "no-display"
-	FlagStartupAddForce         = "force"
-	FlagStartupAddWorkingDir    = "working-dir"
-	FlagDescStartupAddName      = "Logical name for the entry (filename becomes gitmap-<name>.desktop). Required."
-	FlagDescStartupAddExec      = "Command to run at login (default: path to the running gitmap binary)"
-	FlagDescStartupAddDisplay   = "Override the Name= field shown in desktop session managers"
-	FlagDescStartupAddComment   = "Optional Comment= field text"
-	FlagDescStartupAddNoDisplay = "Set NoDisplay=true so the entry stays out of app menus"
-	FlagDescStartupAddForce     = "Overwrite an existing gitmap-managed entry (never overwrites third-party files)"
+	FlagStartupAddName           = "name"
+	FlagStartupAddExec           = "exec"
+	FlagStartupAddDisplay        = "display-name"
+	FlagStartupAddComment        = "comment"
+	FlagStartupAddNoDisplay      = "no-display"
+	FlagStartupAddForce          = "force"
+	FlagStartupAddWorkingDir     = "working-dir"
+	FlagDescStartupAddName       = "Logical name for the entry (filename becomes gitmap-<name>.desktop). Required."
+	FlagDescStartupAddExec       = "Command to run at login (default: path to the running gitmap binary)"
+	FlagDescStartupAddDisplay    = "Override the Name= field shown in desktop session managers"
+	FlagDescStartupAddComment    = "Optional Comment= field text"
+	FlagDescStartupAddNoDisplay  = "Set NoDisplay=true so the entry stays out of app menus"
+	FlagDescStartupAddForce      = "Overwrite an existing gitmap-managed entry (never overwrites third-party files)"
 	FlagDescStartupAddWorkingDir = "Working directory the entry runs in " +
 		"(Linux Path=, macOS WorkingDirectory, Windows tracking-subkey WorkingDir)"
 )
@@ -135,10 +135,10 @@ const (
 // full schema). Default is "terminal" so existing scripts keep
 // working byte-for-byte.
 const (
-	FlagStartupOutput        = "output"
-	FlagDescStartupOutput    = "Output mode: terminal (default human lines) or json (status object)"
-	ErrStartupBadOutput      = "%s: unknown --output %q (expected: terminal, json)"
-	FlagStartupJSONIndent    = "json-indent"
+	FlagStartupOutput         = "output"
+	FlagDescStartupOutput     = "Output mode: terminal (default human lines) or json (status object)"
+	ErrStartupBadOutput       = "%s: unknown --output %q (expected: terminal, json)"
+	FlagStartupJSONIndent     = "json-indent"
 	FlagDescStartupJSONIndent = "Spaces per indent level for --output=json (0 = minified, default 2). Ignored for --output=terminal."
 )
 

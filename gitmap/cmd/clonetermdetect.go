@@ -81,4 +81,3 @@ func remoteBranchSource(branch string) string {
 
 	return constants.BranchSourceRemoteHEAD
 }
-

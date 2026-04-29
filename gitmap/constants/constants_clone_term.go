@@ -110,5 +110,3 @@ const (
 		"(see per-row reports above); exiting with code 3 because " +
 		"--verify-cmd-faithful-exit-on-mismatch was set"
 )
-
-

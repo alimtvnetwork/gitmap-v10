@@ -53,10 +53,10 @@ type CmdFaithfulMismatch struct {
 // Mismatches means the two forms are byte-identical when joined by
 // single spaces — which is the contract --output terminal advertises.
 type CmdFaithfulReport struct {
-	Repo         string
-	Displayed    string   // exact `cmd:` string the user would see
-	Executed     string   // space-joined executor argv (incl. "git")
-	Mismatches   []CmdFaithfulMismatch
+	Repo       string
+	Displayed  string // exact `cmd:` string the user would see
+	Executed   string // space-joined executor argv (incl. "git")
+	Mismatches []CmdFaithfulMismatch
 }
 
 // HasMismatch is a convenience predicate so callers can branch

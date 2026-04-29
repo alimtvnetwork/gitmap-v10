@@ -177,9 +177,9 @@ const (
 	MsgRecloneValidateNoURL           = "no HTTPSUrl or SSHUrl set"
 	MsgRecloneValidateMalformedURL    = "URL is not a valid git URL " +
 		"(expected scheme://host/path or user@host:path)"
-	MsgRecloneValidateMissingDest    = "missing RelativePath"
-	MsgRecloneValidateAbsoluteDest   = "RelativePath must be relative, not absolute"
-	MsgRecloneValidateTraversalDest  = "RelativePath escapes the working dir via '..'"
+	MsgRecloneValidateMissingDest   = "missing RelativePath"
+	MsgRecloneValidateAbsoluteDest  = "RelativePath must be relative, not absolute"
+	MsgRecloneValidateTraversalDest = "RelativePath escapes the working dir via '..'"
 	// Placeholders for empty fields in the report table.
 	MsgRecloneValidateUnnamedRepo = "<unnamed>"
 	MsgRecloneValidateEmptyDest   = "<empty>"
@@ -233,7 +233,7 @@ const (
 	// %d ok, %d skipped, %d failed, %d total.
 	MsgCloneNowSummaryHeader = "\ngitmap clone-now: %d ok, %d skipped, %d failed (%d total)\n"
 	MsgCloneNowDestExists    = "dest exists"
-	MsgCloneNowMissingArg = "reclone: <file> argument is required and " +
+	MsgCloneNowMissingArg    = "reclone: <file> argument is required and " +
 		"no scan artifact was found under ./.gitmap/output/ " +
 		"(looked for gitmap.json then gitmap.csv). " +
 		"Run `gitmap scan` first, or pass an explicit path " +
@@ -272,7 +272,7 @@ const (
 	MsgCloneNowSummaryTreeLineFmt = "    %s\n"
 	// %d = number of dirs not shown.
 	MsgCloneNowSummaryTreeTruncFmt = "    ... and %d more\n"
-	MsgCloneNowConfirmHeader = "reclone: %d destination folder(s) already exist on disk " +
+	MsgCloneNowConfirmHeader       = "reclone: %d destination folder(s) already exist on disk " +
 		"(--on-exists=%s will be applied to each):\n"
 	// %s = relative path. One bullet per existing destination, up
 	// to CloneNowExistingPreviewLimit rows.

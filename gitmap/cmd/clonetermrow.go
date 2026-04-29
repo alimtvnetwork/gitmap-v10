@@ -62,7 +62,6 @@ func printCloneNowTermBlockRow(index, total int, row clonenow.Row,
 	runCmdPrintArgv(clonenow.BuildGitArgs(row, url, dest))
 }
 
-
 // printCloneFromTermBlockRow emits one RepoTermBlock for one
 // clone-from row. clone-from never rewrites URLs, so OriginalURL
 // and TargetURL are both the row's URL. Branch source mirrors
