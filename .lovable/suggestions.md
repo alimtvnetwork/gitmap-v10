@@ -215,3 +215,24 @@ Pending improvement ideas — not yet approved for implementation.
 ### v3.0.0 badge in docs site header
 - **Implemented:** v3.0.0 session (this session)
 - **Notes:** `src/components/docs/DocsLayout.tsx` — Tailwind classes `ml-2 px-2 py-0.5 text-xs font-mono bg-primary/10 text-primary rounded`.
+
+### CI compile gate (`go test ./...` typecheck)
+- **Implemented:** 2026-04-29 session
+- **Notes:** Added pre-matrix step in `.github/workflows/ci.yml` that fails CI on any typecheck/build error after code changes.
+
+### CI Go build/test caching (`GOMODCACHE` + `GOCACHE`)
+- **Implemented:** 2026-04-29 session
+- **Notes:** `actions/setup-go@v5` cache + explicit `actions/cache` keyed on `go.sum` hash; speeds compile gate and downstream jobs.
+
+### CI gofmt check (`gofmt -l`)
+- **Implemented:** 2026-04-29 session
+- **Notes:** Lint job step that fails (with file list) on any unformatted `.go` file.
+
+### CI goimports check (pinned `v0.24.0`, dynamic `-local`)
+- **Implemented:** 2026-04-29 session
+- **Notes:** Reads module path from `go.mod`, runs `-l` then `-d`, prints copy-paste fix command. Positioned between `gofmt` and `go vet`.
+
+### golangci-lint strict gate (`--issues-exit-code=1`)
+- **Implemented:** 2026-04-29 session
+- **Notes:** `golangci/golangci-lint-action@v6` pinned `v1.64.8`, working-dir `gitmap`, `--timeout=5m --issues-exit-code=1`. Any lint error fails CI.
+
