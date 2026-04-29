@@ -16,6 +16,7 @@ var generatedCommands = []string{
 	"as",
 	"audit",
 	"audit-legacy",
+	"aul",
 	"b",
 	"bk",
 	"bookmark",
