@@ -32,10 +32,10 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $Script:HereDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-. (Join-Path $Script:HereDir 'scripts/fix-repo/RepoIdentity.ps1')
-. (Join-Path $Script:HereDir 'scripts/fix-repo/FileScan.ps1')
-. (Join-Path $Script:HereDir 'scripts/fix-repo/Rewrite.ps1')
-. (Join-Path $Script:HereDir 'scripts/fix-repo/Config.ps1')
+. (Join-Path $Script:HereDir 'scripts/fix-repo/Repo-Identity.ps1')
+. (Join-Path $Script:HereDir 'scripts/fix-repo/File-Scan.ps1')
+. (Join-Path $Script:HereDir 'scripts/fix-repo/Rewrite-Engine.ps1')
+. (Join-Path $Script:HereDir 'scripts/fix-repo/Config-Loader.ps1')
 
 $Script:ExitOk              = 0
 $Script:ExitNotARepo        = 2
@@ -92,7 +92,7 @@ function Write-Header {
     Write-Host ("fix-repo  base={0}  current=v{1}  mode={2}" -f $Identity.Base, $Current, $Mode)
     $list = if ($Targets.Count -gt 0) { ($Targets | ForEach-Object { "v$_" }) -join ', ' } else { '(none)' }
     Write-Host ("targets:  {0}" -f $list)
-    Write-Host ("host:     {0}  owner={1}" -f $Identity.Host, $Identity.Owner)
+    Write-Host ("host:     {0}  owner={1}" -f $Identity.RepoHost, $Identity.Owner)
     Write-Host ''
 }
 
@@ -156,7 +156,7 @@ function Resolve-Identity {
         exit $Script:ExitNoVersionSuffix
     }
     if ($split.Version -lt 1) { Write-Host "fix-repo: ERROR version <= 0 (E_BAD_VERSION)"; exit $Script:ExitBadVersion }
-    return [pscustomobject]@{ Root=$root; Host=$parsed.Host; Owner=$parsed.Owner; Base=$split.Base; Current=$split.Version }
+    return [pscustomobject]@{ Root=$root; RepoHost=$parsed.RepoHost; Owner=$parsed.Owner; Base=$split.Base; Current=$split.Version }
 }
 
 # ── Main ──────────────────────────────────────────────────────────────
