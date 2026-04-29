@@ -429,6 +429,10 @@ jobs:
           path: /tmp/lint-gosec-g115-baseline
           key: golangci-gosec-g115-baseline-main-${{ github.sha }}
 
+      - name: Install ripgrep (for bare-stderr check)
+        if: needs.sha-check.outputs.already-built != 'true'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ripgrep
+
       - name: Forbid bare stderr error prints in gitmap/cmd
         if: needs.sha-check.outputs.already-built != 'true'
         shell: bash
