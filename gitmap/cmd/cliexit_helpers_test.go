@@ -26,6 +26,7 @@ package cmd
 
 import (
 	"bytes"
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -40,7 +41,7 @@ import (
 // the cliexit files pays no build cost.
 var (
 	gitmapBinary    string
-	gitmapBuildErr  error
+	errGitmapBuild  error
 	gitmapBuildOnce sync.Once
 )
 
@@ -51,8 +52,8 @@ var (
 func ensureGitmapBinary(t *testing.T) string {
 	t.Helper()
 	gitmapBuildOnce.Do(buildGitmapBinaryOnce)
-	if gitmapBuildErr != nil {
-		t.Skipf("gitmap binary unavailable for cliexit tests: %v", gitmapBuildErr)
+	if errGitmapBuild != nil {
+		t.Skipf("gitmap binary unavailable for cliexit tests: %v", errGitmapBuild)
 	}
 
 	return gitmapBinary
@@ -62,7 +63,7 @@ func ensureGitmapBinary(t *testing.T) string {
 // t.Parallel tests share a single artifact.
 func buildGitmapBinaryOnce() {
 	if _, err := exec.LookPath("go"); err != nil {
-		gitmapBuildErr = err
+		errGitmapBuild = err
 
 		return
 	}
@@ -75,7 +76,7 @@ func buildGitmapBinaryOnce() {
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
-		gitmapBuildErr = wrapBuildErr(err, &stderr)
+		errGitmapBuild = wrapBuildErr(err, &stderr)
 
 		return
 	}
@@ -161,21 +162,9 @@ func extractTestExitCode(err error) int {
 		return 0
 	}
 	var exitErr *exec.ExitError
-	if asExitError(err, &exitErr) {
+	if errors.As(err, &exitErr) {
 		return exitErr.ExitCode()
 	}
 
 	return -1
-}
-
-// asExitError isolates the type-assert so extractExitCode stays one
-// line of logic per branch (project style cap on cyclomatic noise).
-func asExitError(err error, target **exec.ExitError) bool {
-	e, ok := err.(*exec.ExitError)
-	if !ok {
-		return false
-	}
-	*target = e
-
-	return true
 }

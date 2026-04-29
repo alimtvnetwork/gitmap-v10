@@ -42,7 +42,6 @@ func TestFormatLine_Shape(t *testing.T) {
 		},
 	}
 	for _, tc := range cases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			got := formatLine(tc.command, tc.op, tc.subject, tc.err)

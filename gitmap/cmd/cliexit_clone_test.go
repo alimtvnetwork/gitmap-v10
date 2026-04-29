@@ -39,7 +39,6 @@ import (
 func TestCloneCLI_HelpExitsZero(t *testing.T) {
 	t.Parallel()
 	for _, cmd := range cloneFamilyCmds() {
-		cmd := cmd
 		t.Run("help_"+cmd, func(t *testing.T) {
 			t.Parallel()
 			code, stdout, stderr := runGitmap(t, []string{cmd, "--help"}, "")
@@ -70,7 +69,6 @@ func TestCloneCLI_FailureExitCodes(t *testing.T) {
 		{"clonepick_no_args", []string{"clone-pick"}, 2},
 	}
 	for _, tc := range cases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			code, stdout, stderr := runGitmap(t, tc.args, "")
