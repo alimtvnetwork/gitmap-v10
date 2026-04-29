@@ -23,12 +23,12 @@ Two distinct enforcement models live under the "regression guard" umbrella:
 Baseline is cached as `golangci-baseline-main-…`, refreshed only on successful pushes to `main`.
 
 ## Status
-🔄 In Progress — awaiting user decision (see "Resolution Path").
+✅ Resolved (2026-04-29) — User chose Option (b). Job renamed `lint-regression-guard` → `lint-hard-floor` in `.github/workflows/ci.yml`. Comment block rewritten to clearly document that the primary step is hard-floor (`unused` + `G115`) and that the misspell/gocritic/exhaustive sub-steps remain baseline-diff (kept co-located for cache-key locality, with per-step comments stating their model). New job label: `Lint Hard Floor (unused + G115) + baseline-diff sub-steps`.
 
-## Resolution Path
+## Resolution Path (historical)
 Two options presented to user:
 - **(a)** Convert `unused` + `G115` to baseline-diff semantics (any new issue fails; existing baseline tolerated).
-- **(b)** Rename `lint-regression-guard` → `lint-hard-floor` (or split into two jobs) so the job name reflects zero-tolerance enforcement and stops implying baseline-diff.
+- **(b)** Rename `lint-regression-guard` → `lint-hard-floor` (or split into two jobs) so the job name reflects zero-tolerance enforcement and stops implying baseline-diff. ← **Selected.**
 
 ## Prevention
 - When adding a new linter to CI, decide upfront: hard-floor or baseline-diff. Document the choice in the script header comment.
