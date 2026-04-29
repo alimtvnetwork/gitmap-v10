@@ -76,7 +76,13 @@ function Write-OK([string]$msg)   { if (-not $Quiet) { Write-Host "  OK $msg"  -
 function Write-Warn2([string]$m)  { if (-not $Quiet) { Write-Host "  !  $m"    -ForegroundColor Yellow } }
 function Write-Err2([string]$m)   { Write-Host "  X  $m" -ForegroundColor Red }
 
+function Set-InstallerExitCode([int]$exitCode) {
+    $global:LASTEXITCODE = $exitCode
+    [System.Environment]::ExitCode = $exitCode
+}
+
 function Write-FatalError($record, [int]$exitCode = 1) {
+    Set-InstallerExitCode $exitCode
     $message = "Unknown PowerShell error"
     if ($record) {
         if ($record.Exception -and -not [string]::IsNullOrWhiteSpace($record.Exception.Message)) {
@@ -139,7 +145,7 @@ function Write-FatalError($record, [int]$exitCode = 1) {
     }
 
     Write-Host ""
-    exit $exitCode
+    return
 }
 
 # ---------------------------------------------------------------------------
