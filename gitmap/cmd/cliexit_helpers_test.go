@@ -132,7 +132,7 @@ func runGitmap(t *testing.T, args []string, stdin string) (int, string, string) 
 	cmd.Stderr = &stderr
 	err := cmd.Run()
 
-	return extractExitCode(err), stdout.String(), stderr.String()
+	return extractTestExitCode(err), stdout.String(), stderr.String()
 }
 
 // hermeticEnv strips variables that could change behavior between
@@ -151,11 +151,12 @@ func hermeticEnv() []string {
 	return out
 }
 
-// extractExitCode normalizes os/exec's error -> int conversion. A
+// extractTestExitCode normalizes os/exec's error -> int conversion. A
 // non-ExitError (couldn't start, signal, etc.) returns -1 so the
 // caller's table assertion fails with a clear "got -1" rather than
-// silently passing on an exit-0 default.
-func extractExitCode(err error) int {
+// silently passing on an exit-0 default. Distinct from the
+// production extractExitCode in regoldens.go which maps to 127.
+func extractTestExitCode(err error) int {
 	if err == nil {
 		return 0
 	}
