@@ -203,31 +203,32 @@ jobs:
           working-directory: gitmap
           args: --timeout=5m --issues-exit-code=1
 
-  lint-hard-floor:
-    # HARD-FLOOR job: zero-tolerance enforcement for rule classes that
-    # must never have ANY occurrence in the codebase. Unlike
-    # `lint-baseline-diff` (which permits pre-existing findings so
-    # contributors can land incremental improvements), the primary step
-    # of this job runs golangci-lint with --no-config so the repo's
-    # excludes/baselines cannot mask a finding.
+  lint-baseline-guard:
+    # BASELINE-DIFF job: every linter wired below uses the same contract
+    # — only NEW findings (vs the cached main-branch baseline) fail the
+    # build. Pre-existing findings are surfaced in summaries but do not
+    # block merges, letting contributors land incremental improvements
+    # without blowing up the tree.
     #
-    # Hard-floor rule classes (script enables ONLY these):
+    # Linters covered (each via .github/scripts/check-single-linter-diff.sh,
+    # full-path-only, --no-config so excludes can't mask a regression):
     #   - unused              dead code (functions, vars, consts, types)
     #   - gosec G115          integer overflow conversions
+    #     (TEXT_FILTER=^G115 scopes the gosec analyzer to a single rule)
+    #   - misspell            US-English spelling
+    #   - gocritic            style/perf advisories (appendAssign, etc.)
+    #   - exhaustive          missing cases in `switch`
     #
-    # NOTE: This job ALSO hosts baseline-diff sub-steps for misspell,
-    # gocritic, and exhaustive (see steps below). Those are NOT
-    # hard-floor — they fail only on net-new findings vs the cached
-    # main-branch baseline. They live here purely for cache-key locality
-    # with the misspell/gocritic baselines; the enforcement model per
-    # linter is documented inline at each step.
-    name: Lint Hard Floor (unused + G115) + baseline-diff sub-steps
+    # Each linter has its own rolling cache slot keyed by SHA, refreshed
+    # only on successful pushes to `main`. Restoring older caches via
+    # `restore-keys` keeps PR builds fast while the baseline tracks main.
+    name: Lint Baseline Guard (unused, gosec G115, misspell, gocritic, exhaustive)
     runs-on: ubuntu-latest
     needs: sha-check
     steps:
       - name: Already validated
         if: needs.sha-check.outputs.already-built == 'true'
-        run: echo "SHA ${{ github.sha }} already passed lint hard floor"
+        run: echo "SHA ${{ github.sha }} already passed lint baseline guard"
 
       - uses: actions/checkout@v6
         if: needs.sha-check.outputs.already-built != 'true'
@@ -245,10 +246,95 @@ jobs:
             | sh -s -- -b "$(go env GOPATH)/bin" v1.64.8
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
-      - name: Run regression guard
+      # ---- unused diff (baseline-diff, full-path only) --------------
+      - name: Restore unused baseline (rolling, single slot)
+        id: unused-baseline-cache
+        if: needs.sha-check.outputs.already-built != 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/lint-unused-baseline
+          key: golangci-unused-baseline-main-${{ github.sha }}
+          restore-keys: |
+            golangci-unused-baseline-main-
+
+      - name: Unused diff (baseline-diff, full-path only)
+        # Catches NEW dead-code findings (functions, vars, consts, types)
+        # introduced by this PR/commit. Pre-existing dead code stays in
+        # the baseline; contributors can clean it up incrementally.
         if: needs.sha-check.outputs.already-built != 'true'
         shell: bash
-        run: bash .github/scripts/check-lint-regressions.sh gitmap
+        env:
+          LINTER: unused
+          BASELINE: /tmp/lint-unused-baseline/report.json
+          CURRENT_OUT: /tmp/lint-unused-current/report.json
+        run: bash .github/scripts/check-single-linter-diff.sh gitmap
+
+      - name: Save unused baseline (main only)
+        if: |
+          needs.sha-check.outputs.already-built != 'true' &&
+          github.ref == 'refs/heads/main' &&
+          github.event_name == 'push'
+        shell: bash
+        run: |
+          mkdir -p /tmp/lint-unused-baseline
+          cp /tmp/lint-unused-current/report.json \
+             /tmp/lint-unused-baseline/report.json
+
+      - name: Persist unused baseline cache (main only)
+        if: |
+          needs.sha-check.outputs.already-built != 'true' &&
+          github.ref == 'refs/heads/main' &&
+          github.event_name == 'push'
+        uses: actions/cache/save@v4
+        with:
+          path: /tmp/lint-unused-baseline
+          key: golangci-unused-baseline-main-${{ github.sha }}
+
+      # ---- gosec G115 diff (baseline-diff, full-path only) ----------
+      - name: Restore gosec-G115 baseline (rolling, single slot)
+        id: gosec-g115-baseline-cache
+        if: needs.sha-check.outputs.already-built != 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/lint-gosec-g115-baseline
+          key: golangci-gosec-g115-baseline-main-${{ github.sha }}
+          restore-keys: |
+            golangci-gosec-g115-baseline-main-
+
+      - name: Gosec G115 diff (baseline-diff, full-path only)
+        # Runs the full `gosec` analyzer but TEXT_FILTER scopes the diff
+        # to G115 (integer overflow conversions). Pre-existing G115
+        # findings stay tolerated in the baseline; only NEW ones fail.
+        if: needs.sha-check.outputs.already-built != 'true'
+        shell: bash
+        env:
+          LINTER: gosec
+          LABEL: gosec-G115
+          TEXT_FILTER: G115
+          BASELINE: /tmp/lint-gosec-g115-baseline/report.json
+          CURRENT_OUT: /tmp/lint-gosec-g115-current/report.json
+        run: bash .github/scripts/check-single-linter-diff.sh gitmap
+
+      - name: Save gosec-G115 baseline (main only)
+        if: |
+          needs.sha-check.outputs.already-built != 'true' &&
+          github.ref == 'refs/heads/main' &&
+          github.event_name == 'push'
+        shell: bash
+        run: |
+          mkdir -p /tmp/lint-gosec-g115-baseline
+          cp /tmp/lint-gosec-g115-current/report.json \
+             /tmp/lint-gosec-g115-baseline/report.json
+
+      - name: Persist gosec-G115 baseline cache (main only)
+        if: |
+          needs.sha-check.outputs.already-built != 'true' &&
+          github.ref == 'refs/heads/main' &&
+          github.event_name == 'push'
+        uses: actions/cache/save@v4
+        with:
+          path: /tmp/lint-gosec-g115-baseline
+          key: golangci-gosec-g115-baseline-main-${{ github.sha }}
 
       - name: Forbid bare stderr error prints in gitmap/cmd
         if: needs.sha-check.outputs.already-built != 'true'
