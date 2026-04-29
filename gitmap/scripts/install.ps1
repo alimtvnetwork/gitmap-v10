@@ -991,7 +991,8 @@ try {
     $installResult = Main
 
     if (-not $installResult) {
-        exit 1
+        Set-InstallerExitCode 1
+        return
     }
 
     # Set $env:PATH at the TOP-LEVEL script scope (not inside a function)
@@ -1026,4 +1027,5 @@ try {
 }
 catch {
     Write-FatalError $_ 1
+    return
 }
