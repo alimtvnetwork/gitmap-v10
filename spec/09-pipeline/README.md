@@ -18,6 +18,7 @@ Generic, portable documentation for the project's CI/CD pipeline architecture. T
 | [08-terminal-output-standards.md](./08-terminal-output-standards.md) | Output formatting conventions: icons, tables, progress, errors, CI summaries |
 | [09-binary-icon-branding.md](./09-binary-icon-branding.md) | Windows binary icon embedding via `go-winres`: icon, manifest, version info |
 | [10-known-issues-and-fixes.md](./10-known-issues-and-fixes.md) | Post-mortem catalog: every CI/CD pipeline failure with root cause, fix, and prevention rule |
+| [11-lint-gating-rules.md](./11-lint-gating-rules.md) | Lint baseline-diff vs. hard-floor model, per-linter gating table, how to add new linters |
 
 ---
 
