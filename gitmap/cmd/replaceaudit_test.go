@@ -16,7 +16,7 @@ import (
 // scanner: every target version produces exactly two needles
 // (`<base>-vN` and `<base>/vN`) in deterministic order.
 func TestBuildAuditNeedles(t *testing.T) {
-	got := buildAuditNeedles("gitmap", []int{4, 8})
+	got := buildAuditNeedles("gitmap", []int{4, 9})
 	want := [][]byte{
 		[]byte("gitmap-v4"), []byte("gitmap/v4"),
 		[]byte("gitmap-v9"), []byte("gitmap/v9"),

@@ -61,7 +61,7 @@ func TestRemoteSlugRegex(t *testing.T) {
 // both a `-vN` and a `/vN` replacement so Go module import paths and
 // repo URLs are bumped in the same pass.
 func TestPairsForTarget(t *testing.T) {
-	got := pairsForTarget("gitmap", 4, 8)
+	got := pairsForTarget("gitmap", 4, 9)
 	if len(got) != 2 {
 		t.Fatalf("expected 2 pairs, got %d", len(got))
 	}
