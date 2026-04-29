@@ -1112,6 +1112,7 @@ jobs:
             go-build-${{ runner.os }}-jsonsnap-${{ hashFiles('gitmap/go.sum') }}-
             go-build-${{ runner.os }}-jsonsnap-
 
+      - name: Run JSON snapshot fast tests
         if: needs.sha-check.outputs.already-built != 'true'
         working-directory: gitmap
         shell: bash
@@ -1278,6 +1279,7 @@ jobs:
             go-build-${{ runner.os }}-fullsuite-${{ hashFiles('gitmap/go.sum') }}-
             go-build-${{ runner.os }}-fullsuite-
 
+      - name: Run full test suite
         if: needs.sha-check.outputs.already-built != 'true'
         id: full-test
         working-directory: gitmap
@@ -1616,6 +1618,7 @@ jobs:
             go-build-${{ runner.os }}-build-${{ matrix.os }}-${{ matrix.arch }}-${{ hashFiles('gitmap/go.sum') }}-
             go-build-${{ runner.os }}-build-${{ matrix.os }}-${{ matrix.arch }}-
 
+      - name: Print build stamp
         # Prints the exact commit SHA, branch, declared `constants.Version`,
         # and a sha256 fingerprint of the two historically-problematic
         # cmd/ files (updaterepo.go + updatedebugwindows.go) so a stale
