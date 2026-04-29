@@ -519,6 +519,26 @@ function Retry-GitPull {
     Write-Success "Pull complete"
 }
 
+# -- Toolchain preflight --------------------------------------
+function Test-GoToolchain {
+    $goCmd = Get-Command go -ErrorAction SilentlyContinue
+    if ($goCmd) { return }
+    Write-Fail "Go toolchain not found on PATH"
+    Write-Host ""
+    Write-Host "  The 'go' command is required to build gitmap, but it is not" -ForegroundColor Yellow
+    Write-Host "  available in this PowerShell session." -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "  Fix options:" -ForegroundColor Cyan
+    Write-Host "    1. Install Go from https://go.dev/dl/  (use the v1.24.x MSI)"
+    Write-Host "    2. If Go is already installed, add it to PATH for this session:"
+    Write-Host "         `$env:Path = 'C:\Program Files\Go\bin;' + `$env:Path"
+    Write-Host "    3. Then re-open PowerShell (or run .\run.ps1 again)."
+    Write-Host ""
+    Write-Host "  Verify with:  go version" -ForegroundColor Cyan
+    Write-Host ""
+    exit 1
+}
+
 # -- Resolve dependencies -------------------------------------
 function Resolve-Dependencies {
     Write-Step "2/4" "Resolving Go dependencies"
@@ -1576,6 +1596,7 @@ function Invoke-Tests {
 Show-Banner
 Get-DeployManifest
 $config = Load-Config
+Test-GoToolchain
 
 # -- Uninstall / Reinstall handlers ----------------------------
 # -Uninstall  : delegate to ./uninstall-quick.ps1 -Yes and exit.
