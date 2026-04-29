@@ -9,14 +9,15 @@
 3. **gofmt check** — Added a step that runs `gofmt -l` on all `.go` files; fails (with file list) on any unformatted file.
 4. **goimports check** — Added a `goimports` step pinned to `golang.org/x/tools/cmd/goimports@v0.24.0`. Reads `LOCAL_PREFIX` dynamically from `go.mod`, runs `-l` for detection then `-d` for diff output, prints copy-pasteable fix command. Positioned between `gofmt` and `go vet`.
 5. **golangci-lint strict gate** — Updated `golangci/golangci-lint-action@v6` step args to include `--issues-exit-code=1`. Pinned version remains `v1.64.8`, timeout `5m`. Working dir `gitmap`.
-6. **Regression-guard semantics audit** — Documented that the "fail only on new issues" contract is split:
-   - **Hard floor (zero-tolerance, ignores baseline):** `lint-hard-floor` job (renamed from `lint-regression-guard` on 2026-04-29) for `unused` + `gosec G115`, via `.github/scripts/check-lint-regressions.sh`.
-   - **Baseline-diff (fail only on NEW):** `lint-baseline-diff` job (full JSON diff via `.github/scripts/lint-diff.py`) and per-linter sub-steps for `misspell`, `gocritic`, `exhaustive` via `.github/scripts/check-single-linter-diff.sh`.
-   - Baseline cache: `golangci-baseline-main-…`, refreshed only on successful pushes to `main`.
+6. **Lint guard semantics — final state (2026-04-29, two-pass)** — All five guarded linters now share ONE contract: baseline-diff via `.github/scripts/check-single-linter-diff.sh`.
+   - **Pass 1:** Renamed `lint-regression-guard` → `lint-hard-floor` to make the split semantics honest.
+   - **Pass 2:** User chose to unify everything as baseline-diff. Renamed → `lint-baseline-guard`. Replaced the `unused`+`G115` hard-floor step with two new baseline-diff sub-steps (each with rolling per-linter cache: `golangci-unused-baseline-main-` and `golangci-gosec-g115-baseline-main-`). Extended `check-single-linter-diff.sh` with `TEXT_FILTER` (regex on `.Text`, used to scope `gosec` to G115 — applied to BOTH current and baseline) and `LABEL` (banner/annotation override). Deleted `.github/scripts/check-lint-regressions.sh`. Added `lint-baseline-guard` to `test-summary` job's `needs:`.
+   - Linters covered: `unused`, `gosec G115`, `misspell`, `gocritic`, `exhaustive`. Each has its own rolling cache slot keyed by SHA, restored via prefix.
+   - Full JSON diff still in separate `lint-baseline-diff` job (`lint-diff.py`).
 
 ## ⏳ Pending / Open
 
-- 🚫 Decision needed from user: convert `unused` + `G115` from hard-floor to baseline-diff semantics, OR rename the job/docs to clearly say "hard floor" rather than "regression guard". Currently left as-is awaiting input.
+- ⚠️ **Branch protection follow-up**: required-check name in branch protection (if configured) needs updating to `Lint Baseline Guard (unused, gosec G115, misspell, gocritic, exhaustive)`. Old check names (`Lint Regression Guard …`, `Lint Hard Floor …`) will no longer appear after this merges.
 - ⏳ Verify CI green on next push (no live run inspected this session).
 - ⏳ Consider adding `goimports` and `gofmt` to the local `hooks/pre-commit` for parity with CI.
 
