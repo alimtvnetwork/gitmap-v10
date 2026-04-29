@@ -19,7 +19,7 @@ func TestBuildAuditNeedles(t *testing.T) {
 	got := buildAuditNeedles("gitmap", []int{4, 8})
 	want := [][]byte{
 		[]byte("gitmap-v4"), []byte("gitmap/v4"),
-		[]byte("gitmap-v8"), []byte("gitmap/v8"),
+		[]byte("gitmap-v9"), []byte("gitmap/v9"),
 	}
 	if len(got) != len(want) {
 		t.Fatalf("len = %d, want %d", len(got), len(want))
@@ -35,11 +35,11 @@ func TestBuildAuditNeedles(t *testing.T) {
 // whether a line is reportable. Tested independently so future
 // optimizations cannot regress the contract.
 func TestLineContainsAny(t *testing.T) {
-	needles := [][]byte{[]byte("gitmap-v4"), []byte("gitmap/v8")}
+	needles := [][]byte{[]byte("gitmap-v4"), []byte("gitmap/v9")}
 	if !lineContainsAny([]byte("import gitmap-v4/foo"), needles) {
 		t.Error("expected dash-form match")
 	}
-	if !lineContainsAny([]byte("module github.com/x/gitmap/v8"), needles) {
+	if !lineContainsAny([]byte("module github.com/x/gitmap/v9"), needles) {
 		t.Error("expected slash-form match")
 	}
 	if lineContainsAny([]byte("nothing relevant"), needles) {
@@ -52,10 +52,10 @@ func TestLineContainsAny(t *testing.T) {
 func TestScanAuditFileFormatting(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "doc.md")
-	body := "intro line\nsee gitmap-v4 for details\nclean line\nuse gitmap/v8 too\n"
+	body := "intro line\nsee gitmap-v4 for details\nclean line\nuse gitmap/v9 too\n"
 	mustWriteFile(t, path, []byte(body))
 
-	needles := [][]byte{[]byte("gitmap-v4"), []byte("gitmap/v8")}
+	needles := [][]byte{[]byte("gitmap-v4"), []byte("gitmap/v9")}
 
 	stdout, hits := captureStdout(t, func() int {
 		return scanAuditFile(path, needles)
@@ -66,7 +66,7 @@ func TestScanAuditFileFormatting(t *testing.T) {
 	}
 
 	want2 := fmt.Sprintf(constants.MsgReplaceAuditMatch, path, 2, "see gitmap-v4 for details")
-	want4 := fmt.Sprintf(constants.MsgReplaceAuditMatch, path, 4, "use gitmap/v8 too")
+	want4 := fmt.Sprintf(constants.MsgReplaceAuditMatch, path, 4, "use gitmap/v9 too")
 	if !strings.Contains(stdout, want2) {
 		t.Errorf("missing line-2 hit\n got: %q\nwant substring: %q", stdout, want2)
 	}
