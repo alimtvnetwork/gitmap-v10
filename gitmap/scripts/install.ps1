@@ -136,7 +136,7 @@ function Invoke-DelegatedFullInstaller([string]$effectiveRepo) {
         & $block @passArgs
     }
     catch {
-        Write-FatalError $_ 1
+        throw
     }
     return $true
 }
@@ -865,7 +865,7 @@ function Main {
         return @{ InstallDir = $resolvedDir; NewPath = $script:NewPath; Version = $resolvedVersion; PathResult = $pathResult }
     }
     catch {
-        Write-FatalError $_ 1
+        throw
     }
 }
 
