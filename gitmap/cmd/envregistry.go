@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/model"
 )
 
 // loadEnvRegistry reads and parses the env-registry.json file.

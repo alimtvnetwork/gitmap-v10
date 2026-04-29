@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 )
 
 // RunMove executes `gitmap mv LEFT RIGHT`: copy LEFT into RIGHT,

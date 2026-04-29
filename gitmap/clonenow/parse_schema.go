@@ -23,7 +23,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 )
 
 // knownScanFields is the authoritative set of JSON / CSV field names

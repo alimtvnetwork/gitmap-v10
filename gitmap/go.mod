@@ -1,4 +1,4 @@
-module github.com/alimtvnetwork/gitmap-v8/gitmap
+module github.com/alimtvnetwork/gitmap-v9/gitmap
 
 go 1.24.13
 

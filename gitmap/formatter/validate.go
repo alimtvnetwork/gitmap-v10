@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/model"
 )
 
 // ValidationIssue describes one problem discovered in one record. Rendered

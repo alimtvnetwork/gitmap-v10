@@ -8,7 +8,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 )
 
 // acquireLock creates an advisory lock file in the given directory.

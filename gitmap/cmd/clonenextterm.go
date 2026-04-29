@@ -13,8 +13,8 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/render"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/render"
 )
 
 // maybePrintCloneNextTermBlock emits the standardized RepoTermBlock

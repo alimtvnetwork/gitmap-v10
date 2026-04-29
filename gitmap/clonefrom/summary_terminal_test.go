@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 )
 
 // TestClassifyScheme_AllBuckets pins one URL per bucket so a future

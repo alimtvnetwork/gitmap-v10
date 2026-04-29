@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/downloaderconfig"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/downloaderconfig"
 )
 
 // SeedDownloaderConfig applies the Seedable-Config to the database.

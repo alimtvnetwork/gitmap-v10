@@ -7,8 +7,8 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/verbose"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/verbose"
 )
 
 // AutoCommitResult describes what happened during auto-commit.

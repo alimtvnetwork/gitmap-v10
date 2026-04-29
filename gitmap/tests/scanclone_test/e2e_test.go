@@ -20,11 +20,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/clonenow"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/formatter"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/goldenguard"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/clonenow"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/formatter"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/goldenguard"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/model"
 )
 
 // e2eScanRecords is the synthetic "scan output" the pipeline replays.

@@ -5,8 +5,8 @@ import (
 	"os"
 	"sync"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/scanner"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/scanner"
 )
 
 // scanProgressRenderer renders a single-line, CR-overwritten live status

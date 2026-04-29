@@ -14,7 +14,7 @@ import (
 	"os/exec"
 	"regexp"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 )
 
 // versionPattern matches the three version-shaped tokens any cross-dir

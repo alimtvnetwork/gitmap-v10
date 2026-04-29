@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/alimtvnetwork/gitmap-v8/scripts/changelog/internal/group"
-	"github.com/alimtvnetwork/gitmap-v8/scripts/changelog/internal/render"
+	"github.com/alimtvnetwork/gitmap-v9/scripts/changelog/internal/group"
+	"github.com/alimtvnetwork/gitmap-v9/scripts/changelog/internal/render"
 )
 
 func TestPrependBothInsertsAtTopWithoutLosingExisting(t *testing.T) {

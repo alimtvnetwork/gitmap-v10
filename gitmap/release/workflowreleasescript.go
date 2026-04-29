@@ -11,9 +11,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/scripts"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/verbose"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/scripts"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/verbose"
 )
 
 // releaseScriptSnapshot describes one snapshot to generate.

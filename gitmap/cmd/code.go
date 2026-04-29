@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/store"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/vscodepm"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/store"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/vscodepm"
 )
 
 // runCode implements `gitmap code` and its `paths` subcommand.

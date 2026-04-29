@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/model"
 )
 
 // TestDefaultConfig verifies built-in defaults are sensible.

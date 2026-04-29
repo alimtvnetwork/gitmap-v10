@@ -6,9 +6,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/release"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/store"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/release"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/store"
 )
 
 // runTempReleaseRemove handles "tr remove <version>|<v1> to <v2>|all".

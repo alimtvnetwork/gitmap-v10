@@ -21,10 +21,10 @@ import (
 	"io"
 	"os"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/cliexit"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/cloneconcurrency"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/clonenow"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/cliexit"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/cloneconcurrency"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/clonenow"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 )
 
 // cloneNowFlags holds parsed CLI inputs. Grouped in a struct so

@@ -58,7 +58,7 @@ jobs:
         working-directory: gitmap
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          LDFLAGS="-s -w -X 'github.com/alimtvnetwork/gitmap-v8/gitmap/constants.Version=$VERSION'"
+          LDFLAGS="-s -w -X 'github.com/alimtvnetwork/gitmap-v9/gitmap/constants.Version=$VERSION'"
 
           TARGETS=(
             "windows/amd64/.exe"
@@ -82,7 +82,7 @@ jobs:
         working-directory: gitmap-updater
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          LDFLAGS="-s -w -X 'github.com/alimtvnetwork/gitmap-v8/gitmap-updater/cmd.Version=$VERSION'"
+          LDFLAGS="-s -w -X 'github.com/alimtvnetwork/gitmap-v9/gitmap-updater/cmd.Version=$VERSION'"
 
           TARGETS=(
             "windows/amd64/.exe"
@@ -163,7 +163,7 @@ jobs:
       - name: Generate version-specific install script
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          REPO="alimtvnetwork/gitmap-v8"
+          REPO="alimtvnetwork/gitmap-v9"
 
           cat > gitmap/dist/install.ps1 << 'PSEOF'
           <#
@@ -371,7 +371,7 @@ jobs:
       - name: Generate version-specific install.sh
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          REPO="alimtvnetwork/gitmap-v8"
+          REPO="alimtvnetwork/gitmap-v9"
 
           cat > gitmap/dist/install.sh << 'SHEOF'
           #!/usr/bin/env bash
@@ -585,7 +585,7 @@ jobs:
       - name: Build release body
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          REPO="alimtvnetwork/gitmap-v8"
+          REPO="alimtvnetwork/gitmap-v9"
           COMMIT_SHA="${GITHUB_SHA}"
           BRANCH="${GITHUB_REF_NAME}"
           BUILD_DATE="$(date -u '+%Y-%m-%d %H:%M:%S UTC')"

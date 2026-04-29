@@ -83,7 +83,7 @@ are embedded into the binary via `go:embed` in
 
 1. Tries `scripts.ReadFile(name)` first (offline, instant).
 2. Falls back to `https://raw.githubusercontent.com/alimtvnetwork/
-   gitmap-v8/main/gitmap/scripts/install.{ps1,sh}` if the embedded
+   gitmap-v9/main/gitmap/scripts/install.{ps1,sh}` if the embedded
    copy is missing or empty.
 
 ### Execution

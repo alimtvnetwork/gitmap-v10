@@ -9,8 +9,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/model"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/verbose"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/verbose"
 )
 
 // createMaxCompressZip creates a ZIP archive with Deflate level 9.

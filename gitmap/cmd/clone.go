@@ -6,13 +6,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/cloneconcurrency"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/clonenext"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/cloner"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/desktop"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/model"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/verbose"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/cloneconcurrency"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/clonenext"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/cloner"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/desktop"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/verbose"
 )
 
 // applySSHKey sets GIT_SSH_COMMAND if an SSH key name is provided.

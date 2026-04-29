@@ -1,7 +1,7 @@
 package gitutil
 
 import (
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 )
 
 // FetchAll runs git fetch --all --prune for a repo (best effort).

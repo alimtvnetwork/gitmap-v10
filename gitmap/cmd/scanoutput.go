@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/constants"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/formatter"
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/formatter"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/model"
 )
 
 // writeAllOutputs writes terminal, CSV, JSON, text, folder structure, and clone scripts.

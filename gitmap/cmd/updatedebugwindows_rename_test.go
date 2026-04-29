@@ -20,7 +20,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/fsutil"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/fsutil"
 )
 
 // TestFsutilMigrationPinned compiles only when the cmd package is using

@@ -3,7 +3,7 @@ package cmd
 import (
 	"testing"
 
-	"github.com/alimtvnetwork/gitmap-v8/gitmap/templates"
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/templates"
 )
 
 // mustResolveForTest loads (kind, lang) pairs from the embedded

@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/alimtvnetwork/gitmap-v8/scripts/changelog/internal/drift"
-	"github.com/alimtvnetwork/gitmap-v8/scripts/changelog/internal/gitlog"
-	"github.com/alimtvnetwork/gitmap-v8/scripts/changelog/internal/group"
-	"github.com/alimtvnetwork/gitmap-v8/scripts/changelog/internal/render"
-	"github.com/alimtvnetwork/gitmap-v8/scripts/changelog/internal/writer"
+	"github.com/alimtvnetwork/gitmap-v9/scripts/changelog/internal/drift"
+	"github.com/alimtvnetwork/gitmap-v9/scripts/changelog/internal/gitlog"
+	"github.com/alimtvnetwork/gitmap-v9/scripts/changelog/internal/group"
+	"github.com/alimtvnetwork/gitmap-v9/scripts/changelog/internal/render"
+	"github.com/alimtvnetwork/gitmap-v9/scripts/changelog/internal/writer"
 )
 
 // Execute runs the chosen mode and returns the process exit code.

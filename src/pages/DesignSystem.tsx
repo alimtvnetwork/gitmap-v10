@@ -88,7 +88,7 @@ func main() {
 }`;
 
 const bashExample = `# Install gitmap
-curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v8/main/gitmap/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v9/main/gitmap/scripts/install.sh | bash
 
 # Scan all repos
 gitmap scan ~/projects --format table

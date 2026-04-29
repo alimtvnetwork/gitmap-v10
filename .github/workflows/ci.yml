@@ -1562,7 +1562,7 @@ jobs:
         working-directory: gitmap
         run: |
           VERSION="dev-${GITHUB_SHA::10}"
-          LDFLAGS="-s -w -X 'github.com/alimtvnetwork/gitmap-v8/gitmap/constants.Version=$VERSION'"
+          LDFLAGS="-s -w -X 'github.com/alimtvnetwork/gitmap-v9/gitmap/constants.Version=$VERSION'"
           OUTPUT="gitmap-${VERSION}-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }}"
           echo "Building $OUTPUT..."
           CGO_ENABLED=0 GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -ldflags "$LDFLAGS" -o "$OUTPUT" .
