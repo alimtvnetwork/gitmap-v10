@@ -56,7 +56,7 @@ func canonicalReportResults() []Result {
 			Duration: 1234 * time.Millisecond,
 		},
 		{
-			Row: Row{URL: "https://github.com/acme/gadget.git"},
+			Row:      Row{URL: "https://github.com/acme/gadget.git"},
 			Dest:     "gadget",
 			Status:   constants.CloneFromStatusSkipped,
 			Detail:   "dest exists",

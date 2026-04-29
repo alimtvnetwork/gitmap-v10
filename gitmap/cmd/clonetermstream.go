@@ -34,15 +34,15 @@ import (
 // Each caller controls three override fields to achieve that:
 //
 //   - CmdBranch:        branch passed to `-b` in the printed cmd.
-//                       Empty means "no `-b` flag".
+//     Empty means "no `-b` flag".
 //   - CmdExtraArgsPre:  literal tokens inserted between `git clone`
-//                       and the `-b` slot. Used by clone-pick for
-//                       `--filter=blob:none --no-checkout` and the
-//                       long-form `--branch X` / `--depth N`.
+//     and the `-b` slot. Used by clone-pick for
+//     `--filter=blob:none --no-checkout` and the
+//     long-form `--branch X` / `--depth N`.
 //   - CmdExtraArgsPost: literal tokens inserted between the `-b`
-//                       slot and the positional `<url> <dest>` pair.
-//                       Used by clone-from for `--depth=N` (its
-//                       executor places --depth AFTER -b).
+//     slot and the positional `<url> <dest>` pair.
+//     Used by clone-from for `--depth=N` (its
+//     executor places --depth AFTER -b).
 type CloneTermBlockInput struct {
 	Index        int
 	Name         string

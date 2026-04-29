@@ -146,10 +146,10 @@ func TestParseFile_ForceFormat(t *testing.T) {
 // chose the matching parser when --format is empty.
 func TestParseFile_AutoDetect_Extensions(t *testing.T) {
 	cases := []struct {
-		name   string
-		ext    string
-		body   string
-		want   string
+		name string
+		ext  string
+		body string
+		want string
 	}{
 		{"json", ".json", `[{"httpsUrl":"https://x/a.git","relativePath":"a"}]`, constants.CloneNowFormatJSON},
 		{"csv", ".csv",

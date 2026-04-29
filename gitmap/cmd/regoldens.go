@@ -94,7 +94,6 @@ func bindRegoldensFlags(fs *flag.FlagSet, cfg *regoldensFlags) {
 
 // emitRegoldensDryRun lives in regoldens_dryrun.go (file-length cap).
 
-
 // goTestArgv returns the `go test ...` argv shared by both passes.
 // `-count=1` defeats the test cache so pass 2 actually re-runs.
 func goTestArgv(cfg regoldensFlags) []string {
@@ -103,8 +102,6 @@ func goTestArgv(cfg regoldensFlags) []string {
 
 // executeRegoldens lives in regoldens_exec.go to keep this file
 // under the 200-line cap. The split is purely organizational.
-
-
 
 // runRegoldensPass prints the header, runs one pass, and exits 1
 // with the supplied error format on failure. withGate toggles the

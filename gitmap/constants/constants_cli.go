@@ -177,34 +177,34 @@ const (
 	// scans `go test` output for this marker to distinguish a real
 	// non-determinism failure from the EXPECTED gate-block failure.
 	// Keep in sync with goldenguard/determinism.go nonDeterministicWriterMsgFmt.
-	RegoldensNonDetMarker        = "is non-deterministic"
+	RegoldensNonDetMarker = "is non-deterministic"
 )
 
 // Regoldens user-facing messages.
 const (
-	MsgRegoldensPass1Header   = "▸ Pass 1: regenerating goldens (GITMAP_UPDATE_GOLDEN=1 GITMAP_ALLOW_GOLDEN_UPDATE=1)\n"
-	MsgRegoldensPass2Header   = "▸ Pass 2: verifying determinism (gate env vars cleared)\n"
-	MsgRegoldensSkipVerify    = "▸ Pass 2 skipped (--skip-verify)\n"
-	MsgRegoldensSuccess       = "✓ Goldens regenerated and verified for pattern %q in package %q\n"
-	MsgRegoldensSuccessNoVeri = "✓ Goldens regenerated for pattern %q in package %q (verification skipped)\n"
-	MsgRegoldensDryRun        = "▸ Dry run — would execute:\n  %s\n  %s\n"
-	MsgRegoldensDiffHeader     = "▸ Golden diff summary (testdata/**/*golden* files touched by pass 1) [mode=%s]:\n"
-	MsgRegoldensDiffNoChanges  = "  (no testdata/**/*golden* files changed)\n"
-	MsgRegoldensDiffLineShort  = "  %s  %s\n"
-	MsgRegoldensDiffLineFull   = "  %s  %s  (+%d / -%d)\n"
-	MsgRegoldensDiffRenameFull = "      ↳ renamed from %s\n"
-	MsgRegoldensDiffTotals     = "  ─ %d file(s) changed: %d added, %d modified, %d renamed, %d deleted (+%d / -%d total)\n"
+	MsgRegoldensPass1Header     = "▸ Pass 1: regenerating goldens (GITMAP_UPDATE_GOLDEN=1 GITMAP_ALLOW_GOLDEN_UPDATE=1)\n"
+	MsgRegoldensPass2Header     = "▸ Pass 2: verifying determinism (gate env vars cleared)\n"
+	MsgRegoldensSkipVerify      = "▸ Pass 2 skipped (--skip-verify)\n"
+	MsgRegoldensSuccess         = "✓ Goldens regenerated and verified for pattern %q in package %q\n"
+	MsgRegoldensSuccessNoVeri   = "✓ Goldens regenerated for pattern %q in package %q (verification skipped)\n"
+	MsgRegoldensDryRun          = "▸ Dry run — would execute:\n  %s\n  %s\n"
+	MsgRegoldensDiffHeader      = "▸ Golden diff summary (testdata/**/*golden* files touched by pass 1) [mode=%s]:\n"
+	MsgRegoldensDiffNoChanges   = "  (no testdata/**/*golden* files changed)\n"
+	MsgRegoldensDiffLineShort   = "  %s  %s\n"
+	MsgRegoldensDiffLineFull    = "  %s  %s  (+%d / -%d)\n"
+	MsgRegoldensDiffRenameFull  = "      ↳ renamed from %s\n"
+	MsgRegoldensDiffTotals      = "  ─ %d file(s) changed: %d added, %d modified, %d renamed, %d deleted (+%d / -%d total)\n"
 	MsgRegoldensDiffSkipped     = "▸ Diff summary skipped: not a git working tree (or `git` not on PATH)\n"
 	MsgRegoldensPass2NotRun     = "▣ Pass 2: did NOT run — pass 1 failed (exit %d); fixtures left in partial state, determinism unverified\n"
 	MsgRegoldensPass2NotRunSkip = "▣ Pass 2: did NOT run — --skip-verify was set; determinism unverified\n"
 	MsgRegoldensPass2Ran        = "▣ Pass 2: ran and PASSED — writer is deterministic; goldens are safe to commit\n"
 	MsgRegoldensPrecheckHeader  = "▸ Pre-check: determinism (trigger ON, allow-update gate OFF — no fixture writes)\n"
 	MsgRegoldensPrecheckPass    = "✓ Pre-check passed — no non-deterministic writers detected; proceeding to pass 1\n"
-	ErrRegoldensMissingPat     = "regoldens: --pattern is required (e.g. --pattern TestCloneFromReportJSON_Golden)"
-	ErrRegoldensPass1Failed    = "regoldens: pass 1 (regenerate) failed with exit code %d — fixtures may be partially written; inspect git status before committing"
-	ErrRegoldensPass2Failed    = "regoldens: pass 2 (verify) failed with exit code %d — the writer is non-deterministic; fix the writer, do not re-run with --skip-verify"
-	ErrRegoldensDiffMode       = "regoldens: --diff=%q is not valid; use --diff=short or --diff=full"
-	ErrRegoldensPrecheckFailed = "regoldens: determinism pre-check FAILED — at least one golden writer produced different bytes across runs; fix the writer (likely culprits: map iteration, time.Now, randomness, locale-dependent formatting). Pass 1 was NOT run; no fixtures were touched."
+	ErrRegoldensMissingPat      = "regoldens: --pattern is required (e.g. --pattern TestCloneFromReportJSON_Golden)"
+	ErrRegoldensPass1Failed     = "regoldens: pass 1 (regenerate) failed with exit code %d — fixtures may be partially written; inspect git status before committing"
+	ErrRegoldensPass2Failed     = "regoldens: pass 2 (verify) failed with exit code %d — the writer is non-deterministic; fix the writer, do not re-run with --skip-verify"
+	ErrRegoldensDiffMode        = "regoldens: --diff=%q is not valid; use --diff=short or --diff=full"
+	ErrRegoldensPrecheckFailed  = "regoldens: determinism pre-check FAILED — at least one golden writer produced different bytes across runs; fix the writer (likely culprits: map iteration, time.Now, randomness, locale-dependent formatting). Pass 1 was NOT run; no fixtures were touched."
 )
 
 // Usage header.
@@ -255,11 +255,11 @@ const (
 
 // Flag descriptions.
 const (
-	FlagDescConfig      = "Path to config file"
-	FlagDescMode        = "Clone URL style: https or ssh"
-	FlagDescOutput      = "Output format: terminal, csv, json"
-	FlagDescOutFile     = "Exact output file path"
-	FlagDescOutputPath  = "Output directory for CSV/JSON"
+	FlagDescConfig     = "Path to config file"
+	FlagDescMode       = "Clone URL style: https or ssh"
+	FlagDescOutput     = "Output format: terminal, csv, json"
+	FlagDescOutFile    = "Exact output file path"
+	FlagDescOutputPath = "Output directory for CSV/JSON"
 	// FlagScanManifest is a unified alias for `--output-path` on the
 	// scan command, mirroring the same flag on `gitmap reclone` so
 	// the scan→reclone round-trip uses one vocabulary. Resolution:

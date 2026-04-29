@@ -7,16 +7,16 @@ package constants
 //
 // Stages — stable strings, treat as enum:
 //
-//   ProvenanceStageScan      — value flowed in from the user-provided
-//                              input file (JSON/CSV row); clone-from
-//                              never modifies it.
-//   ProvenanceStageMapper    — value was derived inside clonefrom's
-//                              pre-execute resolver (e.g. Dest after
-//                              DeriveDest fallback when Row.Dest is
-//                              empty).
-//   ProvenanceStageClonefrom — value was set during execute (Status,
-//                              Detail, DurationSeconds — all written
-//                              by executeRow / runGitClone).
+//	ProvenanceStageScan      — value flowed in from the user-provided
+//	                           input file (JSON/CSV row); clone-from
+//	                           never modifies it.
+//	ProvenanceStageMapper    — value was derived inside clonefrom's
+//	                           pre-execute resolver (e.g. Dest after
+//	                           DeriveDest fallback when Row.Dest is
+//	                           empty).
+//	ProvenanceStageClonefrom — value was set during execute (Status,
+//	                           Detail, DurationSeconds — all written
+//	                           by executeRow / runGitClone).
 //
 // The map itself is a SLICE OF PAIRS (not a Go map) so the emit
 // order is stable across runs without relying on encoding/json's

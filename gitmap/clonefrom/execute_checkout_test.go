@@ -103,9 +103,9 @@ func TestExecute_SkipCheckout_NoWorkingTree(t *testing.T) {
 // TestExecute_ForceCheckout_BranchMissingFails covers the two
 // failure modes the user asked for:
 //
-//   1. Branch named in the row does not exist on the remote.
-//   2. (implicit detached-HEAD-target case) `git checkout <typo>`
-//      from a freshly-cloned repo where the branch is absent.
+//  1. Branch named in the row does not exist on the remote.
+//  2. (implicit detached-HEAD-target case) `git checkout <typo>`
+//     from a freshly-cloned repo where the branch is absent.
 //
 // We don't pass --branch on the clone (so clone itself succeeds
 // against the remote's HEAD), then ask for a post-clone checkout

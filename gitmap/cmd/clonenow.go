@@ -47,7 +47,7 @@ type cloneNowFlags struct {
 	// confirmation prompt. Required for non-TTY (CI) execution
 	// when any destination already exists; otherwise the run
 	// would block forever waiting on stdin.
-	assumeYes                       bool
+	assumeYes bool
 	// noSummary suppresses the pre-execute summary block printed
 	// by printRecloneExecuteSummary. Useful when a wrapper script
 	// already produced a dry-run preview and just wants the

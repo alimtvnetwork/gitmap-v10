@@ -32,9 +32,9 @@ import (
 // resolveCloneNowSource picks the input file for `gitmap reclone`
 // from three possible sources, in priority order:
 //
-//	1. --manifest <path>   (explicit, highest priority)
-//	2. positional <file>   (legacy form, kept for back-compat)
-//	3. auto-pickup         (<scan-root>/.gitmap/output/gitmap.{json,csv})
+//  1. --manifest <path>   (explicit, highest priority)
+//  2. positional <file>   (legacy form, kept for back-compat)
+//  3. auto-pickup         (<scan-root>/.gitmap/output/gitmap.{json,csv})
 //
 // Supplying BOTH --manifest AND a positional file is a usage error
 // (exit 2): rather than silently preferring one, we refuse so the
