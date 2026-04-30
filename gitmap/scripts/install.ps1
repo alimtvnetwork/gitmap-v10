@@ -368,6 +368,49 @@ function Stop-Strict([string]$detail) {
     throw [InstallerFailure]::new("Strict version install failed", 1)
 }
 
+# --- Pre-flight asset existence ---
+
+# Test-AssetExists: HEAD-probe the asset URL. Returns $true on
+# HTTP 200/301/302, $false otherwise. Used to fail fast with a clear
+# error before any download/extract work.
+function Test-AssetExists([string]$url) {
+    try {
+        $resp = Invoke-WebRequest -Uri $url -Method Head -TimeoutSec 10 `
+            -UseBasicParsing -ErrorAction Stop
+        return ($resp.StatusCode -eq 200)
+    } catch {
+        return $false
+    }
+}
+
+# Write-MissingAssetError: emit a clearly-formatted error block
+# explaining which asset pattern was expected, the full URL probed,
+# and the release page to inspect.
+function Write-MissingAssetError([string]$version, [string]$arch,
+                                  [string]$assetName, [string]$assetUrl) {
+    $releasePage = "https://github.com/$Repo/releases/tag/$version"
+    Write-Err ""
+    Write-Err "================================================================"
+    Write-Err " RELEASE ASSET NOT FOUND"
+    Write-Err "================================================================"
+    Write-Err " Expected pattern: gitmap-$version-windows-$arch.zip"
+    Write-Err " Resolved name:    $assetName"
+    Write-Err " Probed URL:       $assetUrl"
+    Write-Err " Release page:     $releasePage"
+    Write-Err ""
+    Write-Err " The release tag '$version' exists but does not publish the"
+    Write-Err " expected Windows/$arch asset. This usually means:"
+    Write-Err "   - the cross-compile job for this platform failed in CI,"
+    Write-Err "   - the release was cut from a branch missing this target, or"
+    Write-Err "   - you pinned a pre-release/draft tag with partial assets."
+    Write-Err ""
+    Write-Err " Inspect the release page above to see which assets ARE"
+    Write-Err " present, then either pin a different -Version or wait for"
+    Write-Err " the release pipeline to re-publish."
+    Write-Err "================================================================"
+    Write-Err ""
+}
+
 # --- Download asset ---
 
 function Get-Asset([string]$version, [string]$arch) {
@@ -388,6 +431,19 @@ function Get-Asset([string]$version, [string]$arch) {
 
     $zipPath = Join-Path $tmpDir $assetName
     $checksumPath = Join-Path $tmpDir "checksums.txt"
+
+    # Pre-flight asset-existence check. Emits a clearly-formatted
+    # error block when the expected release-asset pattern is missing,
+    # so users see WHAT was expected, WHERE we looked, and the release
+    # page to inspect — not just a generic "Download failed".
+    if (-not (Test-AssetExists $assetUrl)) {
+        Write-MissingAssetError $version $arch $assetName $assetUrl
+        Remove-Item $tmpDir -Recurse -Force -ErrorAction SilentlyContinue
+        if ($strict) {
+            Stop-Strict "expected asset $assetName not found at $assetUrl"
+        }
+        throw [InstallerFailure]::new("Release asset not found", 1)
+    }
 
     Write-Step "Downloading $assetName ($version)..."
 

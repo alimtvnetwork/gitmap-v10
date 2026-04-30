@@ -330,6 +330,58 @@ strict_fail() {
     exit 1
 }
 
+# ── Pre-flight asset existence ─────────────────────────────────────
+
+# preflight_asset_exists: HEAD-probe the asset URL. Returns 0 on
+# HTTP 200/302, non-zero otherwise. Used to fail fast with a clear
+# error before any download/extract work.
+preflight_asset_exists() {
+    local url="$1"
+    local code
+    if command -v curl >/dev/null 2>&1; then
+        code="$(curl -fsSLI -o /dev/null -w '%{http_code}' \
+            --max-time 10 "${url}" 2>/dev/null || echo "000")"
+    elif command -v wget >/dev/null 2>&1; then
+        code="$(wget --spider --timeout=10 -S "${url}" 2>&1 \
+            | awk '/HTTP\// {code=$2} END {print code+0}')"
+    else
+        # No HEAD tool; let the caller try the real download.
+        return 0
+    fi
+    case "${code}" in
+        200|302|301) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+# emit_missing_asset_error: print a clearly-formatted error block
+# explaining which asset pattern was expected, the full URL probed,
+# and the release page to inspect.
+emit_missing_asset_error() {
+    local version="$1" os="$2" arch="$3" asset_name="$4" asset_url="$5"
+    local release_page="https://github.com/${REPO}/releases/tag/${version}"
+    err ""
+    err "================================================================"
+    err " RELEASE ASSET NOT FOUND"
+    err "================================================================"
+    err " Expected pattern: ${BINARY_NAME}-${version}-${os}-${arch}.tar.gz"
+    err " Resolved name:    ${asset_name}"
+    err " Probed URL:       ${asset_url}"
+    err " Release page:     ${release_page}"
+    err ""
+    err " The release tag '${version}' exists but does not publish the"
+    err " expected platform asset for ${os}/${arch}. This usually means:"
+    err "   • the cross-compile job for this platform failed in CI,"
+    err "   • the release was cut from a branch missing this target, or"
+    err "   • you pinned a pre-release/draft tag with partial assets."
+    err ""
+    err " Inspect the release page above to see which assets ARE present,"
+    err " then either pin a different --version or wait for the release"
+    err " pipeline to re-publish."
+    err "================================================================"
+    err ""
+}
+
 # ── Download and verify asset ──────────────────────────────────────
 
 download_asset() {
@@ -352,6 +404,19 @@ download_asset() {
 
     local archive_path="${TMP_DIR}/${asset_name}"
     local checksum_path="${TMP_DIR}/checksums.txt"
+
+    # Pre-flight asset-existence check. Emits a clearly-formatted
+    # error block when the expected release-asset pattern is missing,
+    # so users see WHAT was expected, WHERE we looked, and the
+    # release page to inspect — not just "Download failed".
+    if ! preflight_asset_exists "${asset_url}"; then
+        emit_missing_asset_error "${version}" "${os}" "${arch}" \
+            "${asset_name}" "${asset_url}"
+        if [ "${strict}" = "1" ]; then
+            strict_fail "expected asset ${asset_name} not found at ${asset_url}"
+        fi
+        exit 1
+    fi
 
     step "Downloading ${asset_name} (${version})..."
     if ! download "${asset_url}" "${archive_path}"; then
