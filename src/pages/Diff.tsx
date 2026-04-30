@@ -25,7 +25,7 @@ const TerminalPreview = () => (
         <span className="w-3 h-3 rounded-full bg-yellow-500/80" />
         <span className="w-3 h-3 rounded-full bg-green-500/80" />
       </div>
-      <span className="text-xs font-mono text-muted-foreground ml-2">gitmap diff ./gitmap-v9 ./gitmap-v9</span>
+      <span className="text-xs font-mono text-muted-foreground ml-2">gitmap diff ./gitmap-v10 ./gitmap-v10</span>
     </div>
     <div className="bg-terminal p-4 font-mono text-xs leading-relaxed overflow-x-auto">
       <div className="text-primary font-bold">  Conflicts (different content on both sides):</div>
@@ -120,13 +120,13 @@ gitmap df   LEFT RIGHT [flags]`} />
       <section>
         <h2 className="text-xl font-semibold mb-3">Examples</h2>
         <CodeBlock code={`# Plain diff between two local folders
-gitmap diff ./gitmap-v9 ./gitmap-v9
+gitmap diff ./gitmap-v10 ./gitmap-v10
 
 # Conflicts only (preview before merge-both)
-gitmap diff ./gitmap-v9 ./gitmap-v9 --only-conflicts
+gitmap diff ./gitmap-v10 ./gitmap-v10 --only-conflicts
 
 # Machine-readable output
-gitmap df ./gitmap-v9 ./gitmap-v9 --json`} />
+gitmap df ./gitmap-v10 ./gitmap-v10 --json`} />
       </section>
 
       <section>

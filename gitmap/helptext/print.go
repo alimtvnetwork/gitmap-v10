@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/render"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/render"
 )
 
 //go:embed *.md

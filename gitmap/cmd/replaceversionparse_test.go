@@ -7,10 +7,10 @@ import "testing"
 // expected result is always the last path segment with `.git` trimmed.
 func TestSlugFromRemote(t *testing.T) {
 	cases := map[string]string{
-		"https://github.com/alimtvnetwork/gitmap-v9.git": "gitmap-v9",
-		"https://github.com/alimtvnetwork/gitmap-v9":     "gitmap-v9",
-		"git@github.com:alimtvnetwork/gitmap-v9.git":     "gitmap-v9",
-		"git@github.com:alimtvnetwork/gitmap-v9":         "gitmap-v9",
+		"https://github.com/alimtvnetwork/gitmap-v10.git": "gitmap-v10",
+		"https://github.com/alimtvnetwork/gitmap-v10":     "gitmap-v10",
+		"git@github.com:alimtvnetwork/gitmap-v10.git":     "gitmap-v10",
+		"git@github.com:alimtvnetwork/gitmap-v10":         "gitmap-v10",
 		"ssh://git@host.example/foo/bar/gitmap-v12.git":  "gitmap-v12",
 		"gitmap-v3":     "gitmap-v3",
 		"gitmap-v3.git": "gitmap-v3",
@@ -34,13 +34,13 @@ func TestRemoteSlugRegex(t *testing.T) {
 		num     string
 	}
 	cases := map[string]want{
-		"gitmap-v9":          {true, "gitmap", "9"},
+		"gitmap-v10":          {true, "gitmap", "9"},
 		"my-tool-v123":       {true, "my-tool", "123"},
 		"some-app-prefix-v0": {true, "some-app-prefix", "0"},
 		"gitmap":             {false, "", ""},
 		"gitmap-v":           {false, "", ""},
 		"gitmap-vX":          {false, "", ""},
-		"gitmap-v9-extra":    {false, "", ""},
+		"gitmap-v10-extra":    {false, "", ""},
 	}
 	for in, w := range cases {
 		m := remoteSlugRe.FindStringSubmatch(in)
@@ -65,7 +65,7 @@ func TestPairsForTarget(t *testing.T) {
 	if len(got) != 2 {
 		t.Fatalf("expected 2 pairs, got %d", len(got))
 	}
-	if got[0].old != "gitmap-v4" || got[0].new != "gitmap-v9" {
+	if got[0].old != "gitmap-v4" || got[0].new != "gitmap-v10" {
 		t.Errorf("dash form wrong: %+v", got[0])
 	}
 	if got[1].old != "gitmap/v4" || got[1].new != "gitmap/v9" {

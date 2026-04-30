@@ -144,7 +144,7 @@ const (
 	DefaultAuditLegacyPatterns  = "gitmap-v[567]\\b"
 	DefaultAuditLegacyReport    = ".gitmap/audit-legacy-report.md"
 	DefaultAuditLegacyDiffsDir  = "diffs"
-	DefaultAuditLegacyReplace   = "gitmap-v9"
+	DefaultAuditLegacyReplace   = "gitmap-v10"
 	MsgAuditLegacyClean         = "  ✓ audit-legacy: no forbidden legacy strings found in %s\n"
 	MsgAuditLegacyHeader        = "  ✗ audit-legacy: %d match(es) across %d file(s) for pattern(s) %q\n"
 	MsgAuditLegacyHit           = "    %s:%d: %s\n"

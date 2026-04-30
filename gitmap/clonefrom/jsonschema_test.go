@@ -19,8 +19,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/clonenow"
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/clonenow"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/constants"
 )
 
 func TestEmitSchema_ReportShape(t *testing.T) {

@@ -26,7 +26,7 @@
     contract.
 
 .EXAMPLE
-    irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v9/main/gitmap/scripts/install.ps1 | iex
+    irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v10/main/gitmap/scripts/install.ps1 | iex
 
 .EXAMPLE
     & ./install.ps1 -Version v2.48.0
@@ -35,7 +35,7 @@
     & ./install.ps1 -Version v4.1.0 -DryRun -NoDiscovery
 
 .NOTES
-    Repository: https://github.com/alimtvnetwork/gitmap-v9
+    Repository: https://github.com/alimtvnetwork/gitmap-v10
 #>
 
 param(
@@ -98,7 +98,7 @@ try {
     if ($PSStyle) { $PSStyle.OutputRendering = 'PlainText' }
 } catch {}
 
-$Repo = "alimtvnetwork/gitmap-v9"
+$Repo = "alimtvnetwork/gitmap-v10"
 $BinaryName = "gitmap.exe"
 $InstallerVersion = "1.0.0"
 

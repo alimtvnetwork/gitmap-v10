@@ -3,7 +3,7 @@ package group
 import (
 	"testing"
 
-	"github.com/alimtvnetwork/gitmap-v9/scripts/changelog/internal/gitlog"
+	"github.com/alimtvnetwork/gitmap-v10/scripts/changelog/internal/gitlog"
 )
 
 func TestByPrefixGroupsConventionalCommits(t *testing.T) {

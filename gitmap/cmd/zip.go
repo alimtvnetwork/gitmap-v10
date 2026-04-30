@@ -16,8 +16,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/archive"
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/archive"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/constants"
 )
 
 // runZip is the dispatch entrypoint for `zip` / `z`.

@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/constants"
 )
 
 // tryCrossDirCloneNext intercepts `cn <repo> <version>` and chdirs first.

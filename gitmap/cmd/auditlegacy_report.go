@@ -13,7 +13,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/constants"
 )
 
 // writeAuditLegacyReport renders a Markdown audit report to disk.
@@ -127,7 +127,7 @@ func writeAuditMDDiffArtifacts(b *strings.Builder, plans []auditDiffPlan) {
 		return
 	}
 	fmt.Fprintf(b, "## Per-file diffs\n\n")
-	fmt.Fprintf(b, "Each diff previews the legacy → `gitmap-v9` substitution for one file. ")
+	fmt.Fprintf(b, "Each diff previews the legacy → `gitmap-v10` substitution for one file. ")
 	fmt.Fprintf(b, "Apply with `patch -p0 < <file>.diff` from the repo root.\n\n")
 	for _, p := range plans {
 		fmt.Fprintf(b, "- [`%s`](%s)\n", p.SourceFile, p.DiffRelLink)
