@@ -16,10 +16,10 @@ import (
 // scanner: every target version produces exactly two needles
 // (`<base>-vN` and `<base>/vN`) in deterministic order.
 func TestBuildAuditNeedles(t *testing.T) {
-	got := buildAuditNeedles("gitmap", []int{4, 9})
+	got := buildAuditNeedles("gitmap", []int{4, 10})
 	want := [][]byte{
 		[]byte("gitmap-v4"), []byte("gitmap/v4"),
-		[]byte("gitmap-v9"), []byte("gitmap/v9"),
+		[]byte("gitmap-v10"), []byte("gitmap/v10"),
 	}
 	if len(got) != len(want) {
 		t.Fatalf("len = %d, want %d", len(got), len(want))
