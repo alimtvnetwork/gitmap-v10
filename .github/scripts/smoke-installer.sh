@@ -59,7 +59,8 @@ if [ ! -x "$BIN" ]; then
   exit 3
 fi
 
-ACTUAL="$("$BIN" version 2>&1 | grep -E '^gitmap v[0-9]' | head -1)"
+VERSION_OUTPUT="$("$BIN" version 2>&1)"
+ACTUAL="$(printf '%s\n' "$VERSION_OUTPUT" | awk '/^gitmap v[0-9]/{print; exit}')"
 echo "▶ Actual output: $ACTUAL"
 
 EXPECTED_LINE="gitmap v$EXPECTED"
