@@ -1,5 +1,15 @@
 # Changelog
 
+## v4.2.0 — (2026-04-30) — CI hardening: smoke-installer SIGPIPE fix, generate-check auto-commit, version-line filtering
+
+- `.github/scripts/smoke-installer.sh` now captures `gitmap version` output into
+  a variable and uses `awk '/^gitmap v[0-9]/{print; exit}'` to extract the
+  version line, avoiding `SIGPIPE` (exit 141) under `set -o pipefail`.
+- `.github/scripts/smoke-installer.ps1` filters startup log noise (e.g.
+  "Seeded downloader defaults") with `Where-Object { $_ -match '^gitmap v[0-9]' }`.
+- CI `generate-check` can auto-run `go generate ./...` and commit regenerated
+  files when drift is detected.
+
 ## v4.1.0 — (2026-04-30) — Major version bump rolling up fix-repo command + installer/lint fixes
 
 - Promotes the `gitmap fix-repo` / `fr` Go-native rewriter, installer warning
