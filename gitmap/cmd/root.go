@@ -51,60 +51,60 @@ func Run() {
 
 // dispatch routes to the correct subcommand handler with audit tracking.
 func dispatch(command string) {
-	auditID, auditStart := recordAuditStart(command, os.Args[2:])
+	auditID, auditStart, shouldAudit := beginCommandAudit(command, os.Args[2:])
 
 	if dispatchCore(command) {
-		recordAuditEnd(auditID, auditStart, 0, "", 0)
+		finishCommandAudit(shouldAudit, auditID, auditStart, 0, "", 0)
 
 		return
 	}
 	if dispatchRelease(command) {
-		recordAuditEnd(auditID, auditStart, 0, "", 0)
+		finishCommandAudit(shouldAudit, auditID, auditStart, 0, "", 0)
 
 		return
 	}
 	if dispatchUtility(command) {
-		recordAuditEnd(auditID, auditStart, 0, "", 0)
+		finishCommandAudit(shouldAudit, auditID, auditStart, 0, "", 0)
 
 		return
 	}
 	if dispatchData(command) {
-		recordAuditEnd(auditID, auditStart, 0, "", 0)
+		finishCommandAudit(shouldAudit, auditID, auditStart, 0, "", 0)
 
 		return
 	}
 	if dispatchTooling(command) {
-		recordAuditEnd(auditID, auditStart, 0, "", 0)
+		finishCommandAudit(shouldAudit, auditID, auditStart, 0, "", 0)
 
 		return
 	}
 	if dispatchProjectRepos(command) {
-		recordAuditEnd(auditID, auditStart, 0, "", 0)
+		finishCommandAudit(shouldAudit, auditID, auditStart, 0, "", 0)
 
 		return
 	}
 	if dispatchDiff(command) {
-		recordAuditEnd(auditID, auditStart, 0, "", 0)
+		finishCommandAudit(shouldAudit, auditID, auditStart, 0, "", 0)
 
 		return
 	}
 	if dispatchMoveMerge(command) {
-		recordAuditEnd(auditID, auditStart, 0, "", 0)
+		finishCommandAudit(shouldAudit, auditID, auditStart, 0, "", 0)
 
 		return
 	}
 	if dispatchAdd(command) {
-		recordAuditEnd(auditID, auditStart, 0, "", 0)
+		finishCommandAudit(shouldAudit, auditID, auditStart, 0, "", 0)
 
 		return
 	}
 	if dispatchTemplates(command) {
-		recordAuditEnd(auditID, auditStart, 0, "", 0)
+		finishCommandAudit(shouldAudit, auditID, auditStart, 0, "", 0)
 
 		return
 	}
 	if dispatchCommitTransfer(command) {
-		recordAuditEnd(auditID, auditStart, 0, "", 0)
+		finishCommandAudit(shouldAudit, auditID, auditStart, 0, "", 0)
 
 		return
 	}
