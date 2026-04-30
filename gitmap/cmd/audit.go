@@ -5,12 +5,34 @@ import (
 	"os"
 	"time"
 
+	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
 	"github.com/alimtvnetwork/gitmap-v9/gitmap/model"
 	"github.com/alimtvnetwork/gitmap-v9/gitmap/store"
 )
 
+func beginCommandAudit(command string, args []string) (int64, time.Time, bool) {
+	start := time.Now()
+	if !shouldAuditCommand(command) {
+		return 0, start, false
+	}
+
+	return recordAuditStart(command, args)
+}
+
+func finishCommandAudit(shouldAudit bool, id int64, start time.Time, exitCode int, summary string, repoCount int) {
+	if !shouldAudit {
+		return
+	}
+
+	recordAuditEnd(id, start, exitCode, summary, repoCount)
+}
+
+func shouldAuditCommand(command string) bool {
+	return command != constants.CmdVersion && command != constants.CmdVersionAlias
+}
+
 // recordAuditStart inserts a new history record at command start.
-func recordAuditStart(command string, args []string) (int64, time.Time) {
+func recordAuditStart(command string, args []string) (int64, time.Time, bool) {
 	start := time.Now()
 	alias, flags, positional := classifyArgs(command, args)
 
@@ -24,7 +46,7 @@ func recordAuditStart(command string, args []string) (int64, time.Time) {
 
 	db, err := openAuditDB()
 	if err != nil {
-		return 0, start
+		return 0, start, false
 	}
 	defer db.Close()
 
@@ -33,7 +55,7 @@ func recordAuditStart(command string, args []string) (int64, time.Time) {
 		fmt.Fprintf(os.Stderr, "  ⚠ Could not record command history: %v\n", insertErr)
 	}
 
-	return id, start
+	return id, start, true
 }
 
 // recordAuditEnd updates a history record with completion details.
