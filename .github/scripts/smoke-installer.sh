@@ -46,14 +46,29 @@ case "$MODE" in
       --dir "$DEST" \
       --no-path \
       --no-discovery
-    # install.sh nests the binary under <dest>/gitmap-cli/
-    if [ -x "$DEST/gitmap-cli/gitmap" ]; then
-      BIN="$DEST/gitmap-cli/gitmap"
-    elif [ -x "$DEST/gitmap" ]; then
-      BIN="$DEST/gitmap"
-    else
-      BIN="$DEST/gitmap-cli/gitmap"
+    # install.sh nests the binary under <dest>/gitmap-cli/. Search
+    # defensively in case the layout changes (e.g. extra nesting).
+    BIN=""
+    for candidate in \
+      "$DEST/gitmap-cli/gitmap" \
+      "$DEST/gitmap" \
+      "$DEST/gitmap-cli/bin/gitmap"; do
+      if [ -x "$candidate" ]; then
+        BIN="$candidate"
+        break
+      fi
+    done
+    if [ -z "$BIN" ]; then
+      echo "▶ Searching for gitmap binary under $DEST"
+      BIN="$(find "$DEST" -type f -name 'gitmap' -perm -u+x 2>/dev/null | head -n1 || true)"
     fi
+    if [ -z "$BIN" ]; then
+      echo "::error::Could not locate installed gitmap binary under $DEST" >&2
+      echo "▶ Tree:" >&2
+      find "$DEST" -maxdepth 4 >&2 || true
+      exit 3
+    fi
+    echo "▶ Located binary: $BIN"
     ;;
   *)
     echo "::error::Unknown mode '$MODE' (expected 'source' or 'release')" >&2
