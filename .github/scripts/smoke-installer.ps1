@@ -68,7 +68,12 @@ try {
                 Write-Error "::error::install.ps1 failed (exit $LASTEXITCODE)"
                 exit 3
             }
-            $bin = Join-Path $dest 'gitmap.exe'
+            # install.ps1 nests the binary under <dest>\gitmap-cli\
+            $nested = Join-Path (Join-Path $dest 'gitmap-cli') 'gitmap.exe'
+            $flat   = Join-Path $dest 'gitmap.exe'
+            if (Test-Path $nested) { $bin = $nested }
+            elseif (Test-Path $flat) { $bin = $flat }
+            else { $bin = $nested }
         }
     }
 

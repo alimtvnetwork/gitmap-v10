@@ -46,7 +46,14 @@ case "$MODE" in
       --dir "$DEST" \
       --no-path \
       --no-discovery
-    BIN="$DEST/gitmap"
+    # install.sh nests the binary under <dest>/gitmap-cli/
+    if [ -x "$DEST/gitmap-cli/gitmap" ]; then
+      BIN="$DEST/gitmap-cli/gitmap"
+    elif [ -x "$DEST/gitmap" ]; then
+      BIN="$DEST/gitmap"
+    else
+      BIN="$DEST/gitmap-cli/gitmap"
+    fi
     ;;
   *)
     echo "::error::Unknown mode '$MODE' (expected 'source' or 'release')" >&2
