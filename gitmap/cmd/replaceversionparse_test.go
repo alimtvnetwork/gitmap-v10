@@ -34,7 +34,7 @@ func TestRemoteSlugRegex(t *testing.T) {
 		num     string
 	}
 	cases := map[string]want{
-		"gitmap-v10":         {true, "gitmap", "9"},
+		"gitmap-v10":         {true, "gitmap", "10"},
 		"my-tool-v123":       {true, "my-tool", "123"},
 		"some-app-prefix-v0": {true, "some-app-prefix", "0"},
 		"gitmap":             {false, "", ""},
@@ -61,14 +61,14 @@ func TestRemoteSlugRegex(t *testing.T) {
 // both a `-vN` and a `/vN` replacement so Go module import paths and
 // repo URLs are bumped in the same pass.
 func TestPairsForTarget(t *testing.T) {
-	got := pairsForTarget("gitmap", 4, 9)
+	got := pairsForTarget("gitmap", 4, 10)
 	if len(got) != 2 {
 		t.Fatalf("expected 2 pairs, got %d", len(got))
 	}
 	if got[0].old != "gitmap-v4" || got[0].new != "gitmap-v10" {
 		t.Errorf("dash form wrong: %+v", got[0])
 	}
-	if got[1].old != "gitmap/v4" || got[1].new != "gitmap/v9" {
+	if got[1].old != "gitmap/v4" || got[1].new != "gitmap/v10" {
 		t.Errorf("slash form wrong: %+v", got[1])
 	}
 }
