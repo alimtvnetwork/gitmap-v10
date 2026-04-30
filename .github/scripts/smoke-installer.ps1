@@ -25,6 +25,33 @@ $ErrorActionPreference = 'Stop'
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..\..')
 $expected = $env:EXPECTED
+
+function Get-DeployManifestSmokeConfig {
+    $defaults = @{
+        AppSubdir        = 'gitmap-cli'
+        BinaryNameWin    = 'gitmap.exe'
+        LegacyAppSubdirs = @('gitmap')
+    }
+
+    $manifestPath = Join-Path $repoRoot 'gitmap\constants\deploy-manifest.json'
+    if (-not (Test-Path $manifestPath)) {
+        return $defaults
+    }
+
+    try {
+        $manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
+        return @{
+            AppSubdir        = if ($manifest.appSubdir) { [string]$manifest.appSubdir } else { $defaults.AppSubdir }
+            BinaryNameWin    = if ($manifest.binaryName.windows) { [string]$manifest.binaryName.windows } else { $defaults.BinaryNameWin }
+            LegacyAppSubdirs = if ($manifest.legacyAppSubdirs) { @($manifest.legacyAppSubdirs | ForEach-Object { [string]$_ }) } else { $defaults.LegacyAppSubdirs }
+        }
+    }
+    catch {
+        return $defaults
+    }
+}
+
+$deployConfig = Get-DeployManifestSmokeConfig
 if (-not $expected) {
     $constantsPath = Join-Path $repoRoot 'gitmap\constants\constants.go'
     $line = Select-String -Path $constantsPath -Pattern '^const Version' | Select-Object -First 1
@@ -68,17 +95,19 @@ try {
                 Write-Error "::error::install.ps1 failed (exit $LASTEXITCODE)"
                 exit 3
             }
-            # install.ps1 nests the binary under <dest>\gitmap-cli\.
-            # Search defensively in case the layout changes.
+            # Resolve from the deploy manifest so the smoke test tracks the
+            # installer's canonical layout instead of stale hardcoded paths.
             $candidates = @(
-                (Join-Path (Join-Path $dest 'gitmap-cli') 'gitmap.exe'),
-                (Join-Path $dest 'gitmap.exe'),
-                (Join-Path (Join-Path (Join-Path $dest 'gitmap-cli') 'bin') 'gitmap.exe')
+                (Join-Path (Join-Path $dest $deployConfig.AppSubdir) $deployConfig.BinaryNameWin),
+                (Join-Path $dest $deployConfig.BinaryNameWin)
             )
-            $bin = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+            foreach ($legacyAppSubdir in $deployConfig.LegacyAppSubdirs) {
+                $candidates += (Join-Path (Join-Path $dest $legacyAppSubdir) $deployConfig.BinaryNameWin)
+            }
+            $bin = $candidates | Where-Object { Test-Path $_ -PathType Leaf } | Select-Object -First 1
             if (-not $bin) {
-                Write-Host "▶ Searching for gitmap.exe under $dest"
-                $found = Get-ChildItem -Path $dest -Recurse -Filter 'gitmap.exe' -ErrorAction SilentlyContinue | Select-Object -First 1
+                Write-Host "▶ Searching for $($deployConfig.BinaryNameWin) under $dest"
+                $found = Get-ChildItem -Path $dest -Recurse -Filter $deployConfig.BinaryNameWin -File -ErrorAction SilentlyContinue | Select-Object -First 1
                 if ($found) { $bin = $found.FullName }
             }
             if (-not $bin) {
