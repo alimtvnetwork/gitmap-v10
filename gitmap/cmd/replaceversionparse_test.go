@@ -11,7 +11,7 @@ func TestSlugFromRemote(t *testing.T) {
 		"https://github.com/alimtvnetwork/gitmap-v10":     "gitmap-v10",
 		"git@github.com:alimtvnetwork/gitmap-v10.git":     "gitmap-v10",
 		"git@github.com:alimtvnetwork/gitmap-v10":         "gitmap-v10",
-		"ssh://git@host.example/foo/bar/gitmap-v12.git":  "gitmap-v12",
+		"ssh://git@host.example/foo/bar/gitmap-v12.git":   "gitmap-v12",
 		"gitmap-v3":     "gitmap-v3",
 		"gitmap-v3.git": "gitmap-v3",
 	}
@@ -34,13 +34,13 @@ func TestRemoteSlugRegex(t *testing.T) {
 		num     string
 	}
 	cases := map[string]want{
-		"gitmap-v10":          {true, "gitmap", "9"},
+		"gitmap-v10":         {true, "gitmap", "9"},
 		"my-tool-v123":       {true, "my-tool", "123"},
 		"some-app-prefix-v0": {true, "some-app-prefix", "0"},
 		"gitmap":             {false, "", ""},
 		"gitmap-v":           {false, "", ""},
 		"gitmap-vX":          {false, "", ""},
-		"gitmap-v10-extra":    {false, "", ""},
+		"gitmap-v10-extra":   {false, "", ""},
 	}
 	for in, w := range cases {
 		m := remoteSlugRe.FindStringSubmatch(in)
