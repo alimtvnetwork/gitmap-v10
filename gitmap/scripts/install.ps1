@@ -18,11 +18,21 @@
 .PARAMETER Arch
     Force architecture (amd64, arm64). Default: auto-detect.
 
+.PARAMETER DryRun
+    Resolve the asset URL + filename, run the pre-flight HEAD probe to
+    confirm the release asset exists, print a machine-parseable
+    `dryrun.*=` report, and exit 0 without downloading or installing.
+    Used by CI to validate the install.ps1 / release-pipeline naming
+    contract.
+
 .EXAMPLE
     irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v9/main/gitmap/scripts/install.ps1 | iex
 
 .EXAMPLE
     & ./install.ps1 -Version v2.48.0
+
+.EXAMPLE
+    & ./install.ps1 -Version v4.1.0 -DryRun -NoDiscovery
 
 .NOTES
     Repository: https://github.com/alimtvnetwork/gitmap-v9
@@ -43,7 +53,15 @@ param(
     #         are absent the user is prompted interactively.
     [switch]$Force,
     [switch]$KeepData,
-    [switch]$PurgeData
+    [switch]$PurgeData,
+    # -DryRun: resolve the asset name + URL, run the pre-flight HEAD
+    # probe to confirm the release asset exists, print a structured
+    # report, and exit 0 — without downloading, extracting, or
+    # touching the install dir / PATH. Used by CI to validate that
+    # the install.ps1 + release-pipeline asset-naming contract is
+    # honored before users hit it. Spec: spec/07-generic-release/
+    # 09-generic-install-script-behavior.md §6.
+    [switch]$DryRun
 )
 
 $ErrorActionPreference = "Stop"
@@ -196,7 +214,6 @@ if ($env:INSTALLER_DELEGATED -eq "1") {
         if (Invoke-DelegatedFullInstaller $effective) { return }
     }
 }
-
 
 
 # --- Logging helpers ---
@@ -383,9 +400,40 @@ function Test-AssetExists([string]$url) {
     }
 }
 
-# Write-MissingAssetError: emit a clearly-formatted error block
-# explaining which asset pattern was expected, the full URL probed,
-# and the release page to inspect.
+# Write-DryRunReport: emit a machine-parseable, key=value report of
+# the resolved release-asset coordinates. Validates that the
+# resolved name matches the documented contract
+# `gitmap-vX.Y.Z-windows-{amd64|arm64}.zip` and exits non-zero with
+# a clear error if it does not. CI parses the `dryrun.*=` lines.
+function Write-DryRunReport([string]$version, [string]$arch,
+                            [string]$assetName, [string]$assetUrl,
+                            [string]$checksumUrl) {
+    $pattern = '^gitmap-v\d+\.\d+\.\d+-windows-(amd64|arm64)\.zip$'
+    $hasValidName = $assetName -match $pattern
+
+    Write-Host ""
+    Write-Host "================================================================"
+    Write-Host " INSTALL.PS1 DRY-RUN REPORT"
+    Write-Host "================================================================"
+    Write-Host "dryrun.version=$version"
+    Write-Host "dryrun.arch=$arch"
+    Write-Host "dryrun.asset_name=$assetName"
+    Write-Host "dryrun.asset_url=$assetUrl"
+    Write-Host "dryrun.checksum_url=$checksumUrl"
+    Write-Host "dryrun.expected_pattern=$pattern"
+    Write-Host "dryrun.name_matches_contract=$hasValidName"
+    Write-Host "dryrun.preflight_head=ok"
+    Write-Host "================================================================"
+    Write-Host ""
+
+    if (-not $hasValidName) {
+        Write-Err "::error::Resolved asset name '$assetName' does not match release contract '$pattern'"
+        exit 5
+    }
+    Write-Host "OK install.ps1 dry-run passed for $version ($arch)"
+}
+
+
 function Write-MissingAssetError([string]$version, [string]$arch,
                                   [string]$assetName, [string]$assetUrl) {
     $releasePage = "https://github.com/$Repo/releases/tag/$version"
@@ -443,6 +491,15 @@ function Get-Asset([string]$version, [string]$arch) {
             Stop-Strict "expected asset $assetName not found at $assetUrl"
         }
         throw [InstallerFailure]::new("Release asset not found", 1)
+    }
+
+    # Dry-run short-circuit: the URL exists, the naming contract is
+    # honored — print a machine-parseable report and exit before any
+    # download. CI greps these lines to assert correctness.
+    if ($DryRun) {
+        Write-DryRunReport $version $arch $assetName $assetUrl $checksumUrl
+        Remove-Item $tmpDir -Recurse -Force -ErrorAction SilentlyContinue
+        exit 0
     }
 
     Write-Step "Downloading $assetName ($version)..."

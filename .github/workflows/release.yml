@@ -716,3 +716,75 @@ jobs:
           # EXPECTED comes in as 'v4.1.0'; the script wants '4.1.0'.
           $env:EXPECTED = $env:EXPECTED -replace '^v', ''
           pwsh -File .github/scripts/smoke-installer.ps1 release
+
+  installer-dryrun-windows:
+    # Post-publish DRY-RUN check: invokes install.ps1 with -DryRun
+    # against the freshly-released tag, then asserts the printed
+    # `dryrun.*=` report matches the documented release-asset
+    # naming contract (`gitmap-vX.Y.Z-windows-{amd64|arm64}.zip`).
+    # This validates BOTH the install.ps1 URL-resolution logic AND
+    # that the release pipeline actually published an asset matching
+    # that pattern — independently of the actual download/extract
+    # path exercised by installer-smoke-windows.
+    name: Installer Dry-Run Windows
+    runs-on: windows-latest
+    needs: release
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Wait briefly for release assets to propagate
+        shell: pwsh
+        run: Start-Sleep -Seconds 15
+
+      - name: Run install.ps1 -DryRun and capture report
+        id: dryrun
+        shell: pwsh
+        env:
+          VERSION: ${{ needs.release.outputs.version }}
+        run: |
+          $log = Join-Path $env:RUNNER_TEMP 'dryrun.log'
+          pwsh -File gitmap/scripts/install.ps1 `
+            -DryRun -Version $env:VERSION -NoDiscovery -Arch amd64 `
+            *>&1 | Tee-Object -FilePath $log
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "::error::install.ps1 -DryRun exited $LASTEXITCODE"
+            exit $LASTEXITCODE
+          }
+          "log=$log" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Assert dry-run report matches release contract
+        shell: pwsh
+        env:
+          VERSION: ${{ needs.release.outputs.version }}
+          LOG: ${{ steps.dryrun.outputs.log }}
+        run: |
+          $expectedName = "gitmap-$env:VERSION-windows-amd64.zip"
+          $expectedUrl  = "https://github.com/alimtvnetwork/gitmap-v9/releases/download/$env:VERSION/$expectedName"
+
+          $report = @{}
+          Get-Content $env:LOG | ForEach-Object {
+            if ($_ -match '^dryrun\.([^=]+)=(.*)$') {
+              $report[$Matches[1]] = $Matches[2]
+            }
+          }
+
+          $failed = $false
+          function Check($key, $expected) {
+            $actual = $report[$key]
+            if ($actual -ne $expected) {
+              Write-Error "::error::dryrun.$key mismatch`n  expected: $expected`n  actual:   $actual"
+              $script:failed = $true
+            } else {
+              Write-Host "OK dryrun.$key = $actual"
+            }
+          }
+
+          Check 'version'                  $env:VERSION
+          Check 'arch'                     'amd64'
+          Check 'asset_name'               $expectedName
+          Check 'asset_url'                $expectedUrl
+          Check 'name_matches_contract'    'True'
+          Check 'preflight_head'           'ok'
+
+          if ($failed) { exit 1 }
+          Write-Host "OK install.ps1 dry-run validates release contract for $env:VERSION"
