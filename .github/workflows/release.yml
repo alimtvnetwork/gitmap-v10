@@ -21,6 +21,8 @@ jobs:
   release:
     name: Build and Release
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -665,3 +667,28 @@ jobs:
           draft: false
           prerelease: ${{ contains(steps.version.outputs.version, '-') }}
           make_latest: ${{ !contains(steps.version.outputs.version, '-') }}
+
+  installer-smoke:
+    # Post-publish smoke test: pulls the freshly-released binary via
+    # gitmap/scripts/install.sh in strict --version mode and asserts
+    # that `gitmap version` reports the just-released tag. Catches
+    # broken assets, wrong filenames, or version-constant drift before
+    # users hit it. Strict mode (--no-discovery) means no fallback.
+    name: Installer Smoke (release)
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Wait briefly for release assets to propagate
+        run: sleep 15
+
+      - name: Run installer smoke (release mode)
+        env:
+          # Strip leading 'v' — smoke-installer.sh re-adds it
+          EXPECTED: ${{ needs.release.outputs.version }}
+        shell: bash
+        run: |
+          # EXPECTED comes in as 'v4.1.0'; the script wants '4.1.0'.
+          export EXPECTED="${EXPECTED#v}"
+          bash .github/scripts/smoke-installer.sh release

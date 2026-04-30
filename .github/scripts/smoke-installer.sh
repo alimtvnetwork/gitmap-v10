@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# Smoke test: verify a freshly-installed gitmap reports the expected version.
+#
+# Modes:
+#   source   Build gitmap from the current checkout into a tempdir, then run
+#            `<tempdir>/gitmap version` and assert it contains v$EXPECTED.
+#            Used by ci.yml on every PR — no network release dependency.
+#
+#   release  Run gitmap/scripts/install.sh against a published GitHub release
+#            (--version "v$EXPECTED" --no-discovery), then run the installed
+#            binary and assert. Used by release.yml after the release is cut.
+#
+# Reads $EXPECTED (e.g. "4.1.0") from env. Falls back to constants.Version.
+#
+# Exit 0 on success, non-zero with diagnostic on failure.
+set -euo pipefail
+
+MODE="${1:-source}"
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+EXPECTED="${EXPECTED:-$(awk -F'"' '/^const Version/ {print $2}' "$REPO_ROOT/gitmap/constants/constants.go")}"
+
+if [ -z "$EXPECTED" ]; then
+  echo "::error::Could not determine expected version" >&2
+  exit 2
+fi
+
+WORK="$(mktemp -d)"
+trap 'rm -rf "$WORK"' EXIT
+
+echo "▶ Smoke mode:    $MODE"
+echo "▶ Expected:      v$EXPECTED"
+echo "▶ Workdir:       $WORK"
+
+case "$MODE" in
+  source)
+    echo "▶ Building gitmap from source into $WORK"
+    (cd "$REPO_ROOT/gitmap" && go build -o "$WORK/gitmap" .)
+    BIN="$WORK/gitmap"
+    ;;
+  release)
+    echo "▶ Running install.sh --version v$EXPECTED --no-discovery"
+    DEST="$WORK/install"
+    mkdir -p "$DEST"
+    bash "$REPO_ROOT/gitmap/scripts/install.sh" \
+      --version "v$EXPECTED" \
+      --dir "$DEST" \
+      --no-path \
+      --no-discovery
+    BIN="$DEST/gitmap"
+    ;;
+  *)
+    echo "::error::Unknown mode '$MODE' (expected 'source' or 'release')" >&2
+    exit 2
+    ;;
+esac
+
+if [ ! -x "$BIN" ]; then
+  echo "::error::Binary not found or not executable at $BIN" >&2
+  exit 3
+fi
+
+ACTUAL="$("$BIN" version 2>&1 | head -1)"
+echo "▶ Actual output: $ACTUAL"
+
+EXPECTED_LINE="gitmap v$EXPECTED"
+if [ "$ACTUAL" != "$EXPECTED_LINE" ]; then
+  echo "::error::Version mismatch" >&2
+  echo "  expected: $EXPECTED_LINE" >&2
+  echo "  actual:   $ACTUAL" >&2
+  exit 4
+fi
+
+echo "✅ Installer smoke test passed: $ACTUAL"
