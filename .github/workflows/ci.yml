@@ -40,6 +40,11 @@ on:
         required: false
         default: false
         type: boolean
+      auto_fix_generate_drift:
+        description: "If generate-check finds drift, run `go generate ./...` and auto-commit the regenerated files back to the branch instead of failing."
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: ci-${{ github.ref }}
