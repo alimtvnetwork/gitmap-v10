@@ -26,6 +26,8 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
