@@ -26,6 +26,8 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -93,13 +95,24 @@ func TestUpdateDebugWindowsHasNoLocalFileExistsDecl(t *testing.T) {
 // parseUpdateDebugWindows parses the source file under test into an AST.
 // Errors fail the test immediately because every assertion in this file
 // depends on a successful parse — there is no useful partial result.
+//
+// The path is resolved relative to THIS test file (via runtime.Caller)
+// rather than the test process cwd, so the assertion holds regardless
+// of where `go test` was invoked from (package dir, repo root with
+// `-C`, or a compiled `-c` binary executed from /tmp).
 func parseUpdateDebugWindows(t *testing.T) *ast.File {
 	t.Helper()
 
+	_, thisFile, _, ok := runtime.Caller(0)
+	if !ok {
+		t.Fatalf("runtime.Caller failed; cannot resolve %s relative to test source", updatedebugwindowsPath)
+	}
+	sourcePath := filepath.Join(filepath.Dir(thisFile), updatedebugwindowsPath)
+
 	fset := token.NewFileSet()
-	file, err := parser.ParseFile(fset, updatedebugwindowsPath, nil, parser.ParseComments)
+	file, err := parser.ParseFile(fset, sourcePath, nil, parser.ParseComments)
 	if err != nil {
-		t.Fatalf("parse %s: %v", updatedebugwindowsPath, err)
+		t.Fatalf("parse %s: %v", sourcePath, err)
 	}
 
 	return file
