@@ -1241,6 +1241,34 @@ jobs:
             gitmap/coverage-${{ matrix.name }}.out
           retention-days: 7
 
+  installer-smoke:
+    # Source-build smoke test: builds gitmap from this commit into a tempdir
+    # and asserts `gitmap version` reports the version pinned in
+    # constants.go. Catches version-constant drift on every PR without any
+    # release dependency. The release.yml workflow runs the companion
+    # `release` mode against the freshly-published GitHub release.
+    name: Installer Smoke (source-build)
+    runs-on: ubuntu-latest
+    needs: sha-check
+    steps:
+      - name: Already validated
+        if: needs.sha-check.outputs.already-built == 'true'
+        run: echo "✅ SHA ${{ github.sha }} already passed"
+
+      - uses: actions/checkout@v6
+        if: needs.sha-check.outputs.already-built != 'true'
+
+      - uses: actions/setup-go@v6
+        if: needs.sha-check.outputs.already-built != 'true'
+        with:
+          go-version-file: gitmap/go.mod
+          cache-dependency-path: gitmap/go.sum
+
+      - name: Run installer smoke (source mode)
+        if: needs.sha-check.outputs.already-built != 'true'
+        shell: bash
+        run: bash .github/scripts/smoke-installer.sh source
+
   full-suite-guard:
     # Belt-and-suspenders gate that mirrors what a contributor runs locally:
     # `go test ./...` across EVERY package + a strict `golangci-lint run`
@@ -1484,7 +1512,7 @@ jobs:
   test-summary:
     name: Test Summary
     runs-on: ubuntu-latest
-    needs: [sha-check, lint, lint-script-tests, lint-baseline-guard, lint-baseline-diff, vulncheck, generate-check, cmd-naming-check, constants-naming-check, constants-collision-check, golden-allow-leak-check, test, full-suite-guard]
+    needs: [sha-check, lint, lint-script-tests, lint-baseline-guard, lint-baseline-diff, vulncheck, generate-check, cmd-naming-check, constants-naming-check, constants-collision-check, golden-allow-leak-check, test, installer-smoke, full-suite-guard]
     if: always()
     steps:
       - name: Already validated
