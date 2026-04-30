@@ -14,7 +14,7 @@ import {
   DOCS_TOOLTIP_ALIGN,
   DOCS_TOOLTIP_SIDE,
   DOCS_TOOLTIP_SIDE_OFFSET,
-} from "@/components/docs/docsTooltip";
+} from "@/components/docs/docsTooltipConfig";
 
 interface DocsTooltipProps {
   // The control the tooltip describes. Pass the trigger element
