@@ -1552,15 +1552,28 @@ main() {
         add_to_path "${APP_DIR}"
     fi
 
-    # Verify the binary works
+    # Verify the binary works.
+    #
+    # Discard stderr (`2>/dev/null`) and parse only stdout. First-run side
+    # effects like SeedDownloaderConfig print informational lines to stderr
+    # (e.g. "◦ Downloader config already customized …") that would otherwise
+    # be concatenated into ${installed_version} and shown to the user. We
+    # then filter to the canonical `gitmap vX.Y.Z` line via awk (no pipe to
+    # `head` to avoid SIGPIPE under `set -o pipefail`).
     local bin_path="${APP_DIR}/${BINARY_NAME}"
     local installed_version="${version}"
     if [ -f "${bin_path}" ]; then
         echo ""
         local version_output
-        if version_output="$("${bin_path}" version 2>&1)"; then
-            installed_version="${version_output}"
-            ok "gitmap ${version_output}"
+        if version_output="$("${bin_path}" version 2>/dev/null)"; then
+            local version_line
+            version_line="$(printf '%s\n' "${version_output}" | awk '/^gitmap v[0-9]/{print; exit}')"
+            if [ -n "${version_line}" ]; then
+                installed_version="${version_line}"
+                ok "${version_line}"
+            else
+                ok "gitmap ${version}"
+            fi
         else
             err "Binary found but failed to run."
         fi
