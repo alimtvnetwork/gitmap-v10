@@ -40,10 +40,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/formatter"
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/goldenguard"
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/formatter"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/goldenguard"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/model"
 )
 
 // crossFormatScanRecords mirrors formatter.canonicalScanRecords but

@@ -25,7 +25,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/constants"
 )
 
 func TestExecuteWithHooksConcurrent_FallbackBelowTwoWorkers(t *testing.T) {

@@ -7,10 +7,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/clonenext"
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/gitutil"
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/clonenext"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/gitutil"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/model"
 )
 
 // runVersionHistory handles the "version-history" subcommand.

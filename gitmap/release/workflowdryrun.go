@@ -3,8 +3,8 @@ package release
 import (
 	"fmt"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/store"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/store"
 )
 
 // printDryRun shows what would happen without executing.

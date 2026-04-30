@@ -12,8 +12,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/gitutil"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/gitutil"
 )
 
 // printLatestCSV outputs the latest branch result as CSV to stdout.

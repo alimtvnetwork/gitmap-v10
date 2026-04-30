@@ -6,7 +6,7 @@
 # (gitmap/cmd/auditlegacy.go) — it runs without needing the Go toolchain
 # so it can gate every CI run, including remixes that haven't built yet.
 #
-# Default forbidden patterns: gitmap-v5, gitmap-v6, gitmap-v9
+# Default forbidden patterns: gitmap-v5, gitmap-v6, gitmap-v10
 # Override via env: LEGACY_PATTERN="gitmap-v[567]\\b|old-org-name"
 #
 # Exit codes:

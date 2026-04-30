@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/constants"
 )
 
 // TestSplitRescanSubtreeArgs covers the three flow shapes:

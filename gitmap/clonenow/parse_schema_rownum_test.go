@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/constants"
 )
 
 // TestParseFile_JSONRowNotObject verifies a non-object element in

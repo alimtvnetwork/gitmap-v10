@@ -21,9 +21,9 @@ import (
 	"io"
 	"os"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/cliexit"
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/clonefrom"
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/cliexit"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/clonefrom"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/constants"
 )
 
 // cloneFromFlags holds parsed CLI inputs. Grouped in a struct

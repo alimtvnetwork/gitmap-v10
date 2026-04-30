@@ -29,7 +29,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/constants"
 )
 
 // cmdFaithfulExiter abstracts os.Exit so tests can swap in a recorder

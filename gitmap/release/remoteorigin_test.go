@@ -3,7 +3,7 @@ package release_test
 import (
 	"testing"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/release"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/release"
 )
 
 // TestParseHTTPSURL verifies HTTPS remote URLs are parsed correctly.

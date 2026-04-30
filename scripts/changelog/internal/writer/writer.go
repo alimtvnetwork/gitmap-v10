@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/alimtvnetwork/gitmap-v9/scripts/changelog/internal/render"
+	"github.com/alimtvnetwork/gitmap-v10/scripts/changelog/internal/render"
 )
 
 const (

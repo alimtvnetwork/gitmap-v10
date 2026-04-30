@@ -52,10 +52,10 @@ then schedules its own removal via `cmd.exe /C ... del`.
 
 ```
 # Linux / macOS
-curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v9/main/gitmap/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/gitmap-v10/main/gitmap/scripts/install.sh | bash
 
 # Windows (PowerShell)
-irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v9/main/gitmap/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v10/main/gitmap/scripts/install.ps1 | iex
 ```
 
 …or, if you still have a copy of the binary somewhere, just run

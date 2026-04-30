@@ -26,8 +26,8 @@ package probe
 import (
 	"sync"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/model"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/model"
 )
 
 // Sink is the persistence callback the runner invokes for each

@@ -26,7 +26,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/startup"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/startup"
 )
 
 // TestStartupListJSONContract_EmptyIsArrayNotNull is the headline

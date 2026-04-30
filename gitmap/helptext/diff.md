@@ -39,7 +39,7 @@ None. Both endpoints are folders that already exist on disk.
 
 ### Example 1: Plain diff between two local folders
 
-    gitmap diff ./gitmap-v9 ./gitmap-v9
+    gitmap diff ./gitmap-v10 ./gitmap-v10
 
 **Output:**
 
@@ -57,7 +57,7 @@ None. Both endpoints are folders that already exist on disk.
 
 ### Example 2: Conflicts only (preview before merge-both)
 
-    gitmap diff ./gitmap-v9 ./gitmap-v9 --only-conflicts
+    gitmap diff ./gitmap-v10 ./gitmap-v10 --only-conflicts
 
 **Output:**
 
@@ -69,7 +69,7 @@ None. Both endpoints are folders that already exist on disk.
 
 ### Example 3: Machine-readable output
 
-    gitmap df ./gitmap-v9 ./gitmap-v9 --json
+    gitmap df ./gitmap-v10 ./gitmap-v10 --json
 
 **Output:**
 

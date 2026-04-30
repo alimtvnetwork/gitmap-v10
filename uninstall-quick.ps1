@@ -22,7 +22,7 @@
            - prompt before deleting %APPDATA%/gitmap
 
     Run via one-liner:
-      irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v9/main/uninstall-quick.ps1 | iex
+      irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v10/main/uninstall-quick.ps1 | iex
 
     Or locally:
       ./uninstall-quick.ps1

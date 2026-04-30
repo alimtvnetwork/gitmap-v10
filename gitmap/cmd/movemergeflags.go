@@ -3,8 +3,8 @@ package cmd
 import (
 	"flag"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/constants"
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/movemerge"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/constants"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/movemerge"
 )
 
 // movemergeFlagSet attaches every shared flag for mv/merge-* to fs.

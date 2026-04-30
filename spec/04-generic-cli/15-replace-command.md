@@ -79,8 +79,8 @@ Algorithm (must be implemented exactly):
 6. `base` is the project base name. `num` (parsed as int) is the
    current version `K`. Both are required for the search pattern.
 
-**Example:** `git@github.com:alimtvnetwork/gitmap-v9.git`
-→ `slug = "gitmap-v9"` → `base = "gitmap"`, `K = 7`.
+**Example:** `git@github.com:alimtvnetwork/gitmap-v10.git`
+→ `slug = "gitmap-v10"` → `base = "gitmap"`, `K = 7`.
 
 ---
 
@@ -221,8 +221,8 @@ path, err)` and exit `2` after attempting all remaining files.
 
 ```
 replace: scanning 4123 files in /repo/root
-replace: src/foo.go: 3 matches (gitmap-v4 → gitmap-v9)
-replace: docs/setup.md: 1 match (gitmap-v9 → gitmap-v9)
+replace: src/foo.go: 3 matches (gitmap-v4 → gitmap-v10)
+replace: docs/setup.md: 1 match (gitmap-v10 → gitmap-v10)
 ...
 replace: 12 files, 47 replacements
 Apply replacements for versions v4..v6 → v7? [y/N]: y

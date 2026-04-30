@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/alimtvnetwork/gitmap-v9/gitmap/scanner"
+	"github.com/alimtvnetwork/gitmap-v10/gitmap/scanner"
 )
 
 // TestToHTTPS_FromSSH verifies SSH to HTTPS conversion.
