@@ -48,7 +48,9 @@ func (db *DB) SeedDownloaderConfig(seedPath string) {
 		// Stamp the new hash so we don't re-evaluate this every run, but
 		// keep the user's values intact.
 		_ = db.SetDownloaderSeedHash(hash)
-		fmt.Fprintln(os.Stderr, constants.MsgDownloaderConfigSeedSkip)
+		if !isSeedBannerSuppressed() {
+			fmt.Fprintln(os.Stdout, constants.MsgDownloaderConfigSeedSkip)
+		}
 
 		return
 	}
@@ -61,8 +63,31 @@ func (db *DB) SeedDownloaderConfig(seedPath string) {
 	if err := db.SetDownloaderSeedHash(hash); err != nil {
 		fmt.Fprintf(os.Stderr, "  ⚠ Could not record seed hash: %v\n", err)
 	}
-	fmt.Fprintf(os.Stderr, constants.MsgDownloaderConfigSeeded+"\n", short(hash))
-	fmt.Fprintf(os.Stderr, constants.MsgDownloaderConfigDBVersion+"\n", doc.DatabaseVersion.LastKnownVersion)
+	if isSeedBannerSuppressed() {
+		return
+	}
+	fmt.Fprintf(os.Stdout, constants.MsgDownloaderConfigSeeded+"\n", short(hash))
+	fmt.Fprintf(os.Stdout, constants.MsgDownloaderConfigDBVersion+"\n", doc.DatabaseVersion.LastKnownVersion)
+}
+
+// isSeedBannerSuppressed mirrors cmd.isBannerSuppressed without importing
+// cmd (which would create a cycle). The seed banner is informational, not
+// an error, so it is silenced for `version`, `--no-banner`, GITMAP_QUIET=1,
+// and any non-interactive subcommand probe.
+func isSeedBannerSuppressed() bool {
+	if os.Getenv(constants.EnvGitMapQuiet) == constants.EnvGitMapQuietTrue {
+		return true
+	}
+	for _, arg := range os.Args[1:] {
+		if arg == constants.FlagNoBanner {
+			return true
+		}
+		if arg == "version" || arg == "--version" || arg == "-v" {
+			return true
+		}
+	}
+
+	return false
 }
 
 // loadSeedOrDefaults resolves the seed file relative to the active
