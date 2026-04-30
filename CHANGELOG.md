@@ -1,5 +1,18 @@
 # Changelog
 
+## v4.3.0 — (2026-04-30) — Installer: discard binary stderr on post-install verify, kill cp1252 mojibake
+
+- `gitmap/scripts/install.ps1` and `gitmap/scripts/install.sh` now discard the
+  newly-installed binary's stderr (`2>$null` / `2>/dev/null`) during the
+  post-install `gitmap version` verification and filter stdout to the
+  canonical `gitmap vX.Y.Z` line.
+- Eliminates the false "Binary found but failed to run" error caused by
+  first-run `SeedDownloaderConfig` info lines being wrapped as ErrorRecords
+  under `$ErrorActionPreference='Stop'`.
+- Eliminates the cp1252 mojibake (`Γùª`, `ΓÇö`) leaking into the user's
+  session when PowerShell hosts decode child stderr with the OEM codepage
+  instead of `[Console]::OutputEncoding`.
+
 ## v4.2.0 — (2026-04-30) — CI hardening: smoke-installer SIGPIPE fix, generate-check auto-commit, version-line filtering
 
 - `.github/scripts/smoke-installer.sh` now captures `gitmap version` output into
