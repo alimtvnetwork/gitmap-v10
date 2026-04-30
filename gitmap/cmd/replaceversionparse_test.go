@@ -34,13 +34,13 @@ func TestRemoteSlugRegex(t *testing.T) {
 		num     string
 	}
 	cases := map[string]want{
-		"gitmap-v10":         {true, "gitmap", "9"},
+		"gitmap-v9":          {true, "gitmap", "9"},
 		"my-tool-v123":       {true, "my-tool", "123"},
 		"some-app-prefix-v0": {true, "some-app-prefix", "0"},
 		"gitmap":             {false, "", ""},
 		"gitmap-v":           {false, "", ""},
 		"gitmap-vX":          {false, "", ""},
-		"gitmap-v10-extra":   {false, "", ""},
+		"gitmap-v9-extra":    {false, "", ""},
 	}
 	for in, w := range cases {
 		m := remoteSlugRe.FindStringSubmatch(in)
@@ -65,7 +65,7 @@ func TestPairsForTarget(t *testing.T) {
 	if len(got) != 2 {
 		t.Fatalf("expected 2 pairs, got %d", len(got))
 	}
-	if got[0].old != "gitmap-v4" || got[0].new != "gitmap-v10" {
+	if got[0].old != "gitmap-v4" || got[0].new != "gitmap-v9" {
 		t.Errorf("dash form wrong: %+v", got[0])
 	}
 	if got[1].old != "gitmap/v4" || got[1].new != "gitmap/v9" {
