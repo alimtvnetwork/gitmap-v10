@@ -43,7 +43,15 @@ param(
     #         are absent the user is prompted interactively.
     [switch]$Force,
     [switch]$KeepData,
-    [switch]$PurgeData
+    [switch]$PurgeData,
+    # -DryRun: resolve the asset name + URL, run the pre-flight HEAD
+    # probe to confirm the release asset exists, print a structured
+    # report, and exit 0 — without downloading, extracting, or
+    # touching the install dir / PATH. Used by CI to validate that
+    # the install.ps1 + release-pipeline asset-naming contract is
+    # honored before users hit it. Spec: spec/07-generic-release/
+    # 09-generic-install-script-behavior.md §6.
+    [switch]$DryRun
 )
 
 $ErrorActionPreference = "Stop"
@@ -443,6 +451,15 @@ function Get-Asset([string]$version, [string]$arch) {
             Stop-Strict "expected asset $assetName not found at $assetUrl"
         }
         throw [InstallerFailure]::new("Release asset not found", 1)
+    }
+
+    # Dry-run short-circuit: the URL exists, the naming contract is
+    # honored — print a machine-parseable report and exit before any
+    # download. CI greps these lines to assert correctness.
+    if ($DryRun) {
+        Write-DryRunReport $version $arch $assetName $assetUrl $checksumUrl
+        Remove-Item $tmpDir -Recurse -Force -ErrorAction SilentlyContinue
+        exit 0
     }
 
     Write-Step "Downloading $assetName ($version)..."
