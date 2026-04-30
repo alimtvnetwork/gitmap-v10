@@ -83,7 +83,12 @@ func Defaults() Document {
 func LoadFile(path string) (Document, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
-		return Document{}, fmt.Errorf(constants.ErrDownloaderConfigPathRequired, path)
+		// Preserve the underlying error (in particular fs.ErrNotExist) so
+		// callers using os.IsNotExist / errors.Is can distinguish "missing
+		// optional seed" from a real I/O failure. Without %w the seeder
+		// printed a spurious "Could not read downloader seed" warning on
+		// every fresh install where the seed file does not yet exist.
+		return Document{}, fmt.Errorf(constants.ErrDownloaderConfigPathRequired+": %w", path, err)
 	}
 
 	return Parse(raw)
